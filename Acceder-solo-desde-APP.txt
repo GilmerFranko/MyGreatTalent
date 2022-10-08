@@ -1,0 +1,49 @@
+Estos sirvepara que cualquier seccion sea accesible solo desde la aplicacio APP 
+ponerlo en cada archivo
+
+poner esto despues del primer <?php de cada archivo que quiero ocultar
+
+
+
+
+
+
+if(!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || $_SERVER['HTTP_X_REQUESTED_WITH'] != 'com.bellas.gram.app.android')
+{
+    die('<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <h2>
+    Para ver esta secci&oacute;n, <a href="https://play.google.com/store/apps/details?id=com.bellas.gram.app.android">descarga esta APP del juego AQUÍ</a>
+    </h2>');
+}
+
+
+queda si
+
+
+<?php
+
+if(!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || $_SERVER['HTTP_X_REQUESTED_WITH'] != 'com.bellas.gram.app.android')
+{
+    die('<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <h2>
+    Para ver esta secci&oacute;n, <a href="https://play.google.com/store/apps/details?id=com.bellas.gram.app.android">descarga esta APP del juego AQUÍ</a>
+    </h2>');
+}
+
+
+
+y asi es para poner 2 apps
+
+
+if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && ($_SERVER['HTTP_X_REQUESTED_WITH'] == 'com.bellas.gram.app.android' || $_SERVER['HTTP_X_REQUESTED_WITH'] == 'com.BelGram.android'))
+{
+
+
+AQUI TODO E COFIGO HE IR HASTA ABJO Y PONER ANTES DE LA ULTIMA ?> ESTO
+
+
+} else {
+	die('<h2>
+    Para ver esta secci&oacute;n, <a href="https://play.google.com/store/apps/details?id=com.bellas.gram.app.android">descarga esta APP del juego AQUÍ</a>
+    </h2>');
+}

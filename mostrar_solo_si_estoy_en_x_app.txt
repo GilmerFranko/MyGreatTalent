@@ -1,0 +1,48 @@
+poner despues del primer <?php o despues del primer <?php defined('BELLASGRAM') || exit;
+
+
+// INDICACION TEMPORAL
+if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'com.BelGram.android')
+{
+	echo '<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<center> <H4> <font color="green">Esta secci&oacute;n, es solo visible desde nuestra nueva app de BellasGram, para ingresar sigue los pasos descritos abajo y despu&eacute;s <a href="https://play.google.com/store/apps/details?id=com.bellas.gram.app.android">descarga la APP AQUI</a> ya luego borra la app actual e ingresa solo desde la nueva.
+
+    <hr />
+     Si ya tienes la nueva APP pero no recuerdas tu contrase&ntilde;a y se te dificultan los pasos para una nueva, entonces aun no elimines la app y <br/> enviale un mensaje a <a href="https://bellasgram.com/chat/newchat.php?id=196558">ANDREA MARTINEZ</a> y pidele una contrase&ntilde;a nueva, ella te ayudara.
+    <hr />
+    La nueva app es mas r&aacute;pida, y salen menos anuncios al ver fotos en BellasGram y el Chat, adem&aacute;s ya no te saldr&aacute;n anuncios de video al tocar la lupa en BellasGram para ver una foto.
+        <hr />
+    No te olvides darnos 5 estrellas<br/><br/>
+    <hr />
+    <br/><br/>
+    PASOS A SEGUIR:
+    <br/><br/>
+    <hr />
+    Nuestra aplicaci&iacute;n en la PlayStore o Google Play se llama 
+<br/><a href="https://play.google.com/store/apps/details?id=com.bellas.gram.app.android">BellasGram </a><br/>(Puedes buscarla en la PlayStore o toca las letras azules para ir a Google Play) 
+<hr />
+
+Instala la APP y la abres e ignora el contenido (a simple vista se ve como si fuera un app de un v&iacute;deojuego, pero lo rico esta oculto)<br/> <br/>
+1: toca la lupa que sale arriba a la derecha
+<br/><br/>
+<img src="https://bellasgram.com/static/images/1.png">
+
+
+<hr />
+2: Toca donde donde "buscar"
+<br/><br/>
+<img src="https://bellasgram.com/static/images/2.png">
+<hr />
+Y escribe bellasgram y espera que salga la manzana (al escribir bellasgram saldr&aacute; una manzana) y la tocas para entrar a BellasGram, Ya puedes entrar con tu correo y contrase&ntilde;a, si no recuerdas la contrase&ntilde;a puedes pedir una nueva como se indica arriba.
+<br/><br/>
+<img src="https://bellasgram.com/static/images/3.png">
+<hr />
+
+
+';
+	exit;
+}
+
+/* FIN INDICACION TEMPORAL*/

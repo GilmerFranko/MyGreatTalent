@@ -1,0 +1,76 @@
+[01-Jul-2021 21:45:00 Europe/Berlin] PHP Notice:  Trying to get property 'num_rows' of non-object in C:\xampp\htdocs\chat\cron\action_nopublic.cron.php on line 6
+[01-Jul-2021 21:45:13 Europe/Berlin] PHP Notice:  Trying to get property 'num_rows' of non-object in C:\xampp\htdocs\chat\cron\action_nopublic.cron.php on line 6
+[27-Jul-2021 02:01:33 America/Costa_Rica] PHP Notice:  Undefined variable: date in C:\xampp\htdocs\chat\cron\xxevery10minxx.php on line 62
+[27-Jul-2021 02:01:33 America/Costa_Rica] PHP Notice:  Undefined variable: date in C:\xampp\htdocs\chat\cron\xxevery10minxx.php on line 62
+[27-Jul-2021 02:01:33 America/Costa_Rica] PHP Notice:  Undefined variable: date in C:\xampp\htdocs\chat\cron\xxevery10minxx.php on line 62
+[27-Jul-2021 02:01:33 America/Costa_Rica] PHP Notice:  Undefined variable: date in C:\xampp\htdocs\chat\cron\xxevery10minxx.php on line 62
+[27-Jul-2021 02:01:33 America/Costa_Rica] PHP Notice:  Undefined variable: date in C:\xampp\htdocs\chat\cron\xxevery10minxx.php on line 62
+[27-Jul-2021 02:01:33 America/Costa_Rica] PHP Notice:  Undefined variable: date in C:\xampp\htdocs\chat\cron\xxevery10minxx.php on line 62
+[27-Jul-2021 02:01:33 America/Costa_Rica] PHP Notice:  Undefined variable: date in C:\xampp\htdocs\chat\cron\xxevery10minxx.php on line 62
+[27-Jul-2021 02:01:33 America/Costa_Rica] PHP Notice:  Undefined variable: date in C:\xampp\htdocs\chat\cron\xxevery10minxx.php on line 62
+[27-Jul-2021 02:01:33 America/Costa_Rica] PHP Notice:  Undefined variable: date in C:\xampp\htdocs\chat\cron\xxevery10minxx.php on line 62
+[27-Jul-2021 02:01:33 America/Costa_Rica] PHP Notice:  Undefined variable: date in C:\xampp\htdocs\chat\cron\xxevery10minxx.php on line 62
+[27-Jul-2021 02:01:33 America/Costa_Rica] PHP Notice:  Undefined variable: date in C:\xampp\htdocs\chat\cron\xxevery10minxx.php on line 62
+[27-Jul-2021 02:01:33 America/Costa_Rica] PHP Notice:  Undefined variable: date in C:\xampp\htdocs\chat\cron\xxevery10minxx.php on line 62
+[27-Jul-2021 02:01:33 America/Costa_Rica] PHP Notice:  Undefined variable: date in C:\xampp\htdocs\chat\cron\xxevery10minxx.php on line 62
+[27-Jul-2021 02:01:33 America/Costa_Rica] PHP Notice:  Undefined variable: date in C:\xampp\htdocs\chat\cron\xxevery10minxx.php on line 62
+[27-Jul-2021 02:01:33 America/Costa_Rica] PHP Notice:  Undefined variable: date in C:\xampp\htdocs\chat\cron\xxevery10minxx.php on line 62
+[27-Jul-2021 02:01:33 America/Costa_Rica] PHP Notice:  Undefined variable: date in C:\xampp\htdocs\chat\cron\xxevery10minxx.php on line 62
+[27-Jul-2021 02:01:33 America/Costa_Rica] PHP Notice:  Undefined variable: date in C:\xampp\htdocs\chat\cron\xxevery10minxx.php on line 62
+[27-Jul-2021 02:01:33 America/Costa_Rica] PHP Notice:  Undefined variable: date in C:\xampp\htdocs\chat\cron\xxevery10minxx.php on line 62
+[30-Jul-2021 13:07:02 America/Costa_Rica] PHP Fatal error:  Uncaught Error: Call to a member function fetch_assoc() on bool in C:\xampp\htdocs\chat\cron\xxevery10minxx.php:65
+Stack trace:
+#0 C:\xampp\htdocs\chat\cron\xxevery10minxx.php(115): sendMassMessage(Array)
+#1 {main}
+  thrown in C:\xampp\htdocs\chat\cron\xxevery10minxx.php on line 65
+[30-Jul-2021 13:11:48 America/Costa_Rica] PHP Fatal error:  Uncaught Error: Function name must be a string in C:\xampp\htdocs\chat\cron\xxevery10minxx.php:65
+Stack trace:
+#0 C:\xampp\htdocs\chat\cron\xxevery10minxx.php(117): sendMassMessage(Array)
+#1 {main}
+  thrown in C:\xampp\htdocs\chat\cron\xxevery10minxx.php on line 65
+[30-Jul-2021 13:12:24 America/Costa_Rica] PHP Fatal error:  Uncaught Error: Call to a member function fetch_assoc() on bool in C:\xampp\htdocs\chat\cron\xxevery10minxx.php:67
+Stack trace:
+#0 C:\xampp\htdocs\chat\cron\xxevery10minxx.php(117): sendMassMessage(Array)
+#1 {main}
+  thrown in C:\xampp\htdocs\chat\cron\xxevery10minxx.php on line 67
+[30-Jul-2021 13:13:30 America/Costa_Rica] PHP Fatal error:  Uncaught Error: Call to a member function fetch_assoc() on bool in C:\xampp\htdocs\chat\cron\xxevery10minxx.php:67
+Stack trace:
+#0 C:\xampp\htdocs\chat\cron\xxevery10minxx.php(117): sendMassMessage(Array)
+#1 {main}
+  thrown in C:\xampp\htdocs\chat\cron\xxevery10minxx.php on line 67
+[16-Aug-2021 17:28:18 America/Costa_Rica] PHP Fatal error:  Uncaught Error: Call to a member function fetch_assoc() on bool in C:\xampp\htdocs\chat\cron\xxevery5minxx.php:11
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\chat\cron\xxevery5minxx.php on line 11
+[16-Aug-2021 18:04:10 America/Costa_Rica] PHP Notice:  Undefined variable: conect in C:\xampp\htdocs\chat\cron\xxevery5minxx.php on line 17
+[16-Aug-2021 18:04:10 America/Costa_Rica] PHP Fatal error:  Uncaught Error: Call to a member function query() on null in C:\xampp\htdocs\chat\cron\xxevery5minxx.php:17
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\chat\cron\xxevery5minxx.php on line 17
+[16-Aug-2021 18:04:18 America/Costa_Rica] PHP Notice:  Undefined variable: conect in C:\xampp\htdocs\chat\cron\xxevery5minxx.php on line 17
+[16-Aug-2021 18:04:18 America/Costa_Rica] PHP Fatal error:  Uncaught Error: Call to a member function query() on null in C:\xampp\htdocs\chat\cron\xxevery5minxx.php:17
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\chat\cron\xxevery5minxx.php on line 17
+[16-Aug-2021 18:18:28 America/Costa_Rica] PHP Fatal error:  Uncaught Error: Cannot use object of type mysqli_result as array in C:\xampp\htdocs\chat\cron\xxevery5minxx.php:18
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\chat\cron\xxevery5minxx.php on line 18
+[16-Aug-2021 18:20:25 America/Costa_Rica] PHP Fatal error:  Uncaught Error: Cannot use object of type mysqli_result as array in C:\xampp\htdocs\chat\cron\xxevery5minxx.php:18
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\chat\cron\xxevery5minxx.php on line 18
+[16-Aug-2021 20:49:39 America/Costa_Rica] PHP Fatal error:  Cannot redeclare createThumbnail() (previously declared in C:\xampp\htdocs\chat\functions.php:3) in C:\xampp\htdocs\chat\functions.php on line 45
+[16-Aug-2021 20:50:23 America/Costa_Rica] PHP Fatal error:  Cannot redeclare createThumbnail() (previously declared in C:\xampp\htdocs\chat\functions.php:3) in C:\xampp\htdocs\chat\functions.php on line 45
+[16-Aug-2021 20:50:24 America/Costa_Rica] PHP Fatal error:  Cannot redeclare createThumbnail() (previously declared in C:\xampp\htdocs\chat\functions.php:3) in C:\xampp\htdocs\chat\functions.php on line 45
+[16-Aug-2021 20:50:26 America/Costa_Rica] PHP Fatal error:  Cannot redeclare createThumbnail() (previously declared in C:\xampp\htdocs\chat\functions.php:3) in C:\xampp\htdocs\chat\functions.php on line 45
+[16-Aug-2021 20:51:02 America/Costa_Rica] PHP Fatal error:  Cannot redeclare createThumbnail() (previously declared in C:\xampp\htdocs\chat\functions.php:3) in C:\xampp\htdocs\chat\functions.php on line 45
+[16-Aug-2021 20:51:18 America/Costa_Rica] PHP Fatal error:  Cannot redeclare createThumbnail() (previously declared in C:\xampp\htdocs\chat\functions.php:3) in C:\xampp\htdocs\chat\functions.php on line 45
+[17-Aug-2021 05:06:51 Europe/Berlin] PHP Parse error:  syntax error, unexpected 'elseif' (T_ELSEIF), expecting end of file in C:\xampp\htdocs\chat\cron\xxevery5minxx.php on line 30
+[19-Aug-2021 13:05:19 America/Costa_Rica] PHP Notice:  Trying to get property 'num_rows' of non-object in C:\xampp\htdocs\chat\cron\xxevery5minxx.php on line 13
+[19-Aug-2021 13:05:23 America/Costa_Rica] PHP Notice:  Trying to get property 'num_rows' of non-object in C:\xampp\htdocs\chat\cron\xxevery5minxx.php on line 13
+[19-Aug-2021 13:05:25 America/Costa_Rica] PHP Notice:  Trying to get property 'num_rows' of non-object in C:\xampp\htdocs\chat\cron\xxevery5minxx.php on line 13
+[19-Aug-2021 13:05:44 America/Costa_Rica] PHP Notice:  Trying to get property 'num_rows' of non-object in C:\xampp\htdocs\chat\cron\xxevery5minxx.php on line 13
+[19-Aug-2021 13:06:42 America/Costa_Rica] PHP Notice:  Trying to get property 'num_rows' of non-object in C:\xampp\htdocs\chat\cron\xxevery5minxx.php on line 13
+[19-Aug-2021 13:09:13 America/Costa_Rica] PHP Notice:  Trying to get property 'num_rows' of non-object in C:\xampp\htdocs\chat\cron\xxevery5minxx.php on line 13
+[19-Aug-2021 13:09:21 America/Costa_Rica] PHP Notice:  Trying to get property 'num_rows' of non-object in C:\xampp\htdocs\chat\cron\xxevery5minxx.php on line 13

@@ -1,0 +1,3 @@
+Todo esto es lo que veo que falla en my great
+
+En fotosprogramadas las fotos se suben publicas cuando deberian subirse privadas
