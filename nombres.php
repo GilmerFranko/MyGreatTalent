@@ -41,7 +41,7 @@ $count = 0;
 				</div>
 			</form>
 			<br>
-			<form method="POST" enctype="multipart/form-data">
+			<form id="formActions" method="POST" enctype="multipart/form-data">
 				<!-- BOTONES HEADER -->
 				<div class="row" align="center">
 					<!-- BOTON SELECCIONAR TODO -->
@@ -73,7 +73,7 @@ $count = 0;
 							</span>
 						</div>
 					</div>
-					<input class="btn btn-success" type="submit" name="send">
+					<input class="btn btn-success submitForm" type="submit" name="send">
 				</div>
 				<br>
 				<div id="scroll" class="box" style="border-top:0px;">
@@ -149,6 +149,24 @@ $count = 0;
 </div>
 <script type="text/javascript">
 	var turn = true;
+
+	/* Al enviar formulario */
+	$(".submitForm").click(function()
+	{
+		/* Si se desea eliminar un usuario*/
+		if($("#postType option:selected").val() == 'removeUser'){
+
+			/* Mensaje de confirmación */
+			if(confirm("¿Desea eliminar los usuarios seleccionados?"))
+			{
+				/* Enviar formulario */
+				$("#formActions").submit()
+			}
+
+		}
+		return false
+	})
+
 	//- SELECCIONA TODOS LOS CHECKBOX
 	$("#selectall").on("click", function() {
 		$(".case").prop("checked", turn);
