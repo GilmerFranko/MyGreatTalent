@@ -190,7 +190,7 @@ $sqlPR = $connect->query("SELECT *,p.`id` AS p_id FROM players_recommendations A
 													</center>
 													<!--PORTADA-->
 													<div class="cover-page" style="background: url('<?php echo $rowu['cover-page']=='' ? '' : $rowu['cover-page']; ?>') no-repeat center center;background-size: cover;border-radius: 0;box-shadow: unset;display: flex;flex-direction: column;align-items: center;justify-content: center;position: unset;">
-														<a href="#" class="btn btn-primary" data-toggle="modal" data-target="#cover-page" style=""><i>Cambiar</i></a>
+														<a href="#" class="btn btn-primary" onclick="$('#cover-page').modal('show')"><i>Cambiar</i></a>
 													</div>
 												</div>
 												<div class="col-sm-6">
@@ -220,6 +220,7 @@ $sqlPR = $connect->query("SELECT *,p.`id` AS p_id FROM players_recommendations A
 								</center>
 							</form>
 						</div>
+
 						<div id="cover-page" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
 							<div class="modal-dialog modal-md">
 								<div class="modal-content">
@@ -346,76 +347,79 @@ $sqlPR = $connect->query("SELECT *,p.`id` AS p_id FROM players_recommendations A
 			}
 		}
 
-			$(document).ready(function() {
+		$(document).ready(function() {
 
-				$("#imgInp").change(function () {
+			$("#imgInp").change(function () {
 			// Código a ejecutar cuando se detecta un cambio de archivO
 			readImage(this);
 		});
-				$("#send_cover-page").on("click", function(e){
-					e.preventDefault();
-					var file = document.getElementById("fotoFile").files[0];
+			$("#send_cover-page").on("click", function(e){
+				e.preventDefault();
+				var file = document.getElementById("fotoFile").files[0];
+				var formData = new FormData();
+				formData.append("fotoFile", file);
+				formData.append("id", '<?php echo $rowu["id"] ?>');
+				$("#fotoFile").val("");
+				$('#cover-page').modal('hide');
+				$.ajax
+				({
+					url: "ajax.php?add_cover-page",
+					type: "POST",
+					data: formData,
+					contentType:false,
+					cache: false,
+					processData:false
+				}).done(function(response)
+				{
+					var data = $.parseJSON(response);
+					console.log(response);
+					if(data.status)
+					{
+						var element = $(".box-body").find("tbody").find("tr:first-child");
+						element.before( data.message );
+
+						// Notifica exíto y espera
+						swal.fire(data.message, "", "success").then(() => {
+							window.location.reload()
+						})
+					}
+					else if(data.message=="link-incorrect")
+					{
+						swal.fire("Error!", "Parece que la URL que ingresaste no esy correcta", "error");
+					}
+					else
+					{
+						swal.fire("Error!", data.message, "error");
+					}
+					console.log(response);
+				})
+			});
+			$('#searchAjax').typeahead({
+				source: function (search, result) {
 					var formData = new FormData();
-					formData.append("fotoFile", file);
-					formData.append("id", '<?php echo $rowu["id"] ?>');
-					$("#fotoFile").val("");
-					$('#cover-page').modal('hide');
-					$.ajax
-					({
-						url: "ajax.php?add_cover-page",
+					formData.append("search", search);
+					$.ajax({
+						url: "ajax.php",
 						type: "POST",
 						data: formData,
 						contentType:false,
 						cache: false,
-						processData:false
+						processData:false,
+
 					}).done(function(response)
 					{
-						var data = $.parseJSON(response);
 						console.log(response);
-						if(data.status)
-						{
-							var element = $(".box-body").find("tbody").find("tr:first-child");
-							element.before( data.message );
-							window.location.reload()
-							swal.fire(data.message, "", "success");
-						}
-						else if(data.message=="link-incorrect")
-						{
-							swal.fire("Error!", "Parece que la URL que ingresaste no esy correcta", "error");
-						}
-						else
-						{
-							swal.fire("Error!", data.message, "error");
-						}
-						console.log(response);
-					})
-				});
-				$('#searchAjax').typeahead({
-					source: function (search, result) {
-						var formData = new FormData();
-						formData.append("search", search);
-						$.ajax({
-							url: "ajax.php",
-							type: "POST",
-							data: formData,
-							contentType:false,
-							cache: false,
-							processData:false,
+						var response = $.parseJSON(response);
+						result($.map(response, function (item) {
+							return item;
+						}));
 
-						}).done(function(response)
-						{
-							console.log(response);
-							var response = $.parseJSON(response);
-							result($.map(response, function (item) {
-								return item;
-							}));
-
-						});
-					}
-				});
+					});
+				}
 			});
+		});
 
-		</script>
-		<?php
-		footer();
-		?>
+	</script>
+	<?php
+	footer();
+	?>
