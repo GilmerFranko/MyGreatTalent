@@ -164,6 +164,11 @@ $count = 0;
 			}
 
 		}
+		else
+		{
+			/* Enviar formulario */
+			$("#formActions").submit()
+		}
 		return false
 	})
 
