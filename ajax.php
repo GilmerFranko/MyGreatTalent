@@ -110,7 +110,7 @@ if(isset($_GET['DonarCreditos']) && $player_id)
 		{
 			Echo json_encode([
 				'status' => true,
-				'message' => 'El mínimo para enviar es de 1.000 Créditos!'
+				'message' => 'El mínimo para enviar es de '.$sitio['minToDonate'].' Créditos!'
 			]);
 		}
 	}else{
@@ -716,53 +716,53 @@ if(isset($_GET['addGalery'])) {
 	$countvideos=0;
 	$countimages=0;
 	$countfiles=count($_FILES["fotoFile"]["name"]);
-		foreach($_FILES["fotoFile"]["name"] as $key => $FILE)
-		{
-			$token = rand(111,999);
-			$target_dir    = "shout/galeria/";
-			$target_file   = $target_dir . basename($_FILES["fotoFile"]["name"][$key]);
-			$imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+	foreach($_FILES["fotoFile"]["name"] as $key => $FILE)
+	{
+		$token = rand(111,999);
+		$target_dir    = "shout/galeria/";
+		$target_file   = $target_dir . basename($_FILES["fotoFile"]["name"][$key]);
+		$imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
 			//No permitir subir + de 1 videos ni videos con imagenes
 
-				if (getSourceType($target_file)=="film")
-				{
-					$countvideos++;
-				}else{
-					$countimages++;
-				}
+		if (getSourceType($target_file)=="film")
+		{
+			$countvideos++;
+		}else{
+			$countimages++;
+		}
 
-			if (getSourceType($target_file)=="film" and $countimages>0) {
-				continue;
-			}
+		if (getSourceType($target_file)=="film" and $countimages>0) {
+			continue;
+		}
 
-			$filename      = $token . ( $token*time() ) . $uname . '.' . $imageFileType;
-			$imagen        = "shout/galeria/" . $filename;
-			if(move_uploaded_file($_FILES["fotoFile"]["tmp_name"][$key], "shout/galeria/" . $filename))
-			{
+		$filename      = $token . ( $token*time() ) . $uname . '.' . $imageFileType;
+		$imagen        = "shout/galeria/" . $filename;
+		if(move_uploaded_file($_FILES["fotoFile"]["tmp_name"][$key], "shout/galeria/" . $filename))
+		{
 
-				$thumb = 'thumb/'. $token. ( $token*time() ) . $uname .'.jpg';
+			$thumb = 'thumb/'. $token. ( $token*time() ) . $uname .'.jpg';
 
 			//ALMACENAR EN ARRAY
-				$Images[] = $imagen;
-				$thumb1[]= $thumb;
+			$Images[] = $imagen;
+			$thumb1[]= $thumb;
 
 
 			//CREAR MINIATURA
-				if (getSourceType($target_file)!="film")
-				{
-					createThumbnail($imagen, $thumb, 300);
-				}
-
-			}
-			else
+			if (getSourceType($target_file)!="film")
 			{
-				$error=1;
+				createThumbnail($imagen, $thumb, 300);
 			}
-			if($countvideos>0){
-				break;
-			}
+
 		}
+		else
+		{
+			$error=1;
+		}
+		if($countvideos>0){
+			break;
+		}
+	}
 	$jsonImages = json_encode($Images);
 	$thumbjson  = json_encode($thumb1);
 	if(!$error){
@@ -788,8 +788,8 @@ if(isset($_GET['addGalery'])) {
 			}
 
 			Echo json_encode([
-			'status' => true,
-			'message' => $message
+				'status' => true,
+				'message' => $message
 			]);
 
 		}
@@ -960,8 +960,8 @@ if (isset($_GET['add_cover-page'])) {
 				$error=2;
 			}else{
 				Echo json_encode([
-				'status' => true,
-				'message' => 'Imagen subida con exito!'
+					'status' => true,
+					'message' => 'Imagen subida con exito!'
 				]);
 
 			}
@@ -1200,10 +1200,10 @@ if (isset($_POST['sendNotifications']) AND isset($_POST['idUser']))
 			}
 		}
 		Echo json_encode([
-				'state' => true ,
-				'message' => 'Notificaciones enviadas con éxito',
-				'countsend' => intval($countsend)
-			]);
+			'state' => true ,
+			'message' => 'Notificaciones enviadas con éxito',
+			'countsend' => intval($countsend)
+		]);
 	}
 	else
 	{
@@ -1292,65 +1292,65 @@ if(isset($_GET['getUsersWhoBoughtPack']))
 	$SalesMade = $connect->query("SELECT *, p.`id` AS pid FROM `packscomprados` AS pc INNER JOIN `players` AS p ON p.`id` = pc.`comprador_id` WHERE pc.`foto_id` = '$idPack'");
 
 	if ($SalesMade AND $SalesMade->num_rows > 0)
-	{?>
-		<div style="display: flex;flex-direction: column;flex-wrap: wrap;align-items: flex-start;align-content: center;">
-		<?php while($sale = mysqli_fetch_assoc($SalesMade)): ?>
-			<div>
-				<img class="img-avatar img-circle" src="<?php echo $sale['avatar']; ?>" style="width: 30px; height: 30px">
-				<?php echo createLink('profile', $sale['username'], array('profile_id' => $sale['pid'])); ?>
+		{?>
+			<div style="display: flex;flex-direction: column;flex-wrap: wrap;align-items: flex-start;align-content: center;">
+				<?php while($sale = mysqli_fetch_assoc($SalesMade)): ?>
+					<div>
+						<img class="img-avatar img-circle" src="<?php echo $sale['avatar']; ?>" style="width: 30px; height: 30px">
+						<?php echo createLink('profile', $sale['username'], array('profile_id' => $sale['pid'])); ?>
+					</div>
+					<br>
+				<?php endwhile;?>
 			</div>
-			<br>
-		<?php endwhile;?>
-		</div>
-	<?php }
-}
+		<?php }
+	}
 
 /*
 	RECOLECTA LOS giftCreditsWeekly Y ACREDITA LOS CREDITOS
  */
-if(isset($_GET['acceptGiftCreditsW']))
-{
-	$consult = $connect->query("SELECT * FROM giftcredits_weekly WHERE `player_id` = '$rowu[id]' ");
+	if(isset($_GET['acceptGiftCreditsW']))
+	{
+		$consult = $connect->query("SELECT * FROM giftcredits_weekly WHERE `player_id` = '$rowu[id]' ");
 
 	// COMPRUEBA QUE EL USUARIO TENGA CRÉDITOS DE REGALO POR ACEPTAR
-	if ($consult AND $consult->num_rows > 0)
-	{
-		$giftCredit = $consult->fetch_assoc();
+		if ($consult AND $consult->num_rows > 0)
+		{
+			$giftCredit = $consult->fetch_assoc();
 
 		// BORRAR NOTIFICACION
-		$deleteNotification = $connect->query("DELETE FROM `players_notifications` WHERE toid='$rowu[id]' AND not_key='giftWeekly'");
+			$deleteNotification = $connect->query("DELETE FROM `players_notifications` WHERE toid='$rowu[id]' AND not_key='giftWeekly'");
 
 		// BORRAR DE LA LISTA
-		$deleteGifCredits = $connect->query("DELETE FROM `giftcredits_weekly` WHERE `player_id` = '$rowu[id]'");
+			$deleteGifCredits = $connect->query("DELETE FROM `giftcredits_weekly` WHERE `player_id` = '$rowu[id]'");
 
-		if($deleteGifCredits)
-		{
+			if($deleteGifCredits)
+			{
 			// ACREDITAR CRÉDITOS
-			updateCredits($rowu['id'], '+', $giftCredit['credits'], 12);
-			Echo json_encode([
-				'state' => true ,
-				'message' => 'En hora buena! Has obtenido '. $giftCredit['credits'] .' Créditos Especiales'
-			]);
-			exit;
+				updateCredits($rowu['id'], '+', $giftCredit['credits'], 12);
+				Echo json_encode([
+					'state' => true ,
+					'message' => 'En hora buena! Has obtenido '. $giftCredit['credits'] .' Créditos Especiales'
+				]);
+				exit;
+			}
+			else
+			{
+				Echo json_encode([
+					'state' => false ,
+					'message' => 'Ha ocurrido un error. Porfavor intenta mas tarde...'
+				]);
+				exit;
+			}
 		}
 		else
 		{
 			Echo json_encode([
 				'state' => false ,
-				'message' => 'Ha ocurrido un error. Porfavor intenta mas tarde...'
+				'message' => 'Ya no tienes Creditos de Regalo para recolectar.'
 			]);
 			exit;
 		}
 	}
-	else
-	{
-		Echo json_encode([
-			'state' => false ,
-			'message' => 'Ya no tienes Creditos de Regalo para recolectar.'
-		]);
-		exit;
-	}
-}
 
 /*
 	Envia un regalo
@@ -1418,95 +1418,95 @@ if(isset($_GET['acceptGiftCreditsW']))
 		echo json_encode($return);
 	}
 // AÑADIR UNA NUEVA PREGUNTA DE USUARIO A LA LISTA
-if(isset($_GET['addQuestUser']))
-{
-	$Quest = (isset($_POST['Quest']) AND !empty($_POST['Quest'])) ? $_POST['Quest'] : '';
+	if(isset($_GET['addQuestUser']))
+	{
+		$Quest = (isset($_POST['Quest']) AND !empty($_POST['Quest'])) ? $_POST['Quest'] : '';
 
 	// AÑADIR A LA LISTA
-	$consult = $connect->query("INSERT INTO `site_questions` (player_id, question, description, time) VALUES (\"". $connect->real_escape_string($rowu['id']) ."\",\"". $connect->real_escape_string($Quest) ."\",\"". $connect->real_escape_string('') ."\", UNIX_TIMESTAMP())");
+		$consult = $connect->query("INSERT INTO `site_questions` (player_id, question, description, time) VALUES (\"". $connect->real_escape_string($rowu['id']) ."\",\"". $connect->real_escape_string($Quest) ."\",\"". $connect->real_escape_string('') ."\", UNIX_TIMESTAMP())");
 
 	// COMPRUEBA QUE EL USUARIO TENGA CRÉDITOS DE REGALO POR ACEPTAR
-	if ($consult)
-	{
-		$message = array('state' => true, 'questID' => $connect->insert_id);
+		if ($consult)
+		{
+			$message = array('state' => true, 'questID' => $connect->insert_id);
+		}
+		else
+		{
+			$message = array('state' => false);
+		}
+		echo json_encode($message);
 	}
-	else
-	{
-		$message = array('state' => false);
-	}
-	echo json_encode($message);
-}
 // BORRA UNA PREGUNTA DE USUARIO DE LA DB
-if(isset($_GET['deleteQuestUser']))
-{
-	$Quest = (isset($_POST['idQuest']) AND !empty($_POST['idQuest'])) ? $_POST['idQuest'] : '';
+	if(isset($_GET['deleteQuestUser']))
+	{
+		$Quest = (isset($_POST['idQuest']) AND !empty($_POST['idQuest'])) ? $_POST['idQuest'] : '';
 
 
 	// BORRAR PREGUNTA ENVIADAS
-	$consult2 = $connect->query("DELETE FROM `players_questions` WHERE `question` = \"". $connect->real_escape_string($Quest) ."\"");
+		$consult2 = $connect->query("DELETE FROM `players_questions` WHERE `question` = \"". $connect->real_escape_string($Quest) ."\"");
 	// BORRAR PREGUNTA PRINCIPAL DE LA LISTA
-	$consult = $connect->query("DELETE FROM `site_questions` WHERE `id` = \"". $connect->real_escape_string($Quest) ."\"");
+		$consult = $connect->query("DELETE FROM `site_questions` WHERE `id` = \"". $connect->real_escape_string($Quest) ."\"");
 
 	// COMPRUEBA QUE EL USUARIO TENGA CRÉDITOS DE REGALO POR ACEPTAR
-	if ($consult AND $connect->affected_rows > 0)
-	{
-		$message = array('state' => true);
+		if ($consult AND $connect->affected_rows > 0)
+		{
+			$message = array('state' => true);
+		}
+		else
+		{
+			$message = array('state' => false);
+		}
+		echo json_encode($message);
 	}
-	else
-	{
-		$message = array('state' => false);
-	}
-	echo json_encode($message);
-}
 
 // RESPONDE UNA PREGUNTA DE USUARIO EN LA DB
-if(isset($_GET['sentAnswer']) AND (isset($_POST['idQuest']) AND !empty($_POST['idQuest']) AND (isset($_POST['answer']) AND !empty($_POST['answer']))))
-{
+	if(isset($_GET['sentAnswer']) AND (isset($_POST['idQuest']) AND !empty($_POST['idQuest']) AND (isset($_POST['answer']) AND !empty($_POST['answer']))))
+	{
 
-	$Quest =  $_POST['idQuest'];
-	$answer =  $_POST['answer'];
+		$Quest =  $_POST['idQuest'];
+		$answer =  $_POST['answer'];
 
-	$consult = $connect->query("UPDATE `players_questions` SET `answer` = \"". $connect->real_escape_string($answer) ."\", `read_time` = \"". time() ."\" WHERE `id` = \"". $connect->real_escape_string($Quest) ."\"");
+		$consult = $connect->query("UPDATE `players_questions` SET `answer` = \"". $connect->real_escape_string($answer) ."\", `read_time` = \"". time() ."\" WHERE `id` = \"". $connect->real_escape_string($Quest) ."\"");
 
 	// COMPRUEBA QUE EL USUARIO TENGA CRÉDITOS DE REGALO POR ACEPTAR
-	if ($consult AND $connect->affected_rows > 0)
-	{
-		$message = array('state' => true);
-	}
-	else
-	{
-		$message = array('state' => false);
-	}
-	echo json_encode($message);
-}
-
-if(isset($_GET['controllerTouchInFoto']) AND isset($_GET['controllerTouchInFoto']))
-{
-	$m = [];
-	$Photos = [];
-	if(isset($_POST['idPhoto']) AND !empty($_POST['idPhoto']))
-	{
-		$SQLPhoto = $connect->query("SELECT * FROM `fotosenventa` WHERE `id` = \"". $connect->real_escape_string($_POST['idPhoto']) ."\"");
-		// SI EXISTE LA FOTO
-		if($SQLPhoto AND $SQLPhoto->num_rows > 0)
+		if ($consult AND $connect->affected_rows > 0)
 		{
-			$Photo = $SQLPhoto->fetch_assoc();
+			$message = array('state' => true);
+		}
+		else
+		{
+			$message = array('state' => false);
+		}
+		echo json_encode($message);
+	}
+
+	if(isset($_GET['controllerTouchInFoto']) AND isset($_GET['controllerTouchInFoto']))
+	{
+		$m = [];
+		$Photos = [];
+		if(isset($_POST['idPhoto']) AND !empty($_POST['idPhoto']))
+		{
+			$SQLPhoto = $connect->query("SELECT * FROM `fotosenventa` WHERE `id` = \"". $connect->real_escape_string($_POST['idPhoto']) ."\"");
+		// SI EXISTE LA FOTO
+			if($SQLPhoto AND $SQLPhoto->num_rows > 0)
+			{
+				$Photo = $SQLPhoto->fetch_assoc();
 
 			// COMPROBAR SI EXISTEN MAS DE UNA FOTO DEL MISMO USUARIO
-			if($_POST['selfBuG'] == 1){
-				$SQLPhotos = $connect->query("SELECT * FROM `fotosenventa` WHERE `id` = \"". $connect->real_escape_string($_POST['idPhoto']) ."\"");
-			}
-			else
-			{
-				$noID = $connect->real_escape_string(implode($_POST['noID'], ','));
-				$SQLPhotos = $connect->query("SELECT * FROM `fotosenventa` WHERE `player_id` = \"". $connect->real_escape_string($Photo['player_id']) ."\"  AND `id` != \"". $connect->real_escape_string($_POST['idPhoto']) ."\"");
-			}
-			if($SQLPhotos AND $SQLPhotos->num_rows > 0)
-			{
-				while ($rPhotos = mysqli_fetch_assoc($SQLPhotos)) {
+				if($_POST['selfBuG'] == 1){
+					$SQLPhotos = $connect->query("SELECT * FROM `fotosenventa` WHERE `id` = \"". $connect->real_escape_string($_POST['idPhoto']) ."\"");
+				}
+				else
+				{
+					$noID = $connect->real_escape_string(implode($_POST['noID'], ','));
+					$SQLPhotos = $connect->query("SELECT * FROM `fotosenventa` WHERE `player_id` = \"". $connect->real_escape_string($Photo['player_id']) ."\"  AND `id` != \"". $connect->real_escape_string($_POST['idPhoto']) ."\"");
+				}
+				if($SQLPhotos AND $SQLPhotos->num_rows > 0)
+				{
+					while ($rPhotos = mysqli_fetch_assoc($SQLPhotos)) {
 					// Si es un video
 					if((isset(json_decode($rPhotos['imagen'])[0]) ? getSourceType(json_decode($rPhotos['imagen'])[0]) : 'film')=='film')					// Cantidad de imagenes
-						$rPhotos['isVideo'] = true;
+					$rPhotos['isVideo'] = true;
 					else
 						$rPhotos['isVideo'] = false;
 					// Cantidad de imagenes
@@ -1569,17 +1569,17 @@ if(isset($_GET['ProcessPayment']) AND isset($_POST['data']) AND !empty($_POST['d
 	$data = json_decode(html_entity_decode($_POST['data']));
 
   // Si se efectuo la compra
-  if($data->status == "COMPLETED")
-  {
-  	if(updateCredits($rowu['id'],'+',$Items[$data->purchase_units[0]->reference_id]['Creditos'],3))
-  	{
+	if($data->status == "COMPLETED")
+	{
+		if(updateCredits($rowu['id'],'+',$Items[$data->purchase_units[0]->reference_id]['Creditos'],3))
+		{
   		// Agregar usuario a lista de nombres
-  		addToLDN($rowu['id']);
+			addToLDN($rowu['id']);
 
   		// Devolver datos
-  		echo json_encode(array('status' => true,'coinsTotal' => ($Items[$data->purchase_units[0]->reference_id]['Creditos']) + $rowu['eCreditos']));
-  	}
-  	else echo json_encode(array('status' => false, 'error' => 1));
+			echo json_encode(array('status' => true,'coinsTotal' => ($Items[$data->purchase_units[0]->reference_id]['Creditos']) + $rowu['eCreditos']));
+		}
+		else echo json_encode(array('status' => false, 'error' => 1));
 	}
 	else
 	{
@@ -1618,16 +1618,16 @@ if( isset($_GET['DeleteAccount']) AND isset($_POST['token']) AND !empty($_POST['
 				if(deleteAccount($rowu['id']))
 				{
 					$message[] = array(
-					'Cuenta eliminada con &eacute;xito',
-					1
+						'Cuenta eliminada con &eacute;xito',
+						1
 					);
 				}
 				else
 				{
 					$message[] = array(
-					'Error al eliminar la cuenta. Por favor contacte con nuestro equipo escribiéndonos un <a href="https://bellasgram.com/chat/newchat.php?id=196558">Mensaje</a>',
-					0
-				);
+						'Error al eliminar la cuenta. Por favor contacte con nuestro equipo escribiéndonos un <a href="https://bellasgram.com/chat/newchat.php?id=196558">Mensaje</a>',
+						0
+					);
 				}
 			}
 			else
@@ -1641,17 +1641,17 @@ if( isset($_GET['DeleteAccount']) AND isset($_POST['token']) AND !empty($_POST['
 		else
 		{
 			$message[] = array(
-					'Ha ocurrido un error',
-					0
+				'Ha ocurrido un error',
+				0
 			);
 		}
 	}
 	else
 	{
 		$message[] = array(
-					'Las contraseñas no coinciden',
-					0
-				);
+			'Las contraseñas no coinciden',
+			0
+		);
 	}
 	die($message[0][1].':'.$message[0][0]);
 }
