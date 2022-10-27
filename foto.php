@@ -267,97 +267,99 @@ givecredits($fotoID, 1);
 																							if(getSourceType($images)=='camera'):?>
 																								<div>
 																									<!-- CONTENEDOR DE LAS IMAGENES A CARGAR -->
-																									<div class="swiper-slide <?php if(isFollow($rowcpd['id']) OR $rowcpd['id'] == $player_id) echo 'item-zoom ' ?> <?php echo $sub; ?>" style="background: url('<?php echo $image ?>') center center no-repeat;background-size: contain;" data-src="<?php echo $image ?>">
+																									<div class="swiper-slide <?php if(isFollow($rowcpd['id']) OR $rowcpd['id'] == $player_id) echo 'item-zoom ' ?>" style="background: url('<?php echo $image ?>') center center no-repeat;background-size: contain; " data-src="<?php echo $image ?>">
 																										<img class="<?php echo $sub ?>" src="<?php echo $image ?>" style="width: 100%; opacity: 0;">
+																										<!-- Aviso -->
+																										<?php
+																										/* MENSAJE DE SUSCRIPCIÓN SEMANAL SI NO ESTÁ SUSCRIPTO
+																							   		* Con esto muestra el aviso solo en la primera imagen
+																							   		* and $key==0
+																							   		*/
+																							   		if(!$sub == ''){
+																							   			?>
+																							   			<div class="noSubMessage" style="border-radius: 8px; z-index: 1">
+																							   				<div>
+																							   					<div style="color: white;margin:0;">
+																							   						Apoya a <strong style="color:#1FD2BB;"><?php Echo $rowcpd['username']; ?></strong> para desbloquear este contenido
+																							   					</div>
+																							   					<br>
+																							   					<?php if ($rowu['eCreditos'] > 1000): ?>
+																							   						<a href="#" class="btn btn-success" onclick="openDonarCreditos('<?php echo $rowcpd['id']; ?>','<?php echo $rowcpd['username'] ?>');">Apoyar</a>
+																							   						<?php else: ?>
+																							   							<a href="#" class="btn btn-success no-credits" style="">Apoyar</a>
+																							   						<?php endif ?>
+																							   					</div>
+																							   				</div>
+																							   				<?php
+																							   			}
+																							   			?>
+																							   			<!-- Fin Aviso -->
 
-																									</div>
-																									<!-- Aviso -->
-																									<?php
-																									/* MENSAJE DE SUSCRIPCIÓN SEMANAL SI NO ESTÁ SUSCRIPTO
-																						   		* Con esto muestra el aviso solo en la primera imagen
-																						   		* and $key==0
-																						   		*/
-																						   		if(!$sub == ''){
-																						   			?>
-																						   			<div class="noSubMessage" style="border-radius: 8px; z-index: 1">
-																						   				<br>
-																						   				<div style="color: white;margin:0;">
-																						   					Apoya a <strong style="color:#1FD2BB;"><?php Echo $rowcpd['username']; ?></strong> para desbloquear este contenido
-																						   				</div>
-																						   				<br>
-																						   				<?php if ($rowu['eCreditos'] > 1000): ?>
-																						   					<a href="#" class="btn btn-success" onclick="openDonarCreditos('<?php echo $rowcpd['id']; ?>','<?php echo $rowcpd['username'] ?>');">Apoyar</a><br><br>
-																						   					<?php else: ?>
-																						   						<a href="#" class="btn btn-success no-credits">Apoyar</a><br><br>
-																						   					<?php endif ?>
-																						   				</div>
-																						   				<?php
-																						   			}
-																						   			?>
-																						   			<!-- Fin Aviso -->
-																						   		</div>
-																						   		<?php else: ?>
-																						   			<div class="swiper-slide <?php echo $sub; ?>"><?php Echo getSource($image, $sub); ?></div>
-																						   		<?php endif;
-																						   	}else{ ?>
-																						   		<div class="row-image <?php Echo getSourceType($rowcp['imagen']) == 'film' ? 'videoPreview':'';?>"
-																						   			onclick="window.location.href=`<?php Echo $rowcp["linkdedescarga"];?>`"
-																						   			style="background-image: url(<?php Echo $sitio['site'] . ($thumb[$key] ? strdr($thumb[$key]):strdr($image)); ?>);">
-																						   			<!--TAMBIEN COLOCAR UN BOTON DE LINK PARA PODER REDIRIGIRSE A LA PUBLICACION PARA OTRAS OPCIONES, COMO ELIMINARLA-->
-																						   			<div style="position: absolute;top: -86px;right: 96px;">
-																						   				<a class="btn-primary" href="<?php Echo $sitio['site'] .'foto.php?fotoID='. $rowcp['id'];?>">
-																						   					<button class="btn btn-primary" data-toggle="modal" style="">
-																						   						<i class="fa fa-link"></i>
-																						   					</button>
-																						   				</a>
-																						   			</div>
-																						   			<!--LINK DE DESCARGA-->
-																						   			<?php if($rowcp["linkdedescarga"]!=" "){  ?>
-																						   				<div style="position: absolute;top: 30vw;width: 100%;">
-																						   					<a href="<?php Echo $rowcp["linkdedescarga"];?>">
-																						   						<button class="btn btn-success btn-info-content2" data-toggle="modal" style="">
-																						   							VER CONTENIDO
-																						   						</button>
-																						   					</a>
-																						   					<br><br>
-																						   					<div class="alert alert-success btn-info-content" style="padding: 2px; position: absolute;width: 100%;"><strong><i class="fa fa-info-circle"></i> Este contenio se encuentra fuera de Bellasgram</strong></div>
-																						   				</div>
-																						   				<br>
-																						   			<?php }
-																						   		}
+																							   		</div>
 
-																						   		?>
-																						   	</div>
-																						   	<br>
-																						   	<style>
-																						   		@media (max-width: 460px){
-																						   			.btn-info-content{
-																						   				transform: scale(0.5);
-																						   				top: -14vw;
-																						   				font-size: 12px;
-																						   			}
-																						   		}
-																						   		@media (max-width: 295px) {
-																						   			.btn-info-content{
-																						   				font-size: 10px;
-																						   				top: -7vw;
-																						   			}
-																						   			.btn-info-content2{
-																						   				font-size: 8px;
-																						   				top: 28px;
-																						   			}
+																							   	</div>
+																							   	<?php else: ?>
+																							   		<div class="swiper-slide <?php echo $sub; ?>"><?php Echo getSource($image, $sub); ?></div>
+																							   	<?php endif;
+																							   }else{ ?>
+																							   	<div class="row-image <?php Echo getSourceType($rowcp['imagen']) == 'film' ? 'videoPreview':'';?>"
+																							   		onclick="window.location.href=`<?php Echo $rowcp["linkdedescarga"];?>`"
+																							   		style="background-image: url(<?php Echo $sitio['site'] . ($thumb[$key] ? strdr($thumb[$key]):strdr($image)); ?>);">
+																							   		<!--TAMBIEN COLOCAR UN BOTON DE LINK PARA PODER REDIRIGIRSE A LA PUBLICACION PARA OTRAS OPCIONES, COMO ELIMINARLA-->
+																							   		<div style="position: absolute;top: -86px;right: 96px;">
+																							   			<a class="btn-primary" href="<?php Echo $sitio['site'] .'foto.php?fotoID='. $rowcp['id'];?>">
+																							   				<button class="btn btn-primary" data-toggle="modal" style="">
+																							   					<i class="fa fa-link"></i>
+																							   				</button>
+																							   			</a>
+																							   		</div>
+																							   		<!--LINK DE DESCARGA-->
+																							   		<?php if($rowcp["linkdedescarga"]!=" "){  ?>
+																							   			<div style="position: absolute;top: 30vw;width: 100%;">
+																							   				<a href="<?php Echo $rowcp["linkdedescarga"];?>">
+																							   					<button class="btn btn-success btn-info-content2" data-toggle="modal" style="">
+																							   						VER CONTENIDO
+																							   					</button>
+																							   				</a>
+																							   				<br><br>
+																							   				<div class="alert alert-success btn-info-content" style="padding: 2px; position: absolute;width: 100%;"><strong><i class="fa fa-info-circle"></i> Este contenio se encuentra fuera de Bellasgram</strong></div>
+																							   			</div>
+																							   			<br>
+																							   		<?php }
+																							   	}
 
-																						   		}
-																						   	</style>
-																						   <?php } ?>
-																						 </div>
-																						 <?php if(count($Images) <= 1 AND ((isFollow($rowcpd['id'])) OR ($rowu['id'] == $rowcpd['id']))): ?>
-																						 <!-- Paginador - Siguiente -->
-																						 <div class="swiper-button-next" style="height: 200px;margin-top: -100px;width: 50px;"></div>
-																						 <!-- Paginador - Atras -->
-																						 <div class="swiper-button-prev" style="height: 200px;margin-top: -100px;width: 50px;"></div>
-																						 <!-- Paginador -->
-																						 <div class="swiper-pagination"></div>
+																							   	?>
+																							   </div>
+																							   <br>
+																							   <style>
+																							   	@media (max-width: 460px){
+																							   		.btn-info-content{
+																							   			transform: scale(0.5);
+																							   			top: -14vw;
+																							   			font-size: 12px;
+																							   		}
+																							   	}
+																							   	@media (max-width: 295px) {
+																							   		.btn-info-content{
+																							   			font-size: 10px;
+																							   			top: -7vw;
+																							   		}
+																							   		.btn-info-content2{
+																							   			font-size: 8px;
+																							   			top: 28px;
+																							   		}
+
+																							   	}
+																							   </style>
+																							 <?php } ?>
+																							</div>
+																							<?php if(count($Images) <= 1 AND ((isFollow($rowcpd['id'])) OR ($rowu['id'] == $rowcpd['id']))): ?>
+																							<!-- Paginador - Siguiente -->
+																							<div class="swiper-button-next" style="height: 200px;margin-top: -100px;width: 50px;"></div>
+																							<!-- Paginador - Atras -->
+																							<div class="swiper-button-prev" style="height: 200px;margin-top: -100px;width: 50px;"></div>
+																							<!-- Paginador -->
+																							<div class="swiper-pagination"></div>
 																						<?php endif ?>
 																					</div>
 																					<?php
