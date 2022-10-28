@@ -183,7 +183,10 @@ function readImage (input, div) {
 				var data = $.parseJSON(response);
 				console.log(response);
 				if(data.status){
-					swal.fire(data.message, "Podras ver su contenido durante 7 días", "success");
+					swal.fire(data.message, "Podras ver su contenido durante 7 días", "success").then((result) => {
+						location.reload()
+					})
+
 				}else{
 					swal.fire({title: data.message, html: '<a class="btn btn-success" href="comprar.php">Comprar Créditos</a> ', icon: "warning"});
 				}

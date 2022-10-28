@@ -3154,3 +3154,16 @@ function newNotification($to_user = null, $from_user = null, $key = null, $actio
 		}
 	}
 
+	function blurImage($image)
+	{
+
+
+		$image = imagecreatefromjpeg($image);
+		for ($x=1; $x<=1; $x++)
+		{
+			imagefilter($image, IMG_FILTER_GAUSSIAN_BLUR);
+		}
+		imagepng($image);
+		imagedestroy($image);
+
+	}
