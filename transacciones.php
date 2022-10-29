@@ -6,6 +6,7 @@ if ($rowu['role']!='Admin') {
 	exit;
 }
 head();
+$filter_user = (isset($_GET['profile_id']) AND !empty($_GET['profile_id'])) ? $_GET['profile_id'] : '';
 $WHERE = (isset($_GET['profile_id']) AND !empty($_GET['profile_id'])) ? "WHERE player_id = '$_GET[profile_id]'" : '' ;
 $total_pages = $connect->query("SELECT * FROM `players_movements` $WHERE ORDER BY id DESC")->num_rows;
 ?>
@@ -125,29 +126,29 @@ $total_pages = $connect->query("SELECT * FROM `players_movements` $WHERE ORDER B
 										<?php if (ceil($total_pages / $num_results_on_page) > 0): ?>
 											<ul class="pagination">
 												<?php if ($page > 1): ?>
-													<li class="prev"><a href="transacciones.php?page=<?php echo $page-1 ?>">Anterior</a></li>
+													<li class="prev"><a href="<?php echo createLink('transacciones', '', array('page' => $page-1, 'profile_id' => $filter_user), true) ?>">Anterior</a></li>
 												<?php endif; ?>
 
 												<?php if ($page > 3): ?>
-													<li class="start"><a href="transacciones.php?page=1">1</a></li>
+													<li class="start"><a href="<?php echo createLink('transacciones', '', array('page' => '1', 'profile_id' => $filter_user), true) ?>">1</a></li>
 													<li class="dots">...</li>
 												<?php endif; ?>
 
-												<?php if ($page-2 > 0): ?><li class="page"><a href="transacciones.php?page=<?php echo $page-2 ?>"><?php echo $page-2 ?></a></li><?php endif; ?>
-												<?php if ($page-1 > 0): ?><li class="page"><a href="transacciones.php?page=<?php echo $page-1 ?>"><?php echo $page-1 ?></a></li><?php endif; ?>
+												<?php if ($page-2 > 0): ?><li class="page"><a href="<?php echo createLink('transacciones', '', array('page' => $page-2, 'profile_id' => $filter_user), true) ?>"><?php echo $page-2 ?></a></li><?php endif; ?>
+												<?php if ($page-1 > 0): ?><li class="page"><a href="<?php echo createLink('transacciones', '', array('page' => $page-1, 'profile_id' => $filter_user), true) ?>"><?php echo $page-1 ?></a></li><?php endif; ?>
 
-												<li class="currentpage"><a href="transacciones.php?page=<?php echo $page ?>"><?php echo $page ?></a></li>
+												<li class="currentpage"><a href="<?php echo createLink('transacciones', '', array('page' => $page, 'profile_id' => $filter_user), true) ?>"><?php echo $page ?></a></li>
 
-												<?php if ($page+1 < ceil($total_pages / $num_results_on_page)+1): ?><li class="page"><a href="transacciones.php?page=<?php echo $page+1 ?>"><?php echo $page+1 ?></a></li><?php endif; ?>
-												<?php if ($page+2 < ceil($total_pages / $num_results_on_page)+1): ?><li class="page"><a href="transacciones.php?page=<?php echo $page+2 ?>"><?php echo $page+2 ?></a></li><?php endif; ?>
+												<?php if ($page+1 < ceil($total_pages / $num_results_on_page)+1): ?><li class="page"><a href="<?php echo createLink('transacciones', '', array('page' => $page+1, 'profile_id' => $filter_user), true) ?>"><?php echo $page+1 ?></a></li><?php endif; ?>
+												<?php if ($page+2 < ceil($total_pages / $num_results_on_page)+1): ?><li class="page"><a href="<?php echo createLink('transacciones', '', array('page' => $page+2, 'profile_id' => $filter_user), true) ?>"><?php echo $page+2 ?></a></li><?php endif; ?>
 
 												<?php if ($page < ceil($total_pages / $num_results_on_page)-2): ?>
 													<li class="dots">...</li>
-													<li class="end"><a href="transacciones.php?page=<?php echo ceil($total_pages / $num_results_on_page) ?>"><?php echo ceil($total_pages / $num_results_on_page) ?></a></li>
+													<li class="end"><a href="<?php echo createLink('transacciones', '', array('page' => ceil($total_pages / $num_results_on_page), 'profile_id' => $filter_user), true) ?>"><?php echo ceil($total_pages / $num_results_on_page) ?></a></li>
 												<?php endif; ?>
 
 												<?php if ($page < ceil($total_pages / $num_results_on_page)): ?>
-													<li class="next"><a href="transacciones.php?page=<?php echo $page+1 ?>">Siguiente</a>
+													<li class="next"><a href='<?php echo createLink('transacciones', '', array('page' => $page+1, 'profile_id' => $filter_user), true) ?>'>Siguiente</a>
 													</li>
 												<?php endif; ?>
 											</ul>
