@@ -101,7 +101,7 @@ $total_pages = $connect->query("SELECT * FROM `players_movements` $WHERE ORDER B
 													</th>
 													<th style="text-align:center;">
 														<span>
-															<a href="profile.php?profile_id=<?php echo $rowcp['id']; ?>"  > <?php echo $rowcp['username']; ?> </a>
+															<a href="transacciones.php?profile_id=<?php echo $rowcp['id']; ?>"  > <?php echo $rowcp['username']; ?> </a>
 														</span>
 													</th>
 													<th style="text-align:center;">
