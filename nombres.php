@@ -59,6 +59,7 @@ $count = 0;
 						<option value="newChat">Iniciar Chat</option>
 						<option value="sendMessages">Enviar mensajes masivos</option>
 						<option value="removeUser">Eliminar de la lista</option>
+						<option value="newChatOnlyFriends">Iniciar chat solo con amigos</option>
 					</select>
 					<div id="modalMessage" style="display: none;align-items: center;flex-direction: row;justify-content: center; margin: 20px 0px;">
 						<textarea id="inputMessage" placeholder="Escribe tu mensaje" class="form-control" name="inputMessage" style="width: 263px;"></textarea>
@@ -98,7 +99,7 @@ $count = 0;
 									<?php while($names =  mysqli_fetch_assoc($sqlNames)){ ?>
 										<td>
 											<span>
-												<input class="case" type="checkbox" name="namesId[]" value="<?php echo $names['id']; ?>">
+												<input id="check<?php echo $names['id']; ?>" class="case" type="checkbox" name="namesId[]" value="<?php echo $names['id']; ?>">
 												<label>
 													<?php echo createLink('profile',$names['username'],array('profile_id' => $names['id'])); ?>
 												</label>
@@ -114,7 +115,7 @@ $count = 0;
 											</span>
 											<?php if ($names['f_id']!=null): ?>
 												&nbsp;
-												<i class="fa fa-square" style="color:green;"></i>
+												<i data-checkid="<?php echo $names['id']; ?>" class="fa fa-square isfriend" style="color:green;"></i>
 												<?php else: ?>
 													<i class="fa fa-square" style="color:red;"></i>
 												<?php endif ?>
@@ -188,6 +189,18 @@ $count = 0;
 			// Mostrar opciones
 			$("#modalMessage").css('display','flex')
 		}
+
+		/* Si se desea seleccionar todos los que sean amigos */
+		else if($("#postType option:selected").val() == 'newChatOnlyFriends')
+		{
+			$(".isfriend").each(function(){
+				console.log('#checkid' + $(this).attr("data-checkid"));
+				/* Optener id del check */
+				checkid = '#check' + $(this).attr("data-checkid")
+				$(checkid).prop("checked", true);
+			})
+		}
+
 		// SI NO SE SELECCIONO
 		else{
 			// Vacias Selecciones
@@ -278,7 +291,7 @@ if (isset($_POST['namesId']) AND isset($_POST['option']))
 						{
 
 						//AGREGA SOLICITUD
-							$addrequest = $connect->query("INSERT INTO `players_notifications` (fromid, toid,not_key,read_time) VALUES ('$rowu[id]', '$nameId','newAmistad','0')");
+							$addrequest = $connect->query("INSERT INTO `players_notifications` (fromid, toid,not_key,read_time, action) VALUES ('$rowu[id]', '$nameId','newAmistad','0', '0')");
 
 							if ($addrequest)
 							{
@@ -384,6 +397,43 @@ if (isset($_POST['namesId']) AND isset($_POST['option']))
 		// Mostrar mensaje de resultados
 		setSwal(array('Operación realizada con éxito', '<h3>Mensajes enviados con exito: '.$success.'</h3>'.$string_error,''));
 	}
+	/* Inicia roomchats con usuarios que este
+	 * en la lista y que exista amistad mutua
+	 */
+	elseif($option == 'newChatOnlyFriends')
+	{
+		/* Cuenta chats iniciados */
+		$countchats = 0;
+
+		foreach ($NamesId as $friend)
+		{
+
+			/** Comprueba que no exista un chatroom entre usuario A y usuario B */
+			if(!checkChatRoom($rowu['id'], $friend, false))
+			{
+
+				/* Verifica si este usuario está en la lista de nombres */
+				if(checkUserInNameSpace($friend))
+				{
+
+					/* Comprueba amistad */
+					if(areFriends($friend, $rowu['id']))
+					{
+						/* INICIA UN CHAT */
+						$createroom = $connect->query("INSERT INTO `nuevochat_rooms` (player1, player2) VALUES ('$friend', '$rowu[id]')");
+
+						if ($createroom)
+						{
+							$countchats++;
+						}
+					}
+				}
+
+			}
+			echo "<script>swal.fire({ title:'Excelente',text:'Chats iniciados : ".$countchats."',});</script>";
+		}
+	}
+
 	// Si hay que enviar eliminar a usuario(s) de la lista
 	elseif ($option == 'removeUser')
 	{

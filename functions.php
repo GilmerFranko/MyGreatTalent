@@ -3167,3 +3167,86 @@ function newNotification($to_user = null, $from_user = null, $key = null, $actio
 		imagedestroy($image);
 
 	}
+
+
+
+
+	/**
+	 * Comprueba si existe un chatroom entre dos usuarios
+	 * y de existir comprueba si esta abierto
+	 * @return [type] [description]
+	 */
+	function checkChatRoom($usera = null, $userb = null, $checkstate = true)
+	{
+		global $connect;
+
+		/* Solicita chatroom de existir */
+		$existChat = $connect->query("SELECT `id` FROM `nuevochat_rooms` WHERE (player1 = '$usera' AND player2 = '$userb') || (player2 = '$usera' AND player1 = '$userb')");
+
+		/* Comprueba que exista */
+		if ($existChat AND $existChat->num_rows > 0)
+		{
+			$chatroom = $existChat->fetch_assoc()['id'];
+
+
+			if(!$checkstate)
+			{
+				return true;
+			}
+
+			/* Comprobar estado de chatroom */
+			elseif(checkStateChatRoom($chatroom))
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	function getAllFriends($userid = null)
+	{
+		global $connect;
+
+		$friend = [];
+		$consult = $connect->query("SELECT * FROM `friends` AS f WHERE (f.`player1` = '$userid' OR f.`player2` = '$userid')");
+
+		while ($friends = mysqli_fetch_assoc($consult)) {
+
+			/* Seleccionar amigo */
+			if($friends['player1'] == $userid)
+			{
+				$friend[] = array('id' => $friends['id'], 'friend' => $friends['player2'], 'me' => $friends['player1']);
+			}
+			else
+			{
+				$friend[] = array('id' => $friends['id'], 'friend' => $friends['player1'], 'me' => $friends['player2']);
+			}
+		}
+		return $friend;
+	}
+
+	/**
+	 * Verifica si x usuario está en la lista
+	 * @param  int $userid
+	 * @return boolean
+	 */
+	function checkUserInNameSpace($userid)
+	{
+		global $connect;
+
+		$consult = $connect->query('SELECT `id` FROM `players_namesactions` WHERE `player_id` = \''. $userid .'\'');
+
+		/* Comprueba que el usuario esté registrado */
+		if($consult and $consult->num_rows > 0)
+		{
+			return true;
+		}
+		return false;
+	}
