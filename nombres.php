@@ -11,7 +11,7 @@ $search = (isset($_GET['search']) AND !empty($_GET['search'])) ? $_GET['search']
 // NOMBRES GUARDADOS EN LA LISTA
 if ($search == '')
 {
-	$sqlNames = $connect->query("SELECT pa.`time`,p.`id` AS id,p.`username` AS username,f.`id` AS f_id, email, ipaddres, timeonline, p.`ipaddres` AS `ip` FROM `players_namesactions` AS pa INNER JOIN players AS p ON p.`id`= pa.`player_id` LEFT JOIN friends AS f ON (f.`player1`=p.`id` AND f.`player2`='$rowu[id]') || (f.`player1`='$rowu[id]' AND f.`player2`=p.`id`) GROUP BY p.`id` ORDER BY pa.`time` DESC");
+	$sqlNames = $connect->query("SELECT pa.`time`,p.`id` AS id,p.`username` AS username,f.`id` AS f_id, email, timeonline, p.`ipaddres` AS `ip`, `checked` FROM `players_namesactions` AS pa INNER JOIN players AS p ON p.`id`= pa.`player_id` LEFT JOIN friends AS f ON (f.`player1`=p.`id` AND f.`player2`='$rowu[id]') || (f.`player1`='$rowu[id]' AND f.`player2`=p.`id`) GROUP BY p.`id` ORDER BY pa.`time` DESC");
 }
 	// NOMBRES BUSCADOS
 else
@@ -96,17 +96,19 @@ $count = 0;
 							</thead>
 							<tbody>
 								<tr>
-									<?php while($names =  mysqli_fetch_assoc($sqlNames)){ ?>
+									<?php
+									while($names =  mysqli_fetch_assoc($sqlNames)){
+										/* Determina si se debe colocar el checked */
+										$checked = (isset($names['checked']) and $names['checked']) ? 'checked=\'\'' : '';
+										?>
 										<td>
 											<span>
-												<input id="check<?php echo $names['id']; ?>" class="case" type="checkbox" name="namesId[]" value="<?php echo $names['id']; ?>">
+												<input id="check<?php echo $names['id']; ?>" class="case" type="checkbox" name="namesId[]" value="<?php echo $names['id']; ?>" <?php echo $checked ?>>
 												<label>
 													<?php echo createLink('profile',$names['username'],array('profile_id' => $names['id'])); ?>
 												</label>
 												<div class="view_email"> <small><strong>Email:</strong><br><?php echo $names['email']; ?></small></div>
-
 												<div class="view_email"> <small><strong>Dirección Ip:</strong> <br><?php echo $names['ip']; ?></small></div>
-
 												<div class="view_email"> <small><strong>Ultima conexión:</strong> <br><?php echo TimeAgo($names['timeonline']); ?></small></div>
 												<!-- DE ESTAR AGREGADO EL NOMBRE EN LA LISTA -->
 												<?php if (isset($names['time'])): ?>
@@ -267,7 +269,7 @@ if (isset($_POST['namesId']) AND isset($_POST['option']))
 				}
 			}
 		}
-		echo "<script>swal.fire({ title:'Excelente',text:'Perfiles agregados: ".$countaddnames."',});</script>";
+		setSwalFire(array('Excelente', 'Perfiles agregados: \''. $countaddnames .'\'', ''));
 		exit;
 
 	}
@@ -307,7 +309,7 @@ if (isset($_POST['namesId']) AND isset($_POST['option']))
 				}
 			}
 		}
-		echo "<script>swal.fire({ title:'Excelente',text:'Solicitudes enviadas : ".$countaddrequest."',});</script>";
+		setSwalFire(array('Excelente', 'Solicitudes enviadas: '. $countaddrequest, ''));
 	}
 // AGREGAR CHAT A TODOS LOS USUARIOS
 	elseif($option == 'newChat')
@@ -334,7 +336,7 @@ if (isset($_POST['namesId']) AND isset($_POST['option']))
 					}
 				}
 			}
-			echo "<script>swal.fire({ title:'Excelente',text:'Chats iniciados : ".$countchats."',});</script>";
+			setSwalFire(array('Excelente', 'Chats iniciados: '. $countchats, ''));
 		}
 	}
 	// ENVIA MENSAJES MASIVOS
@@ -388,14 +390,14 @@ if (isset($_POST['namesId']) AND isset($_POST['option']))
 		}
 		else
 		{
-			setSwal(array('No se ha realizado ninguna acci&oacute;n porque los formularios est&aacute;n vac&iacute;os','', 'warning'));
+			setSwalFire(array('No se ha realizado ninguna acci&oacute;n porque los formularios est&aacute;n vac&iacute;os','', 'warning'));
 			return false;
 		}
 		$string_error = '';
 		// DE HABER ERRORES, CREA UN PARRAFO INDICANDOLOS
 		if($errors['file-no-uploaded'] > 0 or $errors['room-no-exist'] > 0 or $errors['room-is-closed'] > 0) $string_error = '<br><h3>Mensajes no enviados por las siguientes causas:</h3><br>'.$errors['file-no-uploaded'].': Fotos no se subieron al servidor.<br>'.$errors['room-is-closed'].': Room cerrada.<br>'.$errors['room-no-exist'].': No existió una room_chat al cual enviar el mensaje.';
 		// Mostrar mensaje de resultados
-		setSwal(array('Operación realizada con éxito', '<h3>Mensajes enviados con exito: '.$success.'</h3>'.$string_error,''));
+		setSwalFire(array('Operación realizada con éxito', '<h3>Mensajes enviados con exito: '.$success.'</h3>'.$string_error,''));
 	}
 	/* Inicia roomchats con usuarios que este
 	 * en la lista y que exista amistad mutua
@@ -430,7 +432,7 @@ if (isset($_POST['namesId']) AND isset($_POST['option']))
 				}
 
 			}
-			echo "<script>swal.fire({ title:'Excelente',text:'Chats iniciados : ".$countchats."',});</script>";
+			setSwalFire(array('Excelente', 'Chats iniciados: \''. $countchats .'\'', ''));
 		}
 	}
 
@@ -446,8 +448,10 @@ if (isset($_POST['namesId']) AND isset($_POST['option']))
 				$countRemoves = $countRemoves + removeUserLDN($connect->real_escape_string($nameId));
 			}
 		}
-		setSwal(array('Se han eliminado ' . $countRemoves . ' Usuarios', '', 'success'));
+		setSwalFire(array('Se han eliminado ' . $countRemoves . ' Usuarios', '', 'success'));
 	}
+
+	addAllRememberAction($NamesId);
 }
 ?>
 

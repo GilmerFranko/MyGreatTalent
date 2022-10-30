@@ -1652,9 +1652,10 @@ function setSwal($input = null)
 {
 	echo '<script>swal.fire("'. $input[0] .'","'. $input[1] .'","'. $input[2] .'");</script>';
 }
-function setSwalFire($input = null)
+function setSwalFire($input = null, $timer = null)
 {
-	echo '<script>swal.fire({title: "'. $input[0] .'",html: "'. $input[1] .'",type: "'. $input[2] .'"});</script>';
+	$textTimer = $timer != null ? ',timer: ' . $timer : '';
+	echo '<script>swal.fire({title: "'. $input[0] .'",html: "'. $input[1] .'",type: "'. $input[2] .'"'. $textTimer .'}).then(() => {window.location.href = window.location.href});</script>';
 
 }
 
@@ -3261,12 +3262,44 @@ function newNotification($to_user = null, $from_user = null, $key = null, $actio
 	{
 		global $connect;
 
-		$consult = $connect->query('SELECT `id` FROM `players_namesactions` WHERE `player_id` = \''. $userid .'\'');
-
+		$consult = $connect->query('SELECT `id` FROM `players_namesactions` WHERE `player_id` = \''. $connect->real_escape_string($userid) .'\'');
 		/* Comprueba que el usuario esté registrado */
 		if($consult and $consult->num_rows > 0)
 		{
 			return true;
 		}
 		return false;
+	}
+
+
+	/**
+	 * Guarda seleccion del usuario
+	 * Para que al recargar la pagina
+	 * El usuario aparezca como seleccionado
+	 * @param  int $userid
+	 * @return [type]
+	 */
+	function addRememberAction($userid = null)
+	{
+		global $connect;
+
+		$update = $connect->query('UPDATE `players_namesactions` SET `checked`= 1 WHERE `player_id` = \''. $connect->real_escape_string($userid) .'\'');
+
+		if($update)
+		{
+			return true;
+		}
+		return false;
+	}
+
+	function addAllRememberAction($data = null)
+	{
+		global $connect;
+		/* Desactiva el checkout de todos los usuarios */
+		$connect->query('UPDATE `players_namesactions` SET `checked`= 0');
+		/* Guardar seleccion */
+		foreach ($data as $nameId)
+		{
+			addRememberAction($nameId);
+		}
 	}
