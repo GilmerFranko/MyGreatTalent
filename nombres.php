@@ -45,7 +45,7 @@ $count = 0;
 				<!-- BOTONES HEADER -->
 				<div class="row" align="center">
 					<!-- BOTON SELECCIONAR TODO -->
-					<a href="#" id="selectall" class="btn btn-primary" name=""><i class="fa fa-check"></i> Seleccionar todo</a>
+					<span href="" id="selectall" class="btn btn-primary" name=""><i class="fa fa-check"></i> Seleccionar todo</span>
 					<!-- BOTON AGREGAR NOMBRES -->
 					<button class="btn btn-primary" name="addnames"><i class="fa fa-plus"></i> Agregar nombres a la lista</button>
 					<!-- BOTON MOSTRAR EMAILS -->
