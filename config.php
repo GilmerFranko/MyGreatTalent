@@ -50,12 +50,12 @@ if (isset($_COOKIE['eluser'])) {
     $sitesfree = array('');
   }
   // DATOS PARA USUARIO INVITADO
-  $guestUser = array('id' => '0987654321','username' => 'invitado', 'email' => '', 'baneado' => '0','role' => 'Player', 'theme' => 0,'follower' => '[]');
+  $guestUser = array('id' => 9999999999,'username' => 'invitado', 'email' => '', 'baneado' => '0','role' => 'Player', 'theme' => 0,'follower' => '[]');
 
   /*===== // ======*/
 
-ini_set('display_errors', 0);
-ini_set('display_startup_errors', 0);
+  ini_set('display_errors', 0);
+  ini_set('display_startup_errors', 0);
 //error_reporting(E_ALL);
 
   require_once("functions.php");

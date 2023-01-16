@@ -1446,7 +1446,7 @@ function checkBlock($userA = null, $userB = null)
 {
 	global $connect;
     // COMPROBAR QUE LOS USUARIOS SEAN DIFERENTES (NO PUEDO BLOQUEARME A MI MISMO)
-	if($userA !== $userB)
+	if($userA != $userB)
 	{
 		$query = $connect->query('SELECT `id` FROM `bloqueos` AS b WHERE (b.`fromid` = \''.$userA.'\' && b.`toid` = \''.$userB.'\') || (b.`fromid` = \''.$userB.'\' && b.`toid` = \''.$userA.'\') LIMIT 1');
         // RETORNAR TRUE SI EXISTE BLOQUEO ENTRE ALGUNO DE ELLOS
@@ -1535,60 +1535,65 @@ function areFriends($usera, $userb){ global $connect;
 }
 
 
-/**
-* devuelve true si puedo ver el perfil de una persona (SI NO HAY BLOQUEOS Y NO TIENE EL PERFIL OCULTO)
-*
-* @param int (usuario a inspeccionar)
-* @param int (mi usuario(no requerido))
-* @param boolean TRUE requiere que los usuarios sea amigos / FALSE no requiere amistad / PRETEMINADO true
-* @return boolean
+	/**
+	* devuelve true si puedo ver el perfil de una persona (SI NO HAY BLOQUEOS Y NO TIENE EL PERFIL OCULTO)
+	*
+	* @param int (usuario a inspeccionar)
+	* @param int (mi usuario(no requerido))
+	* @param boolean TRUE requiere que los usuarios sea amigos / FALSE no requiere amistad / PRETEMINADO true
+	* @return boolean
 */
-function canSeeYourProfile($User = null , $iSelf = null, $require_friendly = true)
-{
-	global $connect, $rowu;
-
-	$iSelf = $iSelf == null ? $rowu['id'] : $iSelf;
-
-	$consult1 = $connect->query("SELECT id, username, hidetochat, perfiloculto FROM players WHERE id = '$User'");
-
-	$consult2 = $connect->query("SELECT id, username, registerfrom FROM players WHERE id = '$iSelf'");
-
-	if($User != $iSelf)
+	function canSeeYourProfile($User = null , $iSelf = null, $require_friendly = true)
 	{
-		if($consult1 AND $consult2){
+		global $connect, $rowu;
 
-			$U = $consult1->fetch_assoc();
-			$I = $consult2->fetch_assoc();
-			$iamfrom = ($I['registerfrom'] == 'chat' ? 'chat' : "bellasgram");
+		$iSelf = $iSelf == null ? $rowu['id'] : $iSelf;
+
+		$consult1 = $connect->query("SELECT id, username, hidetochat, perfiloculto FROM players WHERE id = '$User'");
+
+		$consult2 = $connect->query("SELECT id, username, registerfrom FROM players WHERE id = '$iSelf'");
+
+		if($User != $iSelf)
+		{
+			if($consult1 AND $consult2){
+
+				$U = $consult1->fetch_assoc();
+				$I = $consult2->fetch_assoc();
+				$iamfrom = ($I['registerfrom'] == 'chat' ? 'chat' : "bellasgram");
 
 			// COMPRUEBA QUE NO HAYA BLOQUEOS
-			if(!checkBlock($User,$iSelf))
-			{
-				// COMPRUEBA QUE EL USUARIO NO TENGA EL PERFIL OCULTO
-				if($U['perfiloculto'] == 'no' or areFriends($User, $iSelf))
+				if(!checkBlock($User,$iSelf))
 				{
+				// COMPRUEBA QUE EL USUARIO NO TENGA EL PERFIL OCULTO
+					if($U['perfiloculto'] == 'no' or areFriends($User, $iSelf))
+					{
 
 					// COMPRUEBA QUE NO SOY AMIGO DEL USUARIO
-					if (!areFriends($User, $iSelf)){
+						if (!areFriends($User, $iSelf)){
 
 						// COMPRUEBA SI EL USUARIO TIENE EL PERFIL OCULTO PARA USUARIOS REGISTRADOS FUERA DEL CHAT Y SOY REGISTRADO EN EL CHAT
-						if ($U['hidetochat'] == 'si' AND $iamfrom == "chat")
-						{
-							return true;
-						}
-						elseif($U['hidetochat'] == 'no')
-						{
-							return true;
+							if ($U['hidetochat'] == 'si' AND $iamfrom == "chat")
+							{
+								return true;
+							}
+							elseif($U['hidetochat'] == 'no')
+							{
+								return true;
+							}
+							else
+							{
+								return false;
+							}
+
 						}
 						else
 						{
-							return false;
+							return true;
 						}
-
 					}
 					else
 					{
-						return true;
+						return false;
 					}
 				}
 				else
@@ -1596,93 +1601,87 @@ function canSeeYourProfile($User = null , $iSelf = null, $require_friendly = tru
 					return false;
 				}
 			}
-			else
-			{
-				return false;
-			}
 		}
 	}
-
-}
 
 // COMPRUEBA EL ESTADO ES UN CHAT ROOM @RETURN (ABIERTO : "open" /CERRADO: ID DE LA PERSONA QUE LO BLOQUEO)
 
-function checkStateChatRoom($id){
-	global $connect;
+	function checkStateChatRoom($id){
+		global $connect;
 
 	//
-	$q = $connect->query("SELECT * FROM `nuevochat_rooms` WHERE id = '$id'");
+		$q = $connect->query("SELECT * FROM `nuevochat_rooms` WHERE id = '$id'");
 
 	//
-	if ($q AND $q->num_rows > 0)
-	{
-		$r = $q->fetch_assoc();
-
-		if($r['state']=='open')
+		if ($q AND $q->num_rows > 0)
 		{
-			return 'open';
+			$r = $q->fetch_assoc();
+
+			if($r['state']=='open')
+			{
+				return 'open';
+			}
+			else
+			{
+				return $r['state'];
+			}
 		}
 		else
 		{
-			return $r['state'];
+			return false;
 		}
 	}
-	else
+
+	function getColumns($table = null, $input = null, $where = null, $limit = 1, $sentence = false)
 	{
+		global $connect;
+		$columns = is_array($input) ? implode('`,`', $input) : $input;
+		$where = is_null($where) ? 'ORDER BY RAND()' : 'WHERE `'.$where[0].'` = \''.$connect->real_escape_string($where[1]).'\'';
+		$query = $connect->query('SELECT `'.$columns.'` FROM `'.$table.'` '.$where.' LIMIT '.$limit);
+		if ($query == true && $query->num_rows > 0)
+		{
+			$result = $sentence == true ? $query : $query->fetch_assoc();
+            //
+			return is_array($input) ? $result : $result[$input];
+		}
+
 		return false;
 	}
-}
-
-function getColumns($table = null, $input = null, $where = null, $limit = 1, $sentence = false)
-{
-	global $connect;
-	$columns = is_array($input) ? implode('`,`', $input) : $input;
-	$where = is_null($where) ? 'ORDER BY RAND()' : 'WHERE `'.$where[0].'` = \''.$connect->real_escape_string($where[1]).'\'';
-	$query = $connect->query('SELECT `'.$columns.'` FROM `'.$table.'` '.$where.' LIMIT '.$limit);
-	if ($query == true && $query->num_rows > 0)
+	function setSwal($input = null)
 	{
-		$result = $sentence == true ? $query : $query->fetch_assoc();
-            //
-		return is_array($input) ? $result : $result[$input];
+		echo '<script>swal.fire("'. $input[0] .'","'. $input[1] .'","'. $input[2] .'");</script>';
+	}
+	function setSwalFire($input = null, $timer = null)
+	{
+		$textTimer = $timer != null ? ',timer: ' . $timer : '';
+		echo '<script>swal.fire({title: "'. $input[0] .'",html: "'. $input[1] .'",type: "'. $input[2] .'"'. $textTimer .'}).then(() => {window.location.href = window.location.href});</script>';
+
 	}
 
-	return false;
-}
-function setSwal($input = null)
-{
-	echo '<script>swal.fire("'. $input[0] .'","'. $input[1] .'","'. $input[2] .'");</script>';
-}
-function setSwalFire($input = null, $timer = null)
-{
-	$textTimer = $timer != null ? ',timer: ' . $timer : '';
-	echo '<script>swal.fire({title: "'. $input[0] .'",html: "'. $input[1] .'",type: "'. $input[2] .'"'. $textTimer .'}).then(() => {window.location.href = window.location.href});</script>';
+	function setSwalQuest($title,$link, $quest = '')
+	{
 
-}
-
-function setSwalQuest($title,$link, $quest = '')
-{
-
-	echo "<script>swal.fire({title: '$title',buttons: ['No', 'Si!'],showCancelButton: true,}).then((name) => {if(name.isConfirmed){window.location.href = '$link';}});</script>";
-}
+		echo "<script>swal.fire({title: '$title',buttons: ['No', 'Si!'],showCancelButton: true,}).then((name) => {if(name.isConfirmed){window.location.href = '$link';}});</script>";
+	}
 
 // DETECTA UN LINK Y LO CONVIERTE EN ENLACE
-function detectLink($text = null)
-{
+	function detectLink($text = null)
+	{
 //cadena origen con los enlaces sin detectar
 
 	//filtro los enlaces normales
-	$text = preg_replace("/((http|https|www)[^\s]+)/", '<a href="$1">$0</a>', $text);
+		$text = preg_replace("/((http|https|www)[^\s]+)/", '<a href="$1">$0</a>', $text);
 	//miro si hay enlaces con solamente www, si es así le añado el https://
-	$text= preg_replace("/href=\"www/", 'href="https://www', $text);
+		$text= preg_replace("/href=\"www/", 'href="https://www', $text);
 
 	//saco los enlaces de twitter
 	//$text = preg_replace("/(@[^\s]+)/", '<a target=\"_blank\"  href="http://twitter.com/intent/user?screen_name=$1">$0</a>', $text);
 
 	//$text = preg_replace("/(#[^\s]+)/", '<strong><a target=\"_blank\"  href="http://twitter.com/search?q=$1">$0</a></strong>', $text);
 
-	return $text;
-}
-function ProgramarMenssage($ImageDir, $index, $lastDay = 0){
+		return $text;
+	}
+	function ProgramarMenssage($ImageDir, $index, $lastDay = 0){
 	/**
 	 * --NOTA--
 	 * Tuve un pequeño problema en este algoritmo e implemente el algoritmo de la funcion para programar fotos y funciono bien, luego me di cuenta del error (se estaba multiplicando la hora 60*60 en vez de 60*24) y volvi e implemente este codigo que esta mas optimizado, esta nota es para tener encuenta este algoritmo para implementarlo en la funcion para programar fotos
@@ -3302,4 +3301,9 @@ function newNotification($to_user = null, $from_user = null, $key = null, $actio
 		{
 			addRememberAction($nameId);
 		}
+	}
+
+	function logs($text)
+	{
+		echo '<script>console.log(\''. $text .'\')</script>';
 	}
