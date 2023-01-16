@@ -281,54 +281,54 @@ function DelayMessages(){
 
 			mysqli_query($connect, "INSERT INTO `nuevochat_mensajes` (id_chat, toid, author , mensaje, time) VALUES
 				('{$Mensaje['chat_room']}', '{$toID}', '{$Respuesta['uid']}', '{$Respuesta["respuesta"]}', '{$time}')");
+			}
 		}
 	}
-}
 
-DelayMessages();
+	DelayMessages();
 
-function petImg($data) {
-	$return = (object) [];
-	$img = json_decode($data, true);
-	if(!is_null($img)){
-		$return->imgNormal = @$img['normal'];
-		$return->imgFeed = @$img['feed'];
-		$return->imgGame = @$img['game'];
-		if(!isset($img['lifelow'])){
-			$img['lifelow'] = $img['normal'];
+	function petImg($data) {
+		$return = (object) [];
+		$img = json_decode($data, true);
+		if(!is_null($img)){
+			$return->imgNormal = @$img['normal'];
+			$return->imgFeed = @$img['feed'];
+			$return->imgGame = @$img['game'];
+			if(!isset($img['lifelow'])){
+				$img['lifelow'] = $img['normal'];
+			}
+			$return->lifelow = $img['lifelow'];
+		}else{
+			$return->imgNormal = $data;
+			$return->imgFeed = $data;
+			$return->imgGame = $data;
+			$return->lifelow = $data;
 		}
-		$return->lifelow = $img['lifelow'];
-	}else{
-		$return->imgNormal = $data;
-		$return->imgFeed = $data;
-		$return->imgGame = $data;
-		$return->lifelow = $data;
+		return $return;
 	}
-	return $return;
-}
 
-function EarchLifePets($uid){
-	global $connect;
-	$pets = $connect->query("SELECT * FROM `player_pets` WHERE player_id='{$uid}' AND live=1");
-	if($pets && mysqli_num_rows($pets)>0){
-		while($pet = mysqli_fetch_assoc($pets)){
-			updateHE($pet);
-		}
-	}
-}
-
-function EarchBonusPets($uid){
-	global $connect;
-	$pets = $connect->query("SELECT * FROM `player_pets` WHERE player_id='{$uid}' AND live=1");
-	if($pets && mysqli_num_rows($pets)){
-		while($pet = mysqli_fetch_assoc($pets)){
-			UpdateBonus($pet);
+	function EarchLifePets($uid){
+		global $connect;
+		$pets = $connect->query("SELECT * FROM `player_pets` WHERE player_id='{$uid}' AND live=1");
+		if($pets && mysqli_num_rows($pets)>0){
+			while($pet = mysqli_fetch_assoc($pets)){
+				updateHE($pet);
+			}
 		}
 	}
-}
 
-function UpdateBonus($pet){
-	global $connect;
+	function EarchBonusPets($uid){
+		global $connect;
+		$pets = $connect->query("SELECT * FROM `player_pets` WHERE player_id='{$uid}' AND live=1");
+		if($pets && mysqli_num_rows($pets)){
+			while($pet = mysqli_fetch_assoc($pets)){
+				UpdateBonus($pet);
+			}
+		}
+	}
+
+	function UpdateBonus($pet){
+		global $connect;
 	$delay = 60*60*24*5; // cada cuanto te regala creditos tu mascota aqui 5 dias
 
 	$pet_updated = time() - $pet['update_bonus'];
@@ -1450,89 +1450,89 @@ function checkBlock($userA = null, $userB = null)
 	{
 		$query = $connect->query('SELECT `id` FROM `bloqueos` AS b WHERE (b.`fromid` = \''.$userA.'\' && b.`toid` = \''.$userB.'\') || (b.`fromid` = \''.$userB.'\' && b.`toid` = \''.$userA.'\') LIMIT 1');
         // RETORNAR TRUE SI EXISTE BLOQUEO ENTRE ALGUNO DE ELLOS
-		if ($query == true && $query->num_rows > 0)
+			if ($query == true && $query->num_rows > 0)
+			{
+				return true;
+			}
+		}
+    //
+		return false;
+	}
+
+// DEVUELVE LOS PERFILES RECOMENDADOS DE UN USUARIO
+	function getRecommendations($id, $user = null)
+	{
+		global $connect;
+		if($user == null)
+		{
+			$consult = $connect->query("SELECT * FROM `players_recommendations` AS r WHERE r.`fromid` = '$id'");
+		}
+		else
+		{
+			$consult = $connect->query("SELECT * FROM `players_recommendations` AS r WHERE r.`fromid` = '$id' AND r.`toid` = '$user'");
+		}
+
+		return $consult;
+	}
+// DEVUELVE ARRAY DE UN USUARIO
+	function getUser($id = null, $searchName = false)
+	{
+		global $connect;
+
+	// COMPRUEBA SI HAY QUE BUSCAR POR ID / NOMBRE
+		if ($searchName == false)
+		{
+			$consult = $connect->query('SELECT * FROM `players` WHERE `id` = \''. $connect->real_escape_string($id) .'\'');
+		}
+		else
+		{
+			$consult = $connect->query('SELECT * FROM `players` WHERE `username` = \''. $connect->real_escape_string($id). '\'');
+		}
+
+
+		return $consult;
+	}
+// DEVUELVE ENLACE A UN PERFIL
+	function getUserLink($id = null)
+	{
+		global $connect, $sitio;
+
+	// COMPRUEBA SI HAY QUE BUSCAR POR ID / NOMBRE
+		if (is_numeric($id))
+		{
+			$consult = $connect->query('SELECT `id`,`email`,`username` FROM `players` WHERE `id` = \''. $connect->real_escape_string($id) .'\'');
+		}
+		else
+		{
+			$consult = $connect->query('SELECT `id`,`email`,`username` FROM `players` WHERE `username` = \''. $connect->real_escape_string($id). '\'');
+		}
+		if ($consult AND $consult->num_rows > 0)
+		{
+			$User = $consult->fetch_assoc();
+
+			$link = str_replace(' ','.',$User['username']);
+
+			return $sitio['site'].'profile.php?profile_id='.$link;
+		}
+		else
+		{
+			error_log('No se devolvio el link del usuario deseado. ' .PHP_EOL. 'Linea: '. __LINE__.PHP_EOL.'Variable pasada: '.$id);
+			return '';
+		}
+	}
+// DEVUELVE TRUE SI DOS USUARIOS SON AMIGOS
+	function areFriends($usera, $userb){ global $connect;
+
+		$consult = $connect->query("SELECT * FROM `friends` AS f WHERE (f.`player1` = '$usera' && f.`player2` = '$userb') || (f.`player2` = '$usera' && f.`player1` = '$userb')");
+		if ($consult AND $consult->num_rows > 0)
 		{
 			return true;
 		}
+		else
+		{
+			return false;
+		}
 	}
-    //
-	return false;
-}
-
-// DEVUELVE LOS PERFILES RECOMENDADOS DE UN USUARIO
-function getRecommendations($id, $user = null)
-{
-	global $connect;
-	if($user == null)
-	{
-		$consult = $connect->query("SELECT * FROM `players_recommendations` AS r WHERE r.`fromid` = '$id'");
-	}
-	else
-	{
-		$consult = $connect->query("SELECT * FROM `players_recommendations` AS r WHERE r.`fromid` = '$id' AND r.`toid` = '$user'");
-	}
-
-	return $consult;
-}
-// DEVUELVE ARRAY DE UN USUARIO
-function getUser($id = null, $searchName = false)
-{
-	global $connect;
-
-	// COMPRUEBA SI HAY QUE BUSCAR POR ID / NOMBRE
-	if ($searchName == false)
-	{
-		$consult = $connect->query('SELECT * FROM `players` WHERE `id` = \''. $connect->real_escape_string($id) .'\'');
-	}
-	else
-	{
-		$consult = $connect->query('SELECT * FROM `players` WHERE `username` = \''. $connect->real_escape_string($id). '\'');
-	}
-
-
-	return $consult;
-}
-// DEVUELVE ENLACE A UN PERFIL
-function getUserLink($id = null)
-{
-	global $connect, $sitio;
-
-	// COMPRUEBA SI HAY QUE BUSCAR POR ID / NOMBRE
-	if (is_numeric($id))
-	{
-		$consult = $connect->query('SELECT `id`,`email`,`username` FROM `players` WHERE `id` = \''. $connect->real_escape_string($id) .'\'');
-	}
-	else
-	{
-		$consult = $connect->query('SELECT `id`,`email`,`username` FROM `players` WHERE `username` = \''. $connect->real_escape_string($id). '\'');
-	}
-	if ($consult AND $consult->num_rows > 0)
-	{
-		$User = $consult->fetch_assoc();
-
-		$link = str_replace(' ','.',$User['username']);
-
-		return $sitio['site'].'profile.php?profile_id='.$link;
-	}
-	else
-	{
-		error_log('No se devolvio el link del usuario deseado. ' .PHP_EOL. 'Linea: '. __LINE__.PHP_EOL.'Variable pasada: '.$id);
-		return '';
-	}
-}
-// DEVUELVE TRUE SI DOS USUARIOS SON AMIGOS
-function areFriends($usera, $userb){ global $connect;
-
-	$consult = $connect->query("SELECT * FROM `friends` AS f WHERE (f.`player1` = '$usera' && f.`player2` = '$userb') || (f.`player2` = '$usera' && f.`player1` = '$userb')");
-	if ($consult AND $consult->num_rows > 0)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
 
 
 	/**
@@ -2036,12 +2036,12 @@ function issetFriendRequest($idUser = null, $idUser2 = null, $active = false)
 	global $connect;
 	$active = ($active == true) ? "AND `action` = '0'" : '';
 	$SQL = $connect->query("SELECT action FROM `players_notifications` WHERE ((fromid=\"". $connect->real_escape_string($idUser) ."\" AND toid=\"". $connect->real_escape_string($idUser2) ."\")||(toid=\"". $connect->real_escape_string($idUser) ."\" AND fromid=\"". $connect->real_escape_string($idUser2) ."\")) AND not_key='newAmistad' $active");
-	if($SQL AND $SQL->num_rows > 0)
-	{
-		return true;
+		if($SQL AND $SQL->num_rows > 0)
+		{
+			return true;
+		}
+		return false;
 	}
-	return false;
-}
 /**
 	* Generar informe
 	*/
@@ -2109,23 +2109,23 @@ function sendMessage($idRoom = null, $from = null, $message = null, $file = null
 				// Envia el mensaje
 				$send = $connect->query("INSERT INTO `nuevochat_mensajes` (id_chat, author, toid, mensaje, time, foto, rutadefoto) VALUES (\"". $connect->real_escape_string($idRoom) ."\"  , \"". $connect->real_escape_string($from) ."\", \"". $connect->real_escape_string($to) ."\", \"". $connect->real_escape_string($message) ."\", \"". $time ."\" , \"". $existPhoto ."\" , \"". $file ."\")");
 				// Actualiza hora de ultimo mensaje enviado a la room
-				$connect->query("UPDATE `nuevochat_rooms` SET time = \"". time() ."\"  WHERE `id` = \"". $connect->real_escape_string($idRoom) ."\"");
-				if($send)
+					$connect->query("UPDATE `nuevochat_rooms` SET time = \"". time() ."\"  WHERE `id` = \"". $connect->real_escape_string($idRoom) ."\"");
+					if($send)
+					{
+						return array(true);
+					}
+				}
+				else
 				{
-					return array(true);
+					return array(false, 'room-is-closed');
 				}
 			}
-			else
-			{
-				return array(false, 'room-is-closed');
-			}
+		}
+		else
+		{
+			return array(false, 'room-no-exist');
 		}
 	}
-	else
-	{
-		return array(false, 'room-no-exist');
-	}
-}
 
 /**
  * filtra un mensaje chequeando algunas reglas
@@ -2214,52 +2214,52 @@ function deleteAccount($user_id = null){
 	/* ELIMINA FOTOS DE MENSAJES ENVIADAS O RECIBIDAS */
 	$query = $connect->query("SELECT `rutadefoto` FROM `nuevochat_mensajes` WHERE (`author` = \"". $user_id ."\" OR `toid` = \"". $user_id ."\") AND (`foto` = 'Yes')");
   // COMPROBAR SI TIENE MENSAJES CON FOTOS
-	if ($query == true && $query->num_rows > 0)
-	{
-  // ELIMINAR FOTOS
-		while($msg = $query->fetch_assoc() )
+		if ($query == true && $query->num_rows > 0)
 		{
-			deletePostImages($msg['rutadefoto']);
+  // ELIMINAR FOTOS
+			while($msg = $query->fetch_assoc() )
+			{
+				deletePostImages($msg['rutadefoto']);
+			}
 		}
-	}
 
-	/* ELIMINA FOTOS DE MENSAJES PROGRAMADOS CREADO POR EL USUARIO */
-	$query = $connect->query("SELECT `rutadefoto` FROM `mensajesprogramados` WHERE (`player_id` = \"". $user_id ."\") AND (`rutadefoto` != '')");
+		/* ELIMINA FOTOS DE MENSAJES PROGRAMADOS CREADO POR EL USUARIO */
+		$query = $connect->query("SELECT `rutadefoto` FROM `mensajesprogramados` WHERE (`player_id` = \"". $user_id ."\") AND (`rutadefoto` != '')");
   // COMPROBAR SI TIENE MENSAJES CON FOTOS
-	if ($query == true && $query->num_rows > 0)
-	{
+			if ($query == true && $query->num_rows > 0)
+			{
   // ELIMINAR FOTOS
-		while($msg = $query->fetch_assoc() )
-		{
-			deletePostImages($msg['rutadefoto']);
-		}
-	}
+				while($msg = $query->fetch_assoc() )
+				{
+					deletePostImages($msg['rutadefoto']);
+				}
+			}
 
-	/* ELIMINA LAS FOTOS PROGRAMADAS */
-	$query = $connect->query("SELECT `id`, `imagen` FROM `fotosprogramadas` WHERE `player_id` = \"". $user_id ."\"");
+			/* ELIMINA LAS FOTOS PROGRAMADAS */
+			$query = $connect->query("SELECT `id`, `imagen` FROM `fotosprogramadas` WHERE `player_id` = \"". $user_id ."\"");
   // COMPROBAR SI TIENE POSTS
-	if ($query == true && $query->num_rows > 0)
-	{
+			if ($query == true && $query->num_rows > 0)
+			{
   //
-		while($post = $query->fetch_assoc() )
-		{
-			deletePostImages($post['imagen']);
-		}
-	}
+				while($post = $query->fetch_assoc() )
+				{
+					deletePostImages($post['imagen']);
+				}
+			}
 
-	/* ELIMINAR TODOS LOS REGALOS HECHOS POR EL USUARIO */
-	$query = $connect->query("SELECT `id`, `player_id`, `files` FROM `players_gifts` WHERE `player_id` = \"". $user_id ."\"");
+			/* ELIMINAR TODOS LOS REGALOS HECHOS POR EL USUARIO */
+			$query = $connect->query("SELECT `id`, `player_id`, `files` FROM `players_gifts` WHERE `player_id` = \"". $user_id ."\"");
   // COMPROBAR SI TIENE REGALOS
-	if ($query == true && $query->num_rows > 0)
-	{
+			if ($query == true && $query->num_rows > 0)
+			{
   // ELIMINAR REGALOS
-		while($gift = $query->fetch_assoc() )
-		{
-			deleteGift($gift);
-		}
-	}
+				while($gift = $query->fetch_assoc() )
+				{
+					deleteGift($gift);
+				}
+			}
 
-	/* ELIMINAR PACKS */
+			/* ELIMINAR PACKS */
   /*$query = $connect->query("SELECT `id`, `video`, `imagens` FROM `packsenventa` WHERE `player_id` = \"". $user_id ."\"");
   // COMPROBAR SI EXISTEN
   if ($query == true && $query->num_rows > 0)
@@ -2534,14 +2534,14 @@ function newNotification($to_user = null, $from_user = null, $key = null, $actio
     // ENVIA NOTIFICACIÓN
 		$query = $connect->query('INSERT INTO `players_notifications` (`toid`, `fromid`, `not_key`, `action`, `read_time`) VALUES (\''.$to_user.'\', \''.$from_user.'\', \'' . $key . '\', \''.$action.'\', 0) ');
 
-		if($query == true)
-		{
-			return true;
+			if($query == true)
+			{
+				return true;
+			}
 		}
-	}
   //
-	return false;
-}
+		return false;
+	}
 
  /**
   * Devuelve nombre de la foto avatar sin ?xxxx (revisa un avatar de un usuario en la bbdd para entender)
@@ -2683,108 +2683,108 @@ function newNotification($to_user = null, $from_user = null, $key = null, $actio
 	// SI HAY QUE ENVIAR A TODOS MIS AMIGOS
  	if($optionSelect == 0){
  		$consult = $connect->query("SELECT p.`username` FROM `friends` AS f INNER JOIN `players` AS p ON p.`id` = IF(f.`player1` = \"". $connect->real_escape_string($rowu['id']) ."\", f.`player2`, f.`player1`) WHERE f.`player1` = \"". $connect->real_escape_string($rowu['id']) ."\"  OR f.`player2` = \"". $connect->real_escape_string($rowu['id']) ."\"");
- 		if($consult AND $consult->num_rows > 0){
+ 			if($consult AND $consult->num_rows > 0){
 			// ALMACENAR LOS NOMBRES DE TODOS MIS AMIGOS
- 			while($names = mysqli_fetch_assoc($consult)) {
- 				$Names[] = $names['username'];
+ 				while($names = mysqli_fetch_assoc($consult)) {
+ 					$Names[] = $names['username'];
+ 				}
+ 			}
+ 			else
+ 			{
+ 				$message = array('No puedes enviar regalos si no tienes amigos agregados en tu perfil', 'Intenta denuevo cuando agregues al menos un amigo a tu perfil','error');
+ 				exit;
  			}
  		}
- 		else
- 		{
- 			$message = array('No puedes enviar regalos si no tienes amigos agregados en tu perfil', 'Intenta denuevo cuando agregues al menos un amigo a tu perfil','error');
- 			exit;
- 		}
- 	}
 	// SI HAY QUE ENVIAR REGALO A CIERTAS PERSONAS
- 	else if($optionSelect == 1){
+ 		else if($optionSelect == 1){
 			// CONVERTIR EN ARRAY
- 		$Names = explode(',',$usernames);
- 		$Names = array_unique($Names);
- 	}
+ 			$Names = explode(',',$usernames);
+ 			$Names = array_unique($Names);
+ 		}
 
 	// COMPROBAR SI ES UNA IMAGEN Y SI NO EXCEDE EL LIMITE DE TAMAÑO (1MB)
- 	if(in_array($imageFileType,array('png','gif','jpg','jpeg')) AND $file['size'] <= 1000000)
- 	{
-
-		// MOVER IMAGEN A CARPETA DE SUBIDAS
- 		if(move_uploaded_file($file["tmp_name"], $target_dir . $filename))
+ 		if(in_array($imageFileType,array('png','gif','jpg','jpeg')) AND $file['size'] <= 1000000)
  		{
 
+		// MOVER IMAGEN A CARPETA DE SUBIDAS
+ 			if(move_uploaded_file($file["tmp_name"], $target_dir . $filename))
+ 			{
+
 			// GENERAR DIRECCIÓN DE THUMNAIL
- 			$thumb = 'uploads/thumb_gift/thumb-'. $token . $rowu['username'] .'.jpg';
+ 				$thumb = 'uploads/thumb_gift/thumb-'. $token . $rowu['username'] .'.jpg';
 
 			//CREAR MINIATURA
- 			if (getSourceType($target_file)!="film")
- 			{
- 				createThumbnail($target_dir . $filename, $thumb, 200,200);
- 			}
+ 				if (getSourceType($target_file)!="film")
+ 				{
+ 					createThumbnail($target_dir . $filename, $thumb, 200,200);
+ 				}
 			// CREAR REGALO
- 			$insert = $connect->query("INSERT INTO `players_gifts` (`player_id`, `files`, `comment`, `time`) VALUES (\"". $connect->real_escape_string($rowu['id']) ."\", \"". $connect->real_escape_string($target_dir . $filename) ."\", \"". $connect->real_escape_string($msg) ."\", UNIX_TIMESTAMP())");
- 			$IDGift = $connect->insert_id;
- 			if($insert)
- 			{
+ 				$insert = $connect->query("INSERT INTO `players_gifts` (`player_id`, `files`, `comment`, `time`) VALUES (\"". $connect->real_escape_string($rowu['id']) ."\", \"". $connect->real_escape_string($target_dir . $filename) ."\", \"". $connect->real_escape_string($msg) ."\", UNIX_TIMESTAMP())");
+ 					$IDGift = $connect->insert_id;
+ 					if($insert)
+ 					{
 
 				// ENVIAR NOTIFICACIONES Y REGALO
- 				foreach($Names as $Name):
+ 						foreach($Names as $Name):
 
- 					$consult = $connect->query("SELECT `id`,`username`,`ipaddres` FROM `players` WHERE `username` = \"". $connect->real_escape_string($Name) ."\";");
+ 							$consult = $connect->query("SELECT `id`,`username`,`ipaddres` FROM `players` WHERE `username` = \"". $connect->real_escape_string($Name) ."\";");
 
- 					if($consult AND $consult->num_rows > 0)
- 					{
- 						$User = $consult->fetch_assoc();
+ 							if($consult AND $consult->num_rows > 0)
+ 							{
+ 								$User = $consult->fetch_assoc();
 
 						// COMPRUEBA DE QUE SEAN AMIGOS Y NO HAYA BLOQUEOS
- 						if(areFriends($rowu['id'], $User['id']) AND !checkBlock($rowu['id'], $User['id'])){
+ 								if(areFriends($rowu['id'], $User['id']) AND !checkBlock($rowu['id'], $User['id'])){
 
 
 							// COMPRUEBA QUE ESTA IP NO HAYA SIDO REGISTRADA AUN
- 							if( !in_array($User['ipaddres'], $IPS) ):
+ 									if( !in_array($User['ipaddres'], $IPS) ):
 
 								// ENVIAR NOTIFICACIÓN
- 								$not = $connect->query("INSERT INTO `players_notifications` (`fromid`, `toid`, `not_key`, `action`, `read_time`) VALUES (\"". $connect->real_escape_string($rowu['id']) ."\", \"". $connect->real_escape_string($User['id']) ."\", 'newGift' , \"". $IDGift ."\" , '0' )");
+ 										$not = $connect->query("INSERT INTO `players_notifications` (`fromid`, `toid`, `not_key`, `action`, `read_time`) VALUES (\"". $connect->real_escape_string($rowu['id']) ."\", \"". $connect->real_escape_string($User['id']) ."\", 'newGift' , \"". $IDGift ."\" , '0' )");
 
 								// ENVIAR REGALO
- 								$given = $connect->query("REPLACE INTO `players_gift_given` (`fromid`, `toid`, `gift`, `time`) VALUES (\"". $connect->real_escape_string($rowu['id']) ."\", \"". $connect->real_escape_string($User['id']) ."\", \"". $IDGift ."\" , UNIX_TIMESTAMP())");
+ 											$given = $connect->query("REPLACE INTO `players_gift_given` (`fromid`, `toid`, `gift`, `time`) VALUES (\"". $connect->real_escape_string($rowu['id']) ."\", \"". $connect->real_escape_string($User['id']) ."\", \"". $IDGift ."\" , UNIX_TIMESTAMP())");
 
 								// Almacena la ip del usuario
- 								if($not AND $given){
- 									$IPS[] = $User['ipaddres'];
- 								}
- 								$message = array("Genial!", "El regalo se han enviado correctamente.","success");
- 								$countSuccess++;
- 							endif;
- 						}
- 						else
- 						{
- 							if($countSuccess == 0) $message = array("Error: No hubo nadie a quien enviarle este regalo.", "", "warning");
+ 												if($not AND $given){
+ 													$IPS[] = $User['ipaddres'];
+ 												}
+ 												$message = array("Genial!", "El regalo se han enviado correctamente.","success");
+ 												$countSuccess++;
+ 											endif;
+ 										}
+ 										else
+ 										{
+ 											if($countSuccess == 0) $message = array("Error: No hubo nadie a quien enviarle este regalo.", "", "warning");
+ 										}
+ 									}
+ 									else
+ 									{
+ 										$message = array("Ha ocurrido un error, Porfavor intente mas tarde.","","error");
+ 									}
+ 								endforeach;
+ 							}
+ 							else
+ 							{
+ 								$message = array("Ha ocurrido un error, Porfavor intente mas tarde.","","error");
+ 							}
+			// SI NO SE ENVIO NI UNA SOLA VEZ LA FOTO
+ 							if($countSuccess == 0)
+ 							{
+				//Eliminar archivos subidos
+ 								unlink($target_dir . $filename);
+ 								unlink($thumb);
+ 							}
  						}
  					}
  					else
  					{
- 						$message = array("Ha ocurrido un error, Porfavor intente mas tarde.","","error");
+ 						if($file['size'] >= 1000000)$message = array("El tamaño de la imagen excede el limite permitido","Solo puedes subir imágenes con un tamaño inferior a 1MB.","info");
+ 						else $message = array("Hasta los momentos solo se permite subir imágenes","Solo puedes subir imagenes tipo jpg/jpeg/png/gif","info");
  					}
- 				endforeach;
- 			}
- 			else
- 			{
- 				$message = array("Ha ocurrido un error, Porfavor intente mas tarde.","","error");
- 			}
-			// SI NO SE ENVIO NI UNA SOLA VEZ LA FOTO
- 			if($countSuccess == 0)
- 			{
-				//Eliminar archivos subidos
- 				unlink($target_dir . $filename);
- 				unlink($thumb);
- 			}
- 		}
- 	}
- 	else
- 	{
- 		if($file['size'] >= 1000000)$message = array("El tamaño de la imagen excede el limite permitido","Solo puedes subir imágenes con un tamaño inferior a 1MB.","info");
- 		else $message = array("Hasta los momentos solo se permite subir imágenes","Solo puedes subir imagenes tipo jpg/jpeg/png/gif","info");
- 	}
- 	return json_encode($message);
- }
+ 					return json_encode($message);
+ 				}
 
 
  /**
@@ -2806,57 +2806,57 @@ function newNotification($to_user = null, $from_user = null, $key = null, $actio
 
 	// Crear regalo [Anonimato = true]
  	$insert = $connect->query("INSERT INTO `players_gifts` (`player_id`, `files`, `amount`, `comment`, `anonymous`, `time`) VALUES (\"". $connect->real_escape_string($rowu['id']) ."\", '', \"". $amount ."\", \"". $connect->real_escape_string($msg) ."\", 1, UNIX_TIMESTAMP())");
- 	$IDGift = $connect->insert_id;
+ 		$IDGift = $connect->insert_id;
 
  	// Comprueba que se haya creado el regalo
- 	if($insert)
- 	{
+ 		if($insert)
+ 		{
  		// Optiene el id de todos los usuarios del chat que no "me" tengan bloqueado
- 		$users_id = $connect->query("SELECT p.`id` FROM `players` AS `p` LEFT JOIN `bloqueos` AS `b` ON (b.`toid` = \"". $rowu['id'] ."\" AND b.`fromid` = p.`id`) || (b.`fromid` = \"". $rowu['id'] ."\" AND b.`toid` = p.`id`) WHERE b.`id` IS NULL AND p.`id` != \"". $rowu['id'] ."\";");
+ 			$users_id = $connect->query("SELECT p.`id` FROM `players` AS `p` LEFT JOIN `bloqueos` AS `b` ON (b.`toid` = \"". $rowu['id'] ."\" AND b.`fromid` = p.`id`) || (b.`fromid` = \"". $rowu['id'] ."\" AND b.`toid` = p.`id`) WHERE b.`id` IS NULL AND p.`id` != \"". $rowu['id'] ."\";");
 
  		// Si existe uno o mas
- 		if($users_id AND $users_id->num_rows > 0)
- 		{
+ 				if($users_id AND $users_id->num_rows > 0)
+ 				{
  			// Almacenalos en una lista
- 			while ($user = $users_id->fetch_assoc()) {
- 				$user_id[] = $user['id'];
- 			}
+ 					while ($user = $users_id->fetch_assoc()) {
+ 						$user_id[] = $user['id'];
+ 					}
 
  			// Genera un sql para registrar
- 			foreach($user_id AS $userid)
- 			{
- 				$SQLUpdateCredits .= $separator . "(".$userid.",(SELECT `eCreditos` AS `eC` FROM `players` WHERE `id` = \"". $userid ."\"),'+',((SELECT `eCreditos` AS `eC` FROM `players` WHERE `id` = \"". $userid ."\") + ".$amount."),'14',UNIX_TIMESTAMP())";
+ 					foreach($user_id AS $userid)
+ 					{
+ 						$SQLUpdateCredits .= $separator . "(".$userid.",(SELECT `eCreditos` AS `eC` FROM `players` WHERE `id` = \"". $userid ."\"),'+',((SELECT `eCreditos` AS `eC` FROM `players` WHERE `id` = \"". $userid ."\") + ".$amount."),'14',UNIX_TIMESTAMP())";
 
- 				$SQLInsertGiftGiven .= $separator . "(\"". $connect->real_escape_string($rowu['id']) ."\", \"". $connect->real_escape_string($userid) ."\", \"". $IDGift ."\" , UNIX_TIMESTAMP())";
+ 						$SQLInsertGiftGiven .= $separator . "(\"". $connect->real_escape_string($rowu['id']) ."\", \"". $connect->real_escape_string($userid) ."\", \"". $IDGift ."\" , UNIX_TIMESTAMP())";
 
- 				$SQLNotification .= $separator . "(\"". $connect->real_escape_string($rowu['id']) ."\", \"". $connect->real_escape_string($userid) ."\", 'newGiftMoneyAll' , \"". $IDGift ."\" , '0' )";
- 				$separator = ",";
- 			}
- 			/* REGISTRAR MOVIMIENTO - DESACTIVADO */
+ 						$SQLNotification .= $separator . "(\"". $connect->real_escape_string($rowu['id']) ."\", \"". $connect->real_escape_string($userid) ."\", 'newGiftMoneyAll' , \"". $IDGift ."\" , '0' )";
+ 						$separator = ",";
+ 					}
+ 					/* REGISTRAR MOVIMIENTO - DESACTIVADO */
  			//if($connect->query("INSERT INTO `players_movements` (`player_id`, `credits_before`, `in_out`, `credits_after`, `description`, `time`) VALUES ". $SQLUpdateCredits .""))
 
- 			if($connect->query("UPDATE `players` SET `eCreditos` = (`eCreditos` + $amount) WHERE `id` IN (". implode($user_id, ',') .")")){
- 				if($connect->query("REPLACE INTO `players_gift_given` (`fromid`, `toid`, `gift`, `time`) VALUES ". $SQLInsertGiftGiven .""))
- 				{
- 					if($connect->query("INSERT INTO `players_notifications` (`fromid`, `toid`, `not_key`, `action`, `read_time`) VALUES ". $SQLNotification .""))
- 					{
- 						$message = array("El regalo se envió con exíto.", "", "success");
+ 					if($connect->query("UPDATE `players` SET `eCreditos` = (`eCreditos` + $amount) WHERE `id` IN (". implode($user_id, ',') .")")){
+ 						if($connect->query("REPLACE INTO `players_gift_given` (`fromid`, `toid`, `gift`, `time`) VALUES ". $SQLInsertGiftGiven .""))
+ 						{
+ 							if($connect->query("INSERT INTO `players_notifications` (`fromid`, `toid`, `not_key`, `action`, `read_time`) VALUES ". $SQLNotification .""))
+ 							{
+ 								$message = array("El regalo se envió con exíto.", "", "success");
+ 							}
+ 						}
  					}
- 				}
- 			}
 
- 			else
- 			{
- 				$message = array("Ha ocurrido un error.", "No se ha podido enviar el regalo", "warning");
- 				$connect->query("DELETE FROM `players_gifts` WHERE `id` = \"".$IDGift);
- 			}
- 			echo $connect->error;
- 		}
- 		else
- 		{
- 			$message = array("Ha ocurrido un error", "No se ha podido enviar el regalo", "error");
- 			$connect->query("DELETE FROM `players_gifts` WHERE `id` = \"".$IDGift);
- 		}
+ 					else
+ 					{
+ 						$message = array("Ha ocurrido un error.", "No se ha podido enviar el regalo", "warning");
+ 						$connect->query("DELETE FROM `players_gifts` WHERE `id` = \"".$IDGift);
+ 					}
+ 					echo $connect->error;
+ 				}
+ 				else
+ 				{
+ 					$message = array("Ha ocurrido un error", "No se ha podido enviar el regalo", "error");
+ 					$connect->query("DELETE FROM `players_gifts` WHERE `id` = \"".$IDGift);
+ 				}
 
 		/* ENVIAR SOLO A AMIGOS O ENVIA A TODOS SI ES UN ENVIO CON CREDITOS
  		//if((areFriends($rowu['id'], $User['id'])) OR ($optionSelect == 2)){}
@@ -2907,58 +2907,58 @@ function newNotification($to_user = null, $from_user = null, $key = null, $actio
  	// Selecciona salas de chat pertenecientes a $fromID y $toID
  	$selectRoom = $connect->query("SELECT `id` FROM `nuevochat_rooms` WHERE (`player1` = \"". $fromID ."\" AND `player2` = \"". $toID ."\") OR (`player2` = \"". $fromID ."\" AND `player1` = \"". $toID ."\") LIMIT 2");
 
- 	if($selectRoom AND $selectRoom->num_rows > 0)
- 	{
- 		while($Room = $selectRoom->fetch_assoc())
+ 		if($selectRoom AND $selectRoom->num_rows > 0)
  		{
-			// Borra sala de chat
- 			deleteRoomChat($Room['id']);
- 		}
- 	}
- 	/* ELIIMINAR PACKS COMPRADOS EL UNO AL OTRO */
- 	$query = $connect->query("SELECT `id` FROM `packsenventa` WHERE `player_id` = \"". $fromID ."\" OR `player_id` = \"". $toID ."\"");
- 	while ($pack = $query->fetch_assoc())
- 	{
- 		$connect->query("DELETE FROM `packscomprados` WHERE (`foto_id` = \"". $pack['id'] ."\") AND (`comprador_id` = \"". $fromID ."\" OR `comprador_id` = \"". $toID ."\")");
- 	}
-
- 	/* ELIIMINAR REGALOS ENVIADOS EL UNO AL OTRO */
- 	$query = $connect->query("SELECT `id` FROM `players_gift_given` WHERE (`fromid` = \"". $fromID ."\" AND `toid` = \"". $toID ."\") OR (`toid` = \"". $fromID ."\" AND `fromid` = \"". $toID ."\")");
- 	while ($gift = $query->fetch_assoc())
- 	{
- 		deleteGiftSent($gift['id']);
- 	}
-
- 	return $insertBlock;
- }
-
- function deleteFriend($toID = null, $fromID = null)
- {
- 	global $connect, $rowu;
-
- 	// Si el parámetro esta vacío, predeterminar el id de esta sesión
- 	$fromID = ($fromID == null) ? $rowu['id'] : $fromID;
-
- 	// VERIFICAR QUE EXISTA UNA AMISTAD
- 	if(areFriends($toID, $fromID))
- 	{
-
- 		$querydelete = $connect->query("DELETE FROM `friends` WHERE (`player1` = \"". $fromID ."\" AND `player2` = \"". $toID ."\") OR (`player2` = \"". $fromID ."\" AND `player1` = \"". $toID ."\") LIMIT 2");
-
-		#-> ELMINAR NOTIFICACIONES ENVIADAS
- 		if ($querydelete)
- 		{
- 			$selectN = $connect->query("SELECT `id` FROM `players_notifications` WHERE (`fromid` = \"". $fromID ."\" AND `toid` = \"". $toID ."\") OR (`toid` = \"". $fromID ."\" AND `fromid` = \"". $toID ."\")");
- 			if($selectN AND $selectN->num_rows > 0)
+ 			while($Room = $selectRoom->fetch_assoc())
  			{
- 				while($notification = $selectN->fetch_assoc())
- 				{
- 					deleteNotification($notification['id']);
- 				}
+			// Borra sala de chat
+ 				deleteRoomChat($Room['id']);
  			}
  		}
- 	}
- }
+ 		/* ELIIMINAR PACKS COMPRADOS EL UNO AL OTRO */
+ 		$query = $connect->query("SELECT `id` FROM `packsenventa` WHERE `player_id` = \"". $fromID ."\" OR `player_id` = \"". $toID ."\"");
+ 		while ($pack = $query->fetch_assoc())
+ 		{
+ 			$connect->query("DELETE FROM `packscomprados` WHERE (`foto_id` = \"". $pack['id'] ."\") AND (`comprador_id` = \"". $fromID ."\" OR `comprador_id` = \"". $toID ."\")");
+ 		}
+
+ 		/* ELIIMINAR REGALOS ENVIADOS EL UNO AL OTRO */
+ 		$query = $connect->query("SELECT `id` FROM `players_gift_given` WHERE (`fromid` = \"". $fromID ."\" AND `toid` = \"". $toID ."\") OR (`toid` = \"". $fromID ."\" AND `fromid` = \"". $toID ."\")");
+ 			while ($gift = $query->fetch_assoc())
+ 			{
+ 				deleteGiftSent($gift['id']);
+ 			}
+
+ 			return $insertBlock;
+ 		}
+
+ 		function deleteFriend($toID = null, $fromID = null)
+ 		{
+ 			global $connect, $rowu;
+
+ 	// Si el parámetro esta vacío, predeterminar el id de esta sesión
+ 			$fromID = ($fromID == null) ? $rowu['id'] : $fromID;
+
+ 	// VERIFICAR QUE EXISTA UNA AMISTAD
+ 			if(areFriends($toID, $fromID))
+ 			{
+
+ 				$querydelete = $connect->query("DELETE FROM `friends` WHERE (`player1` = \"". $fromID ."\" AND `player2` = \"". $toID ."\") OR (`player2` = \"". $fromID ."\" AND `player1` = \"". $toID ."\") LIMIT 2");
+
+		#-> ELMINAR NOTIFICACIONES ENVIADAS
+ 					if ($querydelete)
+ 					{
+ 						$selectN = $connect->query("SELECT `id` FROM `players_notifications` WHERE (`fromid` = \"". $fromID ."\" AND `toid` = \"". $toID ."\") OR (`toid` = \"". $fromID ."\" AND `fromid` = \"". $toID ."\")");
+ 							if($selectN AND $selectN->num_rows > 0)
+ 							{
+ 								while($notification = $selectN->fetch_assoc())
+ 								{
+ 									deleteNotification($notification['id']);
+ 								}
+ 							}
+ 						}
+ 					}
+ 				}
 
 	/**
 	 * Elimina una notificación
@@ -3306,4 +3306,43 @@ function newNotification($to_user = null, $from_user = null, $key = null, $actio
 	function logs($text)
 	{
 		echo '<script>console.log(\''. $text .'\')</script>';
+	}
+
+	/**
+	 * Limpia la url
+	 */
+	function clear_url()
+	{
+		?>
+		<script type="text/javascript">
+			var parametrosUrl = ``;
+			var o = new URLSearchParams(parametrosUrl);
+			/* o tiene { [ 'ordering', 't1' ], [ 'ordering', 't2' ] } */
+			console.log(o.entries());
+			var m = new Map(o);
+			// m eliminó los duplicados, tiene { 'ordering' => 't2' }
+			console.log(m);
+			var ns = new URLSearchParams(m);
+			/* ns.toString() tiene ordering=t2;*/
+			console.log(ns.toString())
+			/* cambio la URL:*/
+			window.history.replaceState(null,document.title,window.location.origin + window.location.pathname + '?' + ns.toString());
+		</script>
+		<?php
+	}
+
+	function BlockUsersAdminReport($userid = null)
+	{
+		global $connect;
+		/* Seleciona a todas las personas que hicieron reportes */
+		$query = $connect->query('SELECT `id`, `author` FROM `reportes`');
+		if($query AND $query->num_rows > 0)
+		{
+			while($UsersReports = $query->fetch_assoc())
+			{
+				addBlockUser($UsersReports['author'], $userid);
+				//$connect->query('DELETE FROM `reportes` WHERE `id` = '. $UsersReports['id']);
+			}
+
+		}
 	}
