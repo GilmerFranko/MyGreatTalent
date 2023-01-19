@@ -3346,3 +3346,37 @@ function newNotification($to_user = null, $from_user = null, $key = null, $actio
 
 		}
 	}
+
+	/**
+	 * Cuenta todas las fotos que tenga el usuario
+	 * Tiene en cuenta las siguientes publicaciones:
+	 * 1. Fotos del usuario
+	 * 2. Cada foto de una galeria
+	 * 3. Videos del usuario
+	 */
+	function CountAllThePhotos($userid = '')
+	{
+		global $connect;
+		/* Almacena el total de fotos del usuario */
+		$total_photos = 0;
+
+		/* Consulta todas las fotos del usuario */
+		$query = $connect->query('SELECT `id`, `player_id`, `imagen` FROM `fotosenventa` WHERE `player_id` = \''. $connect->real_escape_string($userid) .'\'');
+		if($query AND $query->num_rows > 0)
+		{
+			while($row = $query->fetch_assoc())
+			{
+				/* Almacena json que contiene las fotos */
+				$photo = json_decode($row['imagen']);
+
+				if (is_countable($photo)) {
+					$total_photos = $total_photos + count($photo);
+				}
+			}
+			return $total_photos;
+		}
+		else
+		{
+			return 0;
+		}
+	}

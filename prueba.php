@@ -2,5 +2,5 @@
 
 include "config.php";
 
-echo getCurrentURL();
+echo CountAllThePhotos(10);
 ?>

@@ -337,6 +337,11 @@ if ($rowu['role'] == 'Admin' && isset($_GET["banear"]) && $userbuscado){
 										echo '<span class="user-offline">Offline</span>';
 									}?>
 
+									<!-- Mostrar cantidad de fotos solo si es mi perfil -->
+									<?php if (isLogged()): ?>
+										<br><br><span><strong><?php echo $userbuscado['username'] ?></strong> tiene <?php echo CountAllThePhotos($userbuscado['id']);?> fotos y videos</span>
+									<?php endif ?>
+
 									<!-- MOSTRAR DESCRIPCIÓN A LOGUEADOS-->
 									<?php if (isLogged()): ?>
 										<hr></center>
@@ -346,9 +351,11 @@ if ($rowu['role'] == 'Admin' && isset($_GET["banear"]) && $userbuscado){
 									<?php endif ?>
 									<!---->
 
-									<?php echo '<p>Género: <b>'.$userbuscado['gender'].'</b></p>
+									<?php if (isLogged()): ?>
+										<?php echo '<p>Género: <b>'.$userbuscado['gender'].'</b></p>'?>
+									<?php endif; ?>
 
-									<p>Créditos: <b>'.$userbuscado['eCreditos'].'</b></p>';
+									<?php echo '<p>Créditos: <b>'.$userbuscado['eCreditos'].'</b></p>';
 
 									if($rowu['role'] == 'Admin'){
 										Echo '<p>IP: <b>'.$userbuscado['ipaddres'].'</b></p>';
@@ -432,19 +439,27 @@ if ($rowu['role'] == 'Admin' && isset($_GET["banear"]) && $userbuscado){
 													echo '<span class="user-offline">Offline</span>';
 												}
 												?>
-												<hr>
+
+
+												<!-- Mostrar cantidad de fotos a los no logueados -->
+												<?php if (!isLogged()): ?>
+													<br><br><span><strong><?php echo $userbuscado['username'] ?></strong> tiene <?php echo CountAllThePhotos($userbuscado['id']);?> fotos y videos</span><br><br>
+												<?php endif ?>
 
 												<!-- MOSTRAR DESCRIPCIÓN A LOGUEADOS-->
 												<?php if (isLogged()): ?>
-
+													<hr></center>
 													<p>
 														<b><em><?php echo StrToUrl($userbuscado['description']);?></em></b>
 													</p>
 												<?php endif ?>
 												<!---->
 
-												<?php echo '<p>Género: <b>'. $userbuscado['gender'] .'</b></p>
-												<center>';
+												<?php if (isLogged()): ?>
+													<?php echo '<p>Género: <b>'.$userbuscado['gender'].'</b></p>'?>
+												<?php endif; ?>
+
+												<?php echo '<p>Créditos: <b>'.$userbuscado['eCreditos'].'</b></p>';
 
 												if($rowu['role'] == 'Admin'): ?>
 													<p>IP: <strong><a href="buscaip.php?nombre=<?php echo $userbuscado['ipaddres'] ?>"> <?php echo $userbuscado['ipaddres']?></a></strong></p>
@@ -640,211 +655,211 @@ if ($rowu['role'] == 'Admin' && isset($_GET["banear"]) && $userbuscado){
 
 
 									}
-									?> </div>
-								</div>
-
+								?> </div>
 							</div>
+
 						</div>
 					</div>
-
 				</div>
-				<div class="content-wrapper" style="padding-top: 0;">
-					<div id="content-container">
-						<div class="content" style=" min-height: 0; padding:0;">
-							<div class="row">
-								<div class="col-md-12">
+
+			</div>
+			<div class="content-wrapper" style="padding-top: 0;">
+				<div id="content-container">
+					<div class="content" style=" min-height: 0; padding:0;">
+						<div class="row">
+							<div class="col-md-12">
+								<div class="box">
+									<div class="box-body">
+										<table class="table table-striped table-bordered table-hover" cellspacing="0" width="100%">
+											<tbody>
+												<div class="card">
+													<div class="card-body">
+														<!--BOTON PACKS-->
+														<?php
+														$packs = $connect->query("SELECT * FROM `packsenventa` WHERE player_id='{$id}' ORDER BY id DESC")->num_rows;
+														if($packs>0){
+															$packs = $connect->query("SELECT * FROM `packsenventa` WHERE player_id='{$id}' ORDER BY RAND()");
+															$count=0;
+															?>
+															<a href="packs.php?id_profile=<?php echo $id; ?>" style="color: #444"> <p style="color:#CC99AD;"> <?php echo $userbuscado['username'] . "  Posee packs. " ?> <b style="color:#337ab7; "> <br/>Ir a la seccion packs</p></b></a>
+
+															<?php while ($rowpacks=mysqli_fetch_assoc($packs)) {
+																$imgpacks=json_decode($rowpacks['imagens']);
+																if ($rowpacks['visible']!="null" and $rowpacks['visible']!="" and $rowpacks['visible']!=null and $rowpacks['visible']!="[]" ) {
+																	$json=json_decode($rowpacks['visible']);
+																	if (!in_array($rowu['username'], $json) and $rowu['id']!=$rowpacks['player_id'] ) {
+																		continue;
+																	}
+																}
+																$author_id = $rowpacks['player_id'];
+																$querycpd  = mysqli_query($connect, "SELECT * FROM `players` WHERE id='$author_id' LIMIT 1");
+																$rowcpd    = mysqli_fetch_assoc($querycpd);
+																#-> SI EL USUARIO TIENE EL PERFIL OCULTO Y YO NO SOY UN USUARIO REGISTRADO DESDE EL CHAT
+																if($rowcpd['perfiloculto']!='no' or $rowpacks['hidetochat']=='si' and $iamfrom!='chat')
+																{
+																#-> SI EL USUARIO ES DIFERENTE AL PROPIETARO DEL PACK
+																	if($uname != $rowcpd['username'])
+																	{
+
+																		$friend = mysqli_query($connect, "SELECT * FROM `friends` WHERE player1='$player_id' AND player2='$author_id'");
+																		$friend01 = mysqli_num_rows($friend);
+
+																		$friend2 = mysqli_query($connect, "SELECT * FROM `friends` WHERE player1='$author_id' AND player2='$player_id'");
+																		$friend02 = mysqli_num_rows($friend2);
+																		if($friend02==false && $friend01==false){
+																			continue;
+																		}
+																	}
+																}
+																?>
+																<a href="packs.php?id_profile=<?php echo $id; ?>">
+																	<div class="avatar-box" style="width: 60px;height: 60px;border:unset;display: inline;box-shadow: unset;"><img src="<?php echo $imgpacks[0]; ?>" style="width: 95px;height: 95px;border: 4px solid white;margin: 5px;box-shadow: 0 0 5px -1px black;"></div></a>
+																	<?php
+																	$count++;
+																	if ($count>=3) {
+																		break;
+																	}
+																}
+															} ?>
+														</div>
+													</div>
+												</tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<?php if(isLogged()): ?>
+							<div class="content">
+								<div class="row">
 									<div class="box">
 										<div class="box-body">
 											<table class="table table-striped table-bordered table-hover" cellspacing="0" width="100%">
 												<tbody>
 													<div class="card">
-														<div class="card-body">
-															<!--BOTON PACKS-->
-															<?php
-															$packs = $connect->query("SELECT * FROM `packsenventa` WHERE player_id='{$id}' ORDER BY id DESC")->num_rows;
-															if($packs>0){
-																$packs = $connect->query("SELECT * FROM `packsenventa` WHERE player_id='{$id}' ORDER BY RAND()");
-																$count=0;
-																?>
-																<a href="packs.php?id_profile=<?php echo $id; ?>" style="color: #444"> <p style="color:#CC99AD;"> <?php echo $userbuscado['username'] . "  Posee packs. " ?> <b style="color:#337ab7; "> <br/>Ir a la seccion packs</p></b></a>
+														<div class="row-list">
 
-																<?php while ($rowpacks=mysqli_fetch_assoc($packs)) {
-																	$imgpacks=json_decode($rowpacks['imagens']);
-																	if ($rowpacks['visible']!="null" and $rowpacks['visible']!="" and $rowpacks['visible']!=null and $rowpacks['visible']!="[]" ) {
-																		$json=json_decode($rowpacks['visible']);
-																		if (!in_array($rowu['username'], $json) and $rowu['id']!=$rowpacks['player_id'] ) {
-																			continue;
-																		}
-																	}
-																	$author_id = $rowpacks['player_id'];
+															<?php
+															$timeonline = time() - 60;
+
+															$total_pages = $connect->query("SELECT * FROM `fotosenventa` WHERE player_id='{$id}' ORDER BY id DESC")->num_rows;
+
+															$page = isset($_GET['page']) && is_numeric($_GET['page']) ? $_GET['page'] : 1;
+
+															$num_results_on_page = 30;
+															$calc_page = ($page - 1) * $num_results_on_page;
+
+															$querycp = mysqli_query($connect, "SELECT * FROM `fotosenventa` WHERE player_id='{$id}' ORDER BY id DESC LIMIT {$calc_page}, {$num_results_on_page}");
+															$countcp = mysqli_num_rows($querycp);
+															$recommendation = getRecommendations($id);
+															$countWhile = 0;
+															if ($countcp > 0) {
+																while ($rowcp = mysqli_fetch_assoc($querycp))
+																{
+																	$countWhile++;
+																	$author_id = $rowcp['player_id'];
 																	$querycpd  = mysqli_query($connect, "SELECT * FROM `players` WHERE id='$author_id' LIMIT 1");
 																	$rowcpd    = mysqli_fetch_assoc($querycpd);
-																#-> SI EL USUARIO TIENE EL PERFIL OCULTO Y YO NO SOY UN USUARIO REGISTRADO DESDE EL CHAT
-																	if($rowcpd['perfiloculto']!='no' or $rowpacks['hidetochat']=='si' and $iamfrom!='chat')
+
+																	$sqlbuscarbloqueo = mysqli_query($connect, "SELECT * FROM `bloqueos` WHERE toid='$player_id' AND fromid='$author_id'");
+																	$hayunbloqueo = mysqli_num_rows($sqlbuscarbloqueo);
+
+																	$sqlbuscarbloqueo2 = mysqli_query($connect, "SELECT * FROM `bloqueos` WHERE toid='$author_id' AND fromid='$player_id'");
+																	$hayunbloqueo2 = mysqli_num_rows($sqlbuscarbloqueo2);
+															// SI NO HAY BLOQUEOS
+																	if ($hayunbloqueo < 1 && $hayunbloqueo2 < 1)
 																	{
-																#-> SI EL USUARIO ES DIFERENTE AL PROPIETARO DEL PACK
-																		if($uname != $rowcpd['username'])
+																		$sub = '';
+
+																// SI NO ESTOY SUSCRITO AL PERFIL
+																		if(!isFollow($rowcpd['id']) && $rowcpd['id'] != $player_id)
 																		{
-
-																			$friend = mysqli_query($connect, "SELECT * FROM `friends` WHERE player1='$player_id' AND player2='$author_id'");
-																			$friend01 = mysqli_num_rows($friend);
-
-																			$friend2 = mysqli_query($connect, "SELECT * FROM `friends` WHERE player1='$author_id' AND player2='$player_id'");
-																			$friend02 = mysqli_num_rows($friend2);
-																			if($friend02==false && $friend01==false){
-																				continue;
-																			}
+																	// SI LA IMAGEN ES VIP, COLOCALE UN FILTRO
+																			$sub = $rowcp['type'] == 'suscripciones' ? ' noSub': '';
 																		}
+
+																// ALMACENA LA MINIATURA
+																		$thumbnail=json_decode($rowcp['thumb']);
+
+																// ALMACENA LA FOTO
+																		$image=json_decode($rowcp['imagen']);
+
+																// INCLUYE LA FOTO
+																		include "./Row-img-profile.php";
 																	}
-																	?>
-																	<a href="packs.php?id_profile=<?php echo $id; ?>">
-																		<div class="avatar-box" style="width: 60px;height: 60px;border:unset;display: inline;box-shadow: unset;"><img src="<?php echo $imgpacks[0]; ?>" style="width: 95px;height: 95px;border: 4px solid white;margin: 5px;box-shadow: 0 0 5px -1px black;"></div></a>
-																		<?php
-																		$count++;
-																		if ($count>=3) {
-																			break;
-																		}
-																	}
-																} ?>
+																}
+																$profile_id = isset($_GET['profile_id']) ? '&profile_id='.$_GET['profile_id']:'';
+
+																?>
 															</div>
 														</div>
 													</tbody>
 												</table>
 											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-							<?php if(isLogged()): ?>
-								<div class="content">
-									<div class="row">
-										<div class="box">
-											<div class="box-body">
-												<table class="table table-striped table-bordered table-hover" cellspacing="0" width="100%">
-													<tbody>
-														<div class="card">
-															<div class="row-list">
+											<div class="content" align="center">
+												<?php if (ceil($total_pages / $num_results_on_page) > 0): ?>
+													<ul class="pagination">
+														<?php if ($page > 1): ?>
+															<li class="prev"><a href="profile.php?page=<?php echo $page-1 . $profile_id  ?>">Anterior</a></li>
+														<?php endif; ?>
 
-																<?php
-																$timeonline = time() - 60;
+														<?php if ($page > 3): ?>
+															<li class="start"><a href="profile.php?page=1">1</a></li>
+															<li class="dots">...</li>
+														<?php endif; ?>
 
-																$total_pages = $connect->query("SELECT * FROM `fotosenventa` WHERE player_id='{$id}' ORDER BY id DESC")->num_rows;
+														<?php if ($page-2 > 0): ?><li class="page"><a href="profile.php?page=<?php echo $page-2 . $profile_id ?>"><?php echo $page-2 ?></a></li><?php endif; ?>
+														<?php if ($page-1 > 0): ?><li class="page"><a href="profile.php?page=<?php echo $page-1 . $profile_id ?>"><?php echo $page-1 ?></a></li><?php endif; ?>
 
-																$page = isset($_GET['page']) && is_numeric($_GET['page']) ? $_GET['page'] : 1;
+														<li class="currentpage"><a href="profile.php?page=<?php echo $page . $profile_id ?>"><?php echo $page ?></a></li>
 
-																$num_results_on_page = 30;
-																$calc_page = ($page - 1) * $num_results_on_page;
+														<?php if ($page+1 < ceil($total_pages / $num_results_on_page)+1): ?><li class="page"><a href="profile.php?page=<?php echo $page+1 . $profile_id ?>"><?php echo $page+1 ?></a></li><?php endif; ?>
+														<?php if ($page+2 < ceil($total_pages / $num_results_on_page)+1): ?><li class="page"><a href="profile.php?page=<?php echo $page+2 . $profile_id ?>"><?php echo $page+2 ?></a></li><?php endif; ?>
 
-																$querycp = mysqli_query($connect, "SELECT * FROM `fotosenventa` WHERE player_id='{$id}' ORDER BY id DESC LIMIT {$calc_page}, {$num_results_on_page}");
-																$countcp = mysqli_num_rows($querycp);
-																$recommendation = getRecommendations($id);
-																$countWhile = 0;
-																if ($countcp > 0) {
-																	while ($rowcp = mysqli_fetch_assoc($querycp))
-																	{
-																		$countWhile++;
-																		$author_id = $rowcp['player_id'];
-																		$querycpd  = mysqli_query($connect, "SELECT * FROM `players` WHERE id='$author_id' LIMIT 1");
-																		$rowcpd    = mysqli_fetch_assoc($querycpd);
+														<?php if ($page < ceil($total_pages / $num_results_on_page)-2): ?>
+															<li class="dots">...</li>
+															<li class="end"><a href="profile.php?page=<?php echo ceil($total_pages / $num_results_on_page) . $profile_id ?>"><?php echo ceil($total_pages / $num_results_on_page) ?></a></li>
+														<?php endif; ?>
 
-																		$sqlbuscarbloqueo = mysqli_query($connect, "SELECT * FROM `bloqueos` WHERE toid='$player_id' AND fromid='$author_id'");
-																		$hayunbloqueo = mysqli_num_rows($sqlbuscarbloqueo);
-
-																		$sqlbuscarbloqueo2 = mysqli_query($connect, "SELECT * FROM `bloqueos` WHERE toid='$author_id' AND fromid='$player_id'");
-																		$hayunbloqueo2 = mysqli_num_rows($sqlbuscarbloqueo2);
-															// SI NO HAY BLOQUEOS
-																		if ($hayunbloqueo < 1 && $hayunbloqueo2 < 1)
-																		{
-																			$sub = '';
-
-																// SI NO ESTOY SUSCRITO AL PERFIL
-																			if(!isFollow($rowcpd['id']) && $rowcpd['id'] != $player_id)
-																			{
-																	// SI LA IMAGEN ES VIP, COLOCALE UN FILTRO
-																				$sub = $rowcp['type'] == 'suscripciones' ? ' noSub': '';
-																			}
-
-																// ALMACENA LA MINIATURA
-																			$thumbnail=json_decode($rowcp['thumb']);
-
-																// ALMACENA LA FOTO
-																			$image=json_decode($rowcp['imagen']);
-
-																// INCLUYE LA FOTO
-																			include "./Row-img-profile.php";
-																		}
-																	}
-																	$profile_id = isset($_GET['profile_id']) ? '&profile_id='.$_GET['profile_id']:'';
-
-																	?>
-																</div>
-															</div>
-														</tbody>
-													</table>
-												</div>
-												<div class="content" align="center">
-													<?php if (ceil($total_pages / $num_results_on_page) > 0): ?>
-														<ul class="pagination">
-															<?php if ($page > 1): ?>
-																<li class="prev"><a href="profile.php?page=<?php echo $page-1 . $profile_id  ?>">Anterior</a></li>
-															<?php endif; ?>
-
-															<?php if ($page > 3): ?>
-																<li class="start"><a href="profile.php?page=1">1</a></li>
-																<li class="dots">...</li>
-															<?php endif; ?>
-
-															<?php if ($page-2 > 0): ?><li class="page"><a href="profile.php?page=<?php echo $page-2 . $profile_id ?>"><?php echo $page-2 ?></a></li><?php endif; ?>
-															<?php if ($page-1 > 0): ?><li class="page"><a href="profile.php?page=<?php echo $page-1 . $profile_id ?>"><?php echo $page-1 ?></a></li><?php endif; ?>
-
-															<li class="currentpage"><a href="profile.php?page=<?php echo $page . $profile_id ?>"><?php echo $page ?></a></li>
-
-															<?php if ($page+1 < ceil($total_pages / $num_results_on_page)+1): ?><li class="page"><a href="profile.php?page=<?php echo $page+1 . $profile_id ?>"><?php echo $page+1 ?></a></li><?php endif; ?>
-															<?php if ($page+2 < ceil($total_pages / $num_results_on_page)+1): ?><li class="page"><a href="profile.php?page=<?php echo $page+2 . $profile_id ?>"><?php echo $page+2 ?></a></li><?php endif; ?>
-
-															<?php if ($page < ceil($total_pages / $num_results_on_page)-2): ?>
-																<li class="dots">...</li>
-																<li class="end"><a href="profile.php?page=<?php echo ceil($total_pages / $num_results_on_page) . $profile_id ?>"><?php echo ceil($total_pages / $num_results_on_page) ?></a></li>
-															<?php endif; ?>
-
-															<?php if ($page < ceil($total_pages / $num_results_on_page)): ?>
-																<li class="next"><a href="profile.php?page=<?php echo $page+1 . $profile_id ?>">Siguiente</a></li>
-															<?php endif; ?>
-														</ul>
-													<?php endif; ?>
-													<?php
-												} else {
-													echo '<div class="alert alert-success"><strong><i class="fa fa-info-circle"></i> Descubre el talento de ' . $userbuscado['username'] . '</strong></div>';
-												}
-
-												?>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-							<?php else: ?>
-								<div class="alert alert-success"><i class="fa fa-info-circle"></i> Ingresa y descubre el talento, fotos y videos de <strong><?php echo $userbuscado['username'];?> </strong></div>
-							<?php endif; ?>
-							<?php
-				#-> CONVERTIR IMAGENES EN NO PUBLICAS
-							if (isset($_GET['action_nopublic']) and !empty($_GET['action_nopublic'] ) ) {
-								if ($rowu['role']='Admin') {
-									$id = $_GET['action_nopublic'];
-									$querycp = mysqli_query($connect, "SELECT * FROM `fotosenventa` WHERE player_id='{$id}' ORDER BY id DESC LIMIT {$calc_page}, {$num_results_on_page}");
-									$countcp = mysqli_num_rows($querycp);
-						#-> GENERA N NUMERO ALEATORIOS NO REPETIDOS
-									$rand = generaterandom(0,$countcp-1);
-									if ($countcp > 0) {
-										$b=0;
-										$a=0;
-							#-> ALMACENA FILAS Y COLUMNAS DE LA CONSULTA EN UN ARRAY
-										while ($rowcp = mysqli_fetch_row($querycp)) {
-											for ($i=0; $i < 7; $i++) {
-												$row[$a][$i]=$rowcp[$i];
+														<?php if ($page < ceil($total_pages / $num_results_on_page)): ?>
+															<li class="next"><a href="profile.php?page=<?php echo $page+1 . $profile_id ?>">Siguiente</a></li>
+														<?php endif; ?>
+													</ul>
+												<?php endif; ?>
+												<?php
+											} else {
+												echo '<div class="alert alert-success"><strong><i class="fa fa-info-circle"></i> Descubre el talento de ' . $userbuscado['username'] . '</strong></div>';
 											}
-											$a++;
-										}
+
+											?>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					<?php else: ?>
+						<div class="alert alert-success"><i class="fa fa-info-circle"></i> Ingresa y descubre el talento, fotos y videos de <strong><?php echo $userbuscado['username'];?> </strong></div>
+					<?php endif; ?>
+					<?php
+				#-> CONVERTIR IMAGENES EN NO PUBLICAS
+					if (isset($_GET['action_nopublic']) and !empty($_GET['action_nopublic'] ) ) {
+						if ($rowu['role']='Admin') {
+							$id = $_GET['action_nopublic'];
+							$querycp = mysqli_query($connect, "SELECT * FROM `fotosenventa` WHERE player_id='{$id}' ORDER BY id DESC LIMIT {$calc_page}, {$num_results_on_page}");
+							$countcp = mysqli_num_rows($querycp);
+						#-> GENERA N NUMERO ALEATORIOS NO REPETIDOS
+							$rand = generaterandom(0,$countcp-1);
+							if ($countcp > 0) {
+								$b=0;
+								$a=0;
+							#-> ALMACENA FILAS Y COLUMNAS DE LA CONSULTA EN UN ARRAY
+								while ($rowcp = mysqli_fetch_row($querycp)) {
+									for ($i=0; $i < 7; $i++) {
+										$row[$a][$i]=$rowcp[$i];
+									}
+									$a++;
+								}
 			/**GENERA LA CONSULTA
 			*CAMBIARA LA MITAD DE LA PAGE COMO PRETEMINADO(50%)
 			**/
