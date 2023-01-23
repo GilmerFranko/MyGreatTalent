@@ -3369,7 +3369,7 @@ function newNotification($to_user = null, $from_user = null, $key = null, $actio
 				/* Almacena json que contiene las fotos */
 				$photo = json_decode($row['imagen']);
 
-				if (is_countable($photo)) {
+				if (count($photo) > 0) {
 					$total_photos = $total_photos + count($photo);
 				}
 			}

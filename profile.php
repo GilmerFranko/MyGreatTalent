@@ -337,11 +337,6 @@ if ($rowu['role'] == 'Admin' && isset($_GET["banear"]) && $userbuscado){
 										echo '<span class="user-offline">Offline</span>';
 									}?>
 
-									<!-- Mostrar cantidad de fotos solo si es mi perfil -->
-									<?php if (isLogged()): ?>
-										<br><br><span><strong><?php echo $userbuscado['username'] ?></strong> tiene <?php echo CountAllThePhotos($userbuscado['id']);?> fotos y videos</span>
-									<?php endif ?>
-
 									<!-- MOSTRAR DESCRIPCIÓN A LOGUEADOS-->
 									<?php if (isLogged()): ?>
 										<hr></center>
@@ -459,7 +454,9 @@ if ($rowu['role'] == 'Admin' && isset($_GET["banear"]) && $userbuscado){
 													<?php echo '<p>Género: <b>'.$userbuscado['gender'].'</b></p>'?>
 												<?php endif; ?>
 
-												<?php echo '<p>Créditos: <b>'.$userbuscado['eCreditos'].'</b></p>';
+												<?php if($rowu['role'] == 'Admin'):
+													echo '<p>Créditos: <b>'.$userbuscado['eCreditos'].'</b></p>';
+												endif;
 
 												if($rowu['role'] == 'Admin'): ?>
 													<p>IP: <strong><a href="buscaip.php?nombre=<?php echo $userbuscado['ipaddres'] ?>"> <?php echo $userbuscado['ipaddres']?></a></strong></p>
