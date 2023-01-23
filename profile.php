@@ -438,7 +438,7 @@ if ($rowu['role'] == 'Admin' && isset($_GET["banear"]) && $userbuscado){
 
 												<!-- Mostrar cantidad de fotos a los no logueados -->
 												<?php if (!isLogged()): ?>
-													<br><br><span><strong><?php echo $userbuscado['username'] ?></strong> tiene <?php echo CountAllThePhotos($userbuscado['id']);?> fotos y videos</span><br><br>
+													<br><br><span><strong><?php echo $userbuscado['username'] ?></strong> tiene <strong><?php echo CountAllThePhotos($userbuscado['id']);?></strong> fotos y videos</span><br><br>
 												<?php endif ?>
 
 												<!-- MOSTRAR DESCRIPCIÓN A LOGUEADOS-->
