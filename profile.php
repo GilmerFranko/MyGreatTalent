@@ -527,7 +527,7 @@ if ($rowu['role'] == 'Admin' && isset($_GET["banear"]) && $userbuscado){
 												}*/
 
 												?>
-												<a class="btn btn-success dropdown-item text-gray" onclick="openDonarCreditos('<?php echo $id ?>, <?php echo $userbuscado['username']?>')" style="width: 30vw;font-size: 16px;font-weight: bold;border-radius: 24px;min-width: 214px;max-width: 400px;color: white !important;padding: 8px;">
+												<a class="btn btn-success dropdown-item text-gray" onclick="openDonarCreditos('<?php echo $id ?>', '<?php echo $userbuscado['username']?>')" style="width: 30vw;font-size: 16px;font-weight: bold;border-radius: 24px;min-width: 214px;max-width: 400px;color: white !important;padding: 8px;">
 													<i class="fas fa-donate"></i>&nbsp;&nbsp;Donar</a><br class="br"><br>
 													<?php
 
