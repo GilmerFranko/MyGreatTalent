@@ -1306,6 +1306,29 @@ if(isset($_GET['getUsersWhoBoughtPack']))
 		<?php }
 	}
 
+	// DEVUELVE UNA LISTA DE USUARIOS QUE COMPRARON CIERTOS PACKS (para mispacks.php)
+	if(isset($_GET['getUsersWhoBoughtPack']))
+	{
+		// OPTENGO EL ID DEL PACK
+		$idPack = $_POST['idPack'];
+
+		// SELECCIONO LA VENTA
+		$SalesMade = $connect->query("SELECT *, p.`id` AS pid FROM `packscomprados` AS pc INNER JOIN `players` AS p ON p.`id` = pc.`comprador_id` WHERE pc.`foto_id` = '$idPack'");
+
+		if ($SalesMade AND $SalesMade->num_rows > 0){?>
+			<div style="display: flex;flex-direction: column;flex-wrap: wrap;align-items: flex-start;align-content: center;">
+				<?php while($sale = mysqli_fetch_assoc($SalesMade)): ?>
+					<div>
+						<img class="img-avatar img-circle" src="<?php echo $sale['avatar']; ?>" style="width: 30px; height: 30px">
+						<?php echo createLink('profile', $sale['username'], array('profile_id' => $sale['pid'])); ?>
+					</div>
+					<br>
+				<?php endwhile;?>
+			</div>
+			<?php
+		}
+	}
+
 /*
 	RECOLECTA LOS giftCreditsWeekly Y ACREDITA LOS CREDITOS
  */

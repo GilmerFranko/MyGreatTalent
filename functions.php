@@ -1749,6 +1749,80 @@ function deleteRow($table = null, $id = null, $where = 'id', $limit = 1)
 // RETORNA FALSE SI NO SE HA ELIMINADO NADA
 	return false;
 }
+
+/**
+* Borra amigos que no hayan comprado packs a un usuario.
+*
+* @param int (id del usuario)
+* @return boolean (true si la consulta tuvo exito, false si no)
+*/
+
+function deleteFriendsNoBuyPacks($idUser = null)
+{
+	global $connect;
+
+	// DEVUELVE A TODOS MIS AMIGOS QUE ME HAN COMPRADO ALGUN PACK
+	$consult = $connect->query("SELECT subquery.`comprador_id` AS `buyer` FROM (SELECT DISTINCT pc.*,f.`player1`,f.`player2`,pe.`player_id`,pe.`id` AS peid,f.`id` AS fid FROM `packscomprados` AS pc LEFT JOIN friends AS f ON (f.`player1` = '$idUser') OR (f.`player2` = '$idUser') LEFT JOIN packsenventa AS pe ON pe.`player_id` = '$idUser' WHERE pc.`comprador_id` = IF(f.`player1` = '$idUser' ,f.`player2`,f.`player1`) AND pc.`foto_id` = pe.`id` GROUP BY pc.`comprador_id`) AS subquery");
+
+	//
+	if ($consult)
+	{
+
+		// SI HAY AMIGOS QUE HAN COMPRADO ALMENOS UN PACK
+		if($consult->num_rows > 0)
+		{
+			while($users = mysqli_fetch_assoc($consult)):
+				// ALMACENA SUS ID
+				$Users[] = $users['buyer'];
+			endwhile;
+		}
+		// SI NINGUN AMIGO ME HA COMPRADO NINGUN PACK
+		else
+		{
+			// SOLO ALMACENA 0, PARA BORRAR A TODOS LOS ID DIFERENTES A 0
+			$Users = [0];
+		}
+		// SELECCIONO A TODOS MIS AMIGOS QUE NO ME HAN COMPRADO NUNCA UN PACK
+		$friend = $connect->query("SELECT *, IF(`player1` = '$idUser', `player2`, `player1`) AS friend FROM friends WHERE (`player1` = '$idUser' AND `player2` NOT IN (". implode($Users, ',') .")) OR (`player2` = '$idUser' AND `player1` NOT IN (". implode($Users, ',') ."))");
+		// BORRA A TODOS ||MIS AMIGOS|| QUE NO ME HAN COMPRADO NUNCA UN PACK
+		$consult = $connect->query("DELETE FROM friends WHERE (`player1` = '$idUser' AND `player2` NOT IN (". implode($Users, ',') .")) OR (`player2` = '$idUser' AND `player1` NOT IN (". implode($Users, ',') ."))");
+
+		if ($consult)
+		{
+			// SI SE BORRO ALMENOS UN AMIGO
+			if($consult AND $connect->affected_rows > 0)
+			{
+				setSwal(array('Acción realizada con éxito','Se han bloqueado: '. $connect->affected_rows .' amigos de tu perfil','success'));
+			}
+			else
+			{
+				setSwal(array('Genial!','Parece que cada uno de tus amigos han comprado al menos un Pack tuyo alguna vez, por lo tanto no se ha bloqueado ninguno de tu lista de amigos.','success'));
+			}
+		}
+		else
+		{
+			setSwal(array('Error!','Fallo algo en la consulta. Por favor intente mas tarde, si el problema persiste por favor comuníquese con el Administrador','error'));
+		}
+		// SI HAY AMIGOS QUE NO HAN COMPRADO ALGUN PACK MIO
+		if($friend AND $friend->num_rows > 0)
+		{
+			while($listFriend = mysqli_fetch_assoc($friend))
+			{
+				// BLOQUEALOS
+				$connect->query("INSERT INTO `bloqueos` (fromid, toid) VALUES ('$idUser', '$listFriend[friend]')");
+				// ELIMINA LAS ROOMCHATS
+				$connect->query("DELETE FROM nuevochat_rooms WHERE (`player1` = '$idUser' AND `player2` = '$listFriend[friend]') OR (`player2` = '$idUser' AND `player1` = '$listFriend[friend]') ");
+				// ELIMINA MIS CONVERSACIONES CON ESE USUARIO
+				$connect->query("DELETE FROM `nuevochat_mensajes` WHERE (`author` = '$idUser' AND `toid` = '$listFriend[friend]') OR (`toid` = '$idUser' AND `author` = '$listFriend[friend]') ");
+			}
+		}
+	}
+	else
+	{
+		setSwal(array('Error!','Fallo algo en la consulta. Por favor intente mas tarde, si el problema persiste por favor comuníquese con el Administrador','error'));
+	}
+}
+
 /**
 * Genera un identificador único
 */
@@ -2262,100 +2336,100 @@ function deleteAccount($user_id = null){
 			}
 
 			/* ELIMINAR PACKS */
-  /*$query = $connect->query("SELECT `id`, `video`, `imagens` FROM `packsenventa` WHERE `player_id` = \"". $user_id ."\"");
-  // COMPROBAR SI EXISTEN
-  if ($query == true && $query->num_rows > 0)
-  {
-  // ELIMINAR PACKS
-    while($pack = $query->fetch_assoc() )
-    {
-      deletePack($pack);
-    }
-  }*/
+			$query = $connect->query("SELECT `id`, `video`, `imagens` FROM `packsenventa` WHERE `player_id` = \"". $user_id ."\"");
+  		// COMPROBAR SI EXISTEN
+			if ($query == true && $query->num_rows > 0)
+			{
+  		// ELIMINAR PACKS
+				while($pack = $query->fetch_assoc() )
+				{
+					deletePack($pack);
+				}
+			}
 
-  /*=====  ELIMINACIONES RESTANTES  ======*/
+			/*=====  ELIMINACIONES RESTANTES  ======*/
 
-  $array = array(
+			$array = array(
     // COMENTARIOS
-  	'DELETE FROM `player_comments` WHERE `author_id` = \''.$user_id.'\'',
+				'DELETE FROM `player_comments` WHERE `author_id` = \''.$user_id.'\'',
     // DESCARGAS
-  	'DELETE FROM `download` WHERE `uid` = \''.$user_id.'\'',
+				'DELETE FROM `download` WHERE `uid` = \''.$user_id.'\'',
     // COMPRAS
-  	'DELETE FROM `fotoscompradas` WHERE `comprador_id` = \''.$user_id.'\'',
+				'DELETE FROM `fotoscompradas` WHERE `comprador_id` = \''.$user_id.'\'',
     // FOTOS PUBLICADAS
-  	'DELETE FROM `fotosenventa` WHERE `player_id` = \''.$user_id.'\'',
+				'DELETE FROM `fotosenventa` WHERE `player_id` = \''.$user_id.'\'',
     // ELIMINAR BLOQUEOS Y BLOQUEADOS
-  	'DELETE FROM `bloqueos` WHERE `fromid` = \''.$user_id.'\' || `toid` = \''.$user_id.'\'',
+				'DELETE FROM `bloqueos` WHERE `fromid` = \''.$user_id.'\' || `toid` = \''.$user_id.'\'',
     // ELIMINAR REGALO SEMANAL
-  	'DELETE FROM `giftcredits_weekly` WHERE `player_id` = \''.$user_id.'\'',
+				'DELETE FROM `giftcredits_weekly` WHERE `player_id` = \''.$user_id.'\'',
     // ELIMINAR LIKES
-  	'DELETE FROM `player_megusta` WHERE `player_id` = \''.$user_id.'\'',
+				'DELETE FROM `player_megusta` WHERE `player_id` = \''.$user_id.'\'',
     // ELIMINAR RECOMENDACIONES
-  	'DELETE FROM `players_recommendations` WHERE `fromid` = \''.$user_id.'\' || `toid` = \''. $user_id .'\'',
+				'DELETE FROM `players_recommendations` WHERE `fromid` = \''.$user_id.'\' || `toid` = \''. $user_id .'\'',
     // NOTIFICACIONES
-  	'DELETE FROM `players_notifications` WHERE `toid` = \''.$user_id.'\' || `fromid` = \''.$user_id.'\'',
+				'DELETE FROM `players_notifications` WHERE `toid` = \''.$user_id.'\' || `fromid` = \''.$user_id.'\'',
     // AMISTADES
-  	'DELETE FROM `friends` WHERE `player1` = \''.$user_id.'\' || `player2` = \''.$user_id.'\'',
+				'DELETE FROM `friends` WHERE `player1` = \''.$user_id.'\' || `player2` = \''.$user_id.'\'',
     // PERFIL / CUENTA
     // PREGUNTAS DE USUARIOS
-  	'DELETE FROM `site_questions` WHERE `player_id` = \''.$user_id.'\'',
+				'DELETE FROM `site_questions` WHERE `player_id` = \''.$user_id.'\'',
     // RETIROS
-  	'UPDATE `retiros` SET `usuario` = "" WHERE `usuario` = \''.$user_id.'\'',
+				'UPDATE `retiros` SET `usuario` = "" WHERE `usuario` = \''.$user_id.'\'',
     // RESPUESTAS AUTOMATICAS DE BOTS
-  	'DELETE FROM `respuesta_automatica` WHERE `uid` = \''.$user_id.'\'',
+				'DELETE FROM `respuesta_automatica` WHERE `uid` = \''.$user_id.'\'',
     // RESPUESTAS DE BOTS EN ESPERA
-  	'DELETE FROM `respuestasbot_enespera` WHERE `bot_id` = \''.$user_id.'\' || `toid` = \''.$user_id.'\'',
+				'DELETE FROM `respuestasbot_enespera` WHERE `bot_id` = \''.$user_id.'\' || `toid` = \''.$user_id.'\'',
     // REPORTES
-  	'DELETE FROM `reportes` WHERE `author` = \''.$user_id.'\'',
+				'DELETE FROM `reportes` WHERE `author` = \''.$user_id.'\'',
     // ENCUESTAS DE USUARIOS
-  	'DELETE FROM `polls` WHERE `uid` = \''.$user_id.'\'',
+				'DELETE FROM `polls` WHERE `uid` = \''.$user_id.'\'',
     // MASCOTAS COMPRADAS
-  	'DELETE FROM `player_pets` WHERE `player_id` = \''.$user_id.'\'',
+				'DELETE FROM `player_pets` WHERE `player_id` = \''.$user_id.'\'',
     // ITEMS DE GRANJA COMPRADOS
-  	'DELETE FROM `player_items_bought` WHERE `player_id` = \''.$user_id.'\'',
+				'DELETE FROM `player_items_bought` WHERE `player_id` = \''.$user_id.'\'',
     // COLECCIONES ADQUIRIDAS
-  	'DELETE FROM `player_colecciones` WHERE `player_id` = \''.$user_id.'\'',
+				'DELETE FROM `player_colecciones` WHERE `player_id` = \''.$user_id.'\'',
     // PREGUNTAS REALIZADAS POR EL USUARIO
-  	'DELETE FROM `players_questions` WHERE `toid` = \''.$user_id.'\'',
+				'DELETE FROM `players_questions` WHERE `toid` = \''.$user_id.'\'',
     // ELIMINAR DE LA LISTA DE NOMBRES
-  	'DELETE FROM `players_namesactions` WHERE `player_id` = \''.$user_id.'\'',
+				'DELETE FROM `players_namesactions` WHERE `player_id` = \''.$user_id.'\'',
     // MOVIMIENTOS REALIZADOS
-  	'DELETE FROM `players_movements` WHERE `player_id` = \''.$user_id.'\'',
+				'DELETE FROM `players_movements` WHERE `player_id` = \''.$user_id.'\'',
     // REGALOS ENVIADOS Y RECIBIDOS
-  	'DELETE FROM `players_gift_given` WHERE `fromid` = \''.$user_id.'\' || `toid` = \''.$user_id.'\'',
+				'DELETE FROM `players_gift_given` WHERE `fromid` = \''.$user_id.'\' || `toid` = \''.$user_id.'\'',
     // ELIMINAR REGALOS CREADOS
-  	'DELETE FROM `players_gifts` WHERE `player_id` = \''.$user_id.'\'',
+				'DELETE FROM `players_gifts` WHERE `player_id` = \''.$user_id.'\'',
     // ELIMINAR GRANJAS ADQUIRIDAS
-  	'DELETE FROM `players_farms` WHERE `player_id` = \''.$user_id.'\'',
+				'DELETE FROM `players_farms` WHERE `player_id` = \''.$user_id.'\'',
     // ELIMINAR ITEMS COMPRADOS
-  	'DELETE FROM `players_farm_items` WHERE `player_id` = \''.$user_id.'\'',
+				'DELETE FROM `players_farm_items` WHERE `player_id` = \''.$user_id.'\'',
     // ELIMINAR ANTECEDENTES EN COMPRAS DE CREDITOS
-  	'DELETE FROM `players_farm_items` WHERE `player_id` = \''.$user_id.'\'',
+				'DELETE FROM `players_farm_items` WHERE `player_id` = \''.$user_id.'\'',
     // PACKS COMPRADOS
-  	'DELETE FROM `packscomprados` WHERE `comprador_id` = \''.$user_id.'\'',
+				'DELETE FROM `packscomprados` WHERE `comprador_id` = \''.$user_id.'\'',
     // SALA DE CHATS
-  	'DELETE FROM `nuevochat_rooms` WHERE `player1` = \''.$user_id.'\' || `player2` = \''.$user_id.'\'',
+				'DELETE FROM `nuevochat_rooms` WHERE `player1` = \''.$user_id.'\' || `player2` = \''.$user_id.'\'',
     //
-  	'DELETE FROM `notificaciones_suscripcionesvencidas` WHERE `usera` = \''.$user_id.'\' || userb = \''. $user_id .'\'',
+				'DELETE FROM `notificaciones_suscripcionesvencidas` WHERE `usera` = \''.$user_id.'\' || userb = \''. $user_id .'\'',
     //
-  	'DELETE FROM `notificaciones_fotosnuevas` WHERE `player_notificador` = \''.$user_id.'\' || `player_notificado` = \''.$user_id.'\'',
+				'DELETE FROM `notificaciones_fotosnuevas` WHERE `player_notificador` = \''.$user_id.'\' || `player_notificado` = \''.$user_id.'\'',
     // NOTAS CREADAS
-  	'DELETE FROM `notas` WHERE `uid` = \''.$user_id.'\'',
+				'DELETE FROM `notas` WHERE `uid` = \''.$user_id.'\'',
     // MENSAJES PROGRAMADOS
-  	'DELETE FROM `mensajesprogramados` WHERE `player_id` = \''.$user_id.'\'',
+				'DELETE FROM `mensajesprogramados` WHERE `player_id` = \''.$user_id.'\'',
     // FOTOS PROGRAMADAS
-  	'DELETE FROM `fotosprogramadas` WHERE `player_id` = \''.$user_id.'\'',
+				'DELETE FROM `fotosprogramadas` WHERE `player_id` = \''.$user_id.'\'',
     // PACKS EN VENTA
-  	'DELETE FROM `packsenventa` WHERE `player_id` = \''.$user_id.'\'',
+				'DELETE FROM `packsenventa` WHERE `player_id` = \''.$user_id.'\'',
     // MENSAJES ENVIADOS Y RECIBIDOS
-  	'DELETE FROM `nuevochat_mensajes` WHERE `author` = \''.$user_id.'\' || `toid` = \''.$user_id.'\'',
+				'DELETE FROM `nuevochat_mensajes` WHERE `author` = \''.$user_id.'\' || `toid` = \''.$user_id.'\'',
     // ELIMINAR COMPROBANTE DE "BIENVENIDA"
-  	'DELETE FROM `welcomechat` WHERE `userid` = \''.$user_id.'\'',
+				'DELETE FROM `welcomechat` WHERE `userid` = \''.$user_id.'\'',
     // ELIMINAR *DESCONOCIDO*
-  	'DELETE FROM `ventascompradas` WHERE `comprador_id` = \''.$user_id.'\'',
+				'DELETE FROM `ventascompradas` WHERE `comprador_id` = \''.$user_id.'\'',
     // ELIMINAR *DESCONOCIDO*
-  	'DELETE FROM `ventasenventa` WHERE `player_id` = \''.$user_id.'\'',
-  );
+				'DELETE FROM `ventasenventa` WHERE `player_id` = \''.$user_id.'\'',
+			);
   // RECORRER CONSULTAS
 foreach($array as $sql)
 {
