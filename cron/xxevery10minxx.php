@@ -9,7 +9,7 @@ $sqlmensajesbot = mysqli_query($connect, "SELECT * FROM `respuestasbot_enespera`
 if(mysqli_num_rows($sqlmensajesbot)>0){
 	while ($rowmensaje = mysqli_fetch_assoc($sqlmensajesbot)) {
 
-	    if (time() >= $rowmensaje['respuesta_time']) {			
+		if (time() >= $rowmensaje['respuesta_time']) {
 			$id_chat = $rowmensaje['chat_id'];
 			$author  = $rowmensaje['bot_id'];
 			$toid    = $rowmensaje['toid'];
@@ -22,7 +22,7 @@ if(mysqli_num_rows($sqlmensajesbot)>0){
 			// COMPRUEBA QUE EL CHAT ESTE ABIERTO(DESBLOQUEADO)
 			if(checkStateChatRoom($id_chat)=='open')
 			{
-		    $responder = mysqli_query($connect, "INSERT INTO `nuevochat_mensajes` (id_chat, author, toid, mensaje, time, foto, rutadefoto) VALUES ('$id_chat', '$author', '$toid', '$mensaje', '$time', '$foto', '$rutadefoto')");
+				$responder = mysqli_query($connect, "INSERT INTO `nuevochat_mensajes` (id_chat, author, toid, mensaje, time, foto, rutadefoto) VALUES ('$id_chat', '$author', '$toid', '$mensaje', '$time', '$foto', '$rutadefoto')");
 				//borrar la respuesta en espera
 				$borrarrespuestaenespera = mysqli_query($connect, "DELETE FROM `respuestasbot_enespera` WHERE id='$rowmensaje[id]'");
 				// indicandole a la sala que ya se le respondió al bot_id
@@ -48,6 +48,11 @@ function sendMassMessage($data) {
 	// ALMACENA LA FECHA ACTUAL
 	$time    = time();
 	$timeroom = time();
+
+	/* Determina si hay que consultar el
+	 * nombre del usuario receptor si existe
+	 * en el mensaje la propiedad -user-*/
+	$consultUserData = detect_user_String($mensaje);
 
 	// SELECCIOA TODOS LOS CHATS INICIADOS POR $uid
 	$sqlsala = $connect->query("SELECT * FROM `nuevochat_rooms` WHERE player1='{$uid}' OR player2='{$uid}'");
@@ -89,9 +94,12 @@ function sendMassMessage($data) {
 					// SELECCIONAR TIPO. 1: ENVIAR A TODOS. 2: ENVIAR A USUARIOS CON INACTIVAD DE 5 O MAS DIAS. 3: ENVIAR SI EL ULTIMO MENSAJE ES DEL DESTINARIO.
 					if (($data['type'] == 1 OR is_null($data['type'])) OR ($data['type'] == 2 AND $r AND TimeAgo($recipient['timeonline'],true) >= 5) OR ($data['type'] == 3 AND $lA != false AND $lA['author'] != $uid)) {
 
+						/* Transforma '-user-' al nombre del usuario al que se le envía el mensaje */
+						$mensaje1 = detectUserString($mensaje, $recipient['username']);
+
 						// ENVIAR MENSAJE PROGRAMADO
 						$addmensaje = mysqli_query($connect, "INSERT INTO `nuevochat_mensajes` (id_chat, author, toid, mensaje, time, foto, rutadefoto) VALUES
-						('{$id_chat}', '{$uid}', '{$toid}', '{$mensaje}', '{$time}', '{$foto}', '{$rutadefoto}')");
+							('{$id_chat}', '{$uid}', '{$toid}', '{$mensaje1}', '{$time}', '{$foto}', '{$rutadefoto}')");
 
 						// ACUTALIZAR FECHA DEL CHAT
 						$update_time_room = mysqli_query($connect, "UPDATE `nuevochat_rooms` SET time='$timeroom' WHERE id='$id_chat'");

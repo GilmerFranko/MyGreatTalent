@@ -1475,23 +1475,25 @@ function checkBlock($userA = null, $userB = null)
 		return $consult;
 	}
 // DEVUELVE ARRAY DE UN USUARIO
-	function getUser($id = null, $searchName = false)
+	function getUser($id = null, $searchName = false, $column = '*')
 	{
 		global $connect;
 
 	// COMPRUEBA SI HAY QUE BUSCAR POR ID / NOMBRE
 		if ($searchName == false)
 		{
-			$consult = $connect->query('SELECT * FROM `players` WHERE `id` = \''. $connect->real_escape_string($id) .'\'');
+			$consult = $connect->query('SELECT '.$column.' FROM `players` WHERE `id` = \''. $connect->real_escape_string($id) .'\'');
+			//error_log('SELECT '.$column.' FROM `players` WHERE `id` = \''. $connect->real_escape_string($id) .'\'');
 		}
 		else
 		{
-			$consult = $connect->query('SELECT * FROM `players` WHERE `username` = \''. $connect->real_escape_string($id). '\'');
+			$consult = $connect->query('SELECT '.$column.' FROM `players` WHERE `username` = \''. $connect->real_escape_string($id). '\'');
 		}
 
 
 		return $consult;
 	}
+
 // DEVUELVE ENLACE A UN PERFIL
 	function getUserLink($id = null)
 	{
@@ -3378,5 +3380,37 @@ function newNotification($to_user = null, $from_user = null, $key = null, $actio
 		else
 		{
 			return 0;
+		}
+	}
+
+
+	/**
+	 * Detecta en un string '-user-' y lo cambia texto pasado
+	 * @param  string mensaje
+	 * @param  string Nombre de usuario
+	 * @return
+	 */
+	function detectUserString($message = '', $username = '')
+	{
+
+		$message = str_replace("-user-", $username, $message);
+
+		return $message;
+
+	}
+
+	/**
+	 * Detecta en un string '-user-' y devuelve true
+	 * @param  string mensaje
+	 * @return
+	 */
+	function detect_user_String($message)
+	{
+		$pos = strpos($message, '-user-');
+
+		if ($pos === false) {
+			return false;
+		} else {
+			return true;
 		}
 	}

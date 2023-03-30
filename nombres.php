@@ -87,49 +87,49 @@ $count = 0;
 								<th colspan="3">
 									<?php if ($search==''): ?>
 										<h5><strong>Nombres agregados</strong></h5>
+									<?php else: ?>
+										<h5></h5>
+									<?php endif ?>
+								</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<?php
+								while($names =  mysqli_fetch_assoc($sqlNames)){
+									/* Determina si se debe colocar el checked */
+									$checked = (isset($names['checked']) and $names['checked']) ? 'checked=\'\'' : '';
+									?>
+									<td>
+										<span>
+											<input id="check<?php echo $names['id']; ?>" class="case" type="checkbox" name="namesId[]" value="<?php echo $names['id']; ?>" <?php echo $checked ?>>
+											<label>
+												<?php echo createLink('profile',$names['username'],array('profile_id' => $names['id'])); ?>
+											</label>
+											<div class="view_email"> <small><strong>Email:</strong><br><?php echo $names['email']; ?></small></div>
+											<div class="view_email"> <small><strong>Dirección Ip:</strong> <br><?php echo $names['ip']; ?></small></div>
+											<div class="view_email"> <small><strong>Ultima conexión:</strong> <br><?php echo TimeAgo($names['timeonline']); ?></small></div>
+											<!-- DE ESTAR AGREGADO EL NOMBRE EN LA LISTA -->
+											<?php if (isset($names['time'])): ?>
+												<div class="view_email"><small><strong>Fecha de agregado: </strong><br><?php echo date('d/m/Y  h:i',$names['time']); ?></small></div>
+											<?php endif ?>
+										</span>
+										<?php if ($names['f_id']!=null): ?>
+											&nbsp;
+											<i data-checkid="<?php echo $names['id']; ?>" class="fa fa-square isfriend" style="color:green;"></i>
 										<?php else: ?>
-											<h5></h5>
+											<i class="fa fa-square" style="color:red;"></i>
 										<?php endif ?>
-									</th>
-									<th></th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
+									</td>
 									<?php
-									while($names =  mysqli_fetch_assoc($sqlNames)){
-										/* Determina si se debe colocar el checked */
-										$checked = (isset($names['checked']) and $names['checked']) ? 'checked=\'\'' : '';
-										?>
-										<td>
-											<span>
-												<input id="check<?php echo $names['id']; ?>" class="case" type="checkbox" name="namesId[]" value="<?php echo $names['id']; ?>" <?php echo $checked ?>>
-												<label>
-													<?php echo createLink('profile',$names['username'],array('profile_id' => $names['id'])); ?>
-												</label>
-												<div class="view_email"> <small><strong>Email:</strong><br><?php echo $names['email']; ?></small></div>
-												<div class="view_email"> <small><strong>Dirección Ip:</strong> <br><?php echo $names['ip']; ?></small></div>
-												<div class="view_email"> <small><strong>Ultima conexión:</strong> <br><?php echo TimeAgo($names['timeonline']); ?></small></div>
-												<!-- DE ESTAR AGREGADO EL NOMBRE EN LA LISTA -->
-												<?php if (isset($names['time'])): ?>
-													<div class="view_email"><small><strong>Fecha de agregado: </strong><br><?php echo date('d/m/Y  h:i',$names['time']); ?></small></div>
-												<?php endif ?>
-											</span>
-											<?php if ($names['f_id']!=null): ?>
-												&nbsp;
-												<i data-checkid="<?php echo $names['id']; ?>" class="fa fa-square isfriend" style="color:green;"></i>
-												<?php else: ?>
-													<i class="fa fa-square" style="color:red;"></i>
-												<?php endif ?>
-											</td>
-											<?php
-											$count++;
-											if ($count == 7): ?>
-											</tr><tr>
-												<?php
-												$count = 0;
-											endif;
-										}
+									$count++;
+									if ($count == 7): ?>
+									</tr><tr>
+										<?php
+										$count = 0;
+									endif;
+								}
 
 								/**
 								* COMPLETA LAS FILAS VACIAS
@@ -348,9 +348,21 @@ if (isset($_POST['namesId']) AND isset($_POST['option']))
 		$errors = array('file-no-uploaded' => 0, 'room-is-closed' => 0, 'room-no-exist' => 0);
 		if((isset($_FILES['inputFile']) AND !empty($_FILES['inputFile']) OR (isset($_POST['inputMessage']) AND !empty($_POST['inputMessage']))))
 		{
+			/* Almacena mensaje de existir*/
 			$message = (isset($_POST['inputMessage']) and !empty($_POST['inputMessage'])) ? $_POST['inputMessage'] : null;
+			/* Almacena imagen de existir */
 			$file = (isset($_FILES['inputFile']) and !empty($_FILES['inputFile'])) ? $_FILES['inputFile'] : null;
+			/**/
 			$response = array();
+
+			/* Determina si hay que consultar el
+			 * nombre del usuario receptor si existe
+		 	 * en el mensaje la propiedad -user-
+			 * evita procesos innecesarios aumentanto rendimiento
+			 *
+		 	 */
+			$consultUserData = detect_user_String($message);
+
 			// COMBPRUEBA SI SE DEBE SUBIR UNA FOTO
 			$filename = '';
 			if(!empty($file) and !empty($file['tmp_name']))
@@ -367,8 +379,22 @@ if (isset($_POST['namesId']) AND isset($_POST['option']))
 					if($SQLroom and $SQLroom->num_rows > 0)
 					{
 						$room = $SQLroom->fetch_assoc();
+
+						$message1 = $message;
+						/* Optiene el usuario */
+						if($consultUserData)
+						{
+							$recipientUser = getUser($nameId, false, 'username');
+							if($recipientUser AND $recipientUser->num_rows > 0)
+							{
+								$r = $recipientUser->fetch_assoc();
+								/* Cambia -user- por el nombre del usuario*/
+								$message1 = detectUserString($message, $r['username']);
+							}
+						}
+
 						// Envia mensaje a usuario
-						$response = sendMessage($room['id'], $rowu['id'], $message, $filename);
+						$response = sendMessage($room['id'], $rowu['id'], $message1, $filename);
 
 						// SI OCURRIO ALGUN ERROR
 						if (!$response[0]) {
