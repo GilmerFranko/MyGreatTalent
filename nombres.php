@@ -76,6 +76,19 @@ $count = 0;
 					</div>
 					<input class="btn btn-success submitForm" type="submit" name="send">
 				</div>
+				<li class="dropdown select-user select-user-menu">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown" style="padding: 0px!important;" aria-expanded="false">
+						Seleccionar usuarios
+					</a>
+					<ul class="dropdown-menu" style="text-align: center;">
+						<input id="selectFromUser" class="form-control" type="text" placeholder="Desde x usuario">
+						<input class="btn btn-warning" onclick="listenCheckboxUserFrom()" type="button" value="Escuchar">
+						<input id="selectToUser" class="form-control" type="text" placeholder="A x usuario">
+						<input class="btn btn-warning" onclick="listenCheckboxUserTo()" type="button" value="Escuchar"><br>
+
+						<input class="btn btn-success" onclick="selectUsersCheckbox($('#selectFromUser').val(), $('#selectToUser').val())" type="button" value="Seleccionar" style="width: 100%;">
+					</ul>
+				</li>
 				<br>
 				<div id="scroll" class="box" style="border-top:0px;">
 					<table id="datatable" class="table table-bordered table-hover no-margin" style="min-width: 700px;">
@@ -97,13 +110,14 @@ $count = 0;
 						<tbody>
 							<tr>
 								<?php
+								$countCheck = 0;
 								while($names =  mysqli_fetch_assoc($sqlNames)){
 									/* Determina si se debe colocar el checked */
 									$checked = (isset($names['checked']) and $names['checked']) ? 'checked=\'\'' : '';
 									?>
 									<td>
 										<span>
-											<input id="check<?php echo $names['id']; ?>" class="case" type="checkbox" name="namesId[]" value="<?php echo $names['id']; ?>" <?php echo $checked ?>>
+											<input id="check<?php echo $names['id']; ?>" class="case countCheck<?php echo $countCheck ?>" data-idcheck="<?php echo $countCheck ?>" type="checkbox" name="namesId[]" value="<?php echo $names['id']; ?>" <?php echo $checked ?>>
 											<label>
 												<?php echo createLink('profile',$names['username'],array('profile_id' => $names['id'])); ?>
 											</label>
@@ -129,6 +143,7 @@ $count = 0;
 										<?php
 										$count = 0;
 									endif;
+									$countCheck++;
 								}
 
 								/**
@@ -235,6 +250,75 @@ $count = 0;
 		// Ocultar deseleccionador de imagen
 		$("#deselectFile").hide()
 	})
+
+
+	function selectUsersCheckbox(checkbox1, checkbox2)
+	{
+		let min = Math.min(checkbox1, checkbox2);
+		let max = Math.max(checkbox1, checkbox2);
+		selectCheckboxesById(min, max);
+	}
+
+	/**
+ * Selecciona o deselecciona elementos input de tipo checkbox por su id numérico en un determinado rango
+ * @param {number} startId - El id numérico inicial de los elementos a seleccionar
+ * @param {number} endId - El id numérico final de los elementos a seleccionar
+ * @param {boolean}activeAlways - Determina si siempre se debe activar los checkbox o si se activan si no están activados
+ */
+	function selectCheckboxesById(startId, endId, activeAlways = true) {
+		for (let i = startId; i <= endId; i++) {
+			let idChecked = '.countCheck' + i.toString();
+			let checkbox = $(idChecked);
+			if (checkbox.is(':checkbox')) {
+
+				if(!activeAlways){
+					if (checkbox.is(':checked')) {
+  				// Si el checkbox está seleccionado, deseleccionarlo
+						checkbox.prop('checked', false);
+					} else {
+  				// Si el checkbox no está seleccionado, seleccionarlo
+						checkbox.prop('checked', true);
+					}
+				}
+				else
+				{
+					checkbox.prop('checked', true);
+				}
+			}
+		}
+	}
+
+	function listenCheckboxUserFrom()
+	{
+		// Selecciona todos los elementos input de tipo checkbox y agrega la clase "listenCheckbox"
+		$('input[type="checkbox"]').addClass('listenCheckboxFrom');
+	}
+
+	function listenCheckboxUserTo()
+	{
+		// Selecciona todos los elementos input de tipo checkbox y agrega la clase "listenCheckbox"
+		$('input[type="checkbox"]').addClass('listenCheckboxTo');
+	}
+
+	// Agrega un controlador de eventos para cuando se haga clic en un checkbox con la clase "listenCheckboxFrom"
+	$(document).on('click', '.listenCheckboxFrom', function() {
+  // Coloca el id del checkbox en un input (reemplaza 'selector' con el selector del input)
+		$('#selectFromUser').val($(this).data('idcheck'));
+		console.log($(this).data('id'))
+
+  	// Quita la clase "listenCheckbox" de todos los checkboxes
+		$('input[type="checkbox"]').removeClass('listenCheckboxFrom');
+	});
+
+	// Agrega un controlador de eventos para cuando se haga clic en un checkbox con la clase "listenCheckboxTo"
+	$(document).on('click', '.listenCheckboxTo', function() {
+  // Coloca el id del checkbox en un input (reemplaza 'selector' con el selector del input)
+		$('#selectToUser').val($(this).data('idcheck'));
+		console.log($(this).data('id'))
+
+  	// Quita la clase "listenCheckbox" de todos los checkboxes
+		$('input[type="checkbox"]').removeClass('listenCheckboxTo');
+	});
 </script>
 
 
