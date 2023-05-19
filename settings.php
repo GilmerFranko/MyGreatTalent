@@ -49,6 +49,7 @@ if (isset($_POST['save'])) {
 
 	if($rowu['gender']=='mujer'){
 		$perfiloculto = empty($_POST['perfiloculto']) ? 'no' : $_POST['perfiloculto'];
+		$mostrar_en_galeria = empty($_POST['mostrar_en_galeria']) ? 0 : $connect->real_escape_string($_POST['mostrar_en_galeria']);
 		$hidetochat = empty($_POST['hidetochat']) ? 'no' : $_POST['hidetochat'];
 	}else{
 		$perfiloculto = 'no';
@@ -99,8 +100,7 @@ if (isset($_POST['save'])) {
 
 	//exit();
 
-	$querysd = mysqli_query($connect, "UPDATE `players` SET avatar='$avatar', description='$description', perfiloculto='$perfiloculto',hidetochat='$hidetochat' WHERE id='$player_id'");
-
+	$querysd = $connect->query("UPDATE `players` SET `avatar` = '$avatar', `description` = '$description', `perfiloculto` = '$perfiloculto', `hidetochat` = '$hidetochat', `mostrar_en_galeria` = '$mostrar_en_galeria' WHERE `id` = '$player_id'");
 	echo '<meta http-equiv="refresh" content="0;url=settings.php">';
 }
 
@@ -136,6 +136,12 @@ $sqlPR = $connect->query("SELECT *,p.`id` AS p_id FROM players_recommendations A
 						</div>
 						<form enctype="multipart/form-data" id="save" name="save" method="POST" action="">
 							<center>
+								<div class="form-group">
+										<label class="content-input">
+											<input id="mostrar_en_galeria" type="checkbox" name="mostrar_en_galeria" value="1" <?php echo $rowu['mostrar_en_galeria'] == '1' ? 'checked=""' :''; ?>>Mostrar mis fotos en la galeria
+											<i></i>
+										</label>
+									</div>
 								<?php
 								if(false){
 									?>

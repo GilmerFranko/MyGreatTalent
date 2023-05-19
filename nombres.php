@@ -260,11 +260,11 @@ $count = 0;
 	}
 
 	/**
- * Selecciona o deselecciona elementos input de tipo checkbox por su id numérico en un determinado rango
- * @param {number} startId - El id numérico inicial de los elementos a seleccionar
- * @param {number} endId - El id numérico final de los elementos a seleccionar
- * @param {boolean}activeAlways - Determina si siempre se debe activar los checkbox o si se activan si no están activados
- */
+	 * Selecciona o deselecciona elementos input de tipo checkbox por su id numérico en un determinado rango
+	 * @param {number} startId - El id numérico inicial de los elementos a seleccionar
+	 * @param {number} endId - El id numérico final de los elementos a seleccionar
+	 * @param {boolean}activeAlways - Determina si siempre se debe activar los checkbox o si se activan si no están activados
+	 */
 	function selectCheckboxesById(startId, endId, activeAlways = true) {
 		for (let i = startId; i <= endId; i++) {
 			let idChecked = '.countCheck' + i.toString();
