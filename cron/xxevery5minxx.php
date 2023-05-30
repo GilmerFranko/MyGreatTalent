@@ -1,5 +1,7 @@
 <?php
-
+/*
+ * Cron para ejecutar acciones cada 5 minutos
+ */
 include "../config.php";
 
 /* --- REGALAR CREDITOS AL ENTRAR A LA ULTIMA IMAGEN SUBIDA SI ESTA SE SUBIO HACE MAS DE 30MIN ---*/
@@ -36,6 +38,31 @@ elseif($lastPGC == false AND time() >= $time)
 
 	// GENERAR NUEVA FOTO DE REGALO
 	$connect->query("INSERT INTO `photo_gift_credits` (photo_id, given) VALUES ('$lastImage[id]', '[\"\"]')");
+}
+
+/**
+ * Publicar packs programados
+ * colocar en cron de 1 minuto
+ */
+
+$time = time();
+
+/* Optiene todos los packsprogramados los cuales estén caducados */
+$consult = $connect->query('SELECT * FROM `packsprogramados` WHERE `time` < '. $time);
+
+if($consult->num_rows > 0)
+{
+  while($pack = $consult->fetch_assoc())
+  {
+    if(publicarPackProgramado($pack['id']))
+    {
+      error_log($pack['id'] . PHP_EOL);
+    }
+    else
+    {
+      error_log('Pack no publicado. Pack: ' . $pack['id']);
+    }
+  }
 }
 
 

@@ -3491,3 +3491,307 @@ function newNotification($to_user = null, $from_user = null, $key = null, $actio
 			return true;
 		}
 	}
+
+
+  function programarPack($data)
+  {
+    global $connect, $rowu;
+    // PERSONAS A QUIEN MOSTRAR PACKS
+    $json = '';
+
+    // DIRECCION DEL VIDEO (Si existe)
+    $dirPackVideo = '';
+
+    // Precio
+    $precio = $data['precio'];
+
+    // CANTIDAD DE IMAGENES(si existe)
+    $countImages = 0;
+
+    // MINUTOS DE VIDEO (si existe)
+    $minutes = 0;
+
+    // SEGUNDOS DE VIDEO (si existe)
+    $seconds = 0;
+
+    // TOTAL DE TIEMPO DE VIDEO
+    $total_time=($minutes + $seconds);
+
+    if ($precio >= 0){
+
+      $descripcion = (isset($data['descripcion']) AND !empty($data['descripcion']))? $data['descripcion'] : '';
+
+      $Images = [];
+
+      // SI EXISTE ALGUNA IMAGEN, MOVERLA AL DIRECTORIO
+      if($data["images"]) {
+        foreach($data["images"] as $image){
+
+          /* Token */
+          $token = generateUUID(15);
+          /* Ubicacion */
+          $target_dir    = "images/packsprogramados/";
+          /* Nombre del archivo */
+          $filename      = 'pack_programado' . '-' .$token. '.jpg';
+          /* Concatena ubicacion + nombre */
+          $target_dir    = $target_dir . $filename;
+
+          // COMPRUEBA QUE ES UNA IMAGEN Y MUEVELA AL DIRECTORIO
+          if(file_put_contents($target_dir, $image))
+          {
+            $Images[] = $target_dir;
+          }
+          else
+          {
+            return false;
+          }
+        }
+      }
+
+      // SI EXISTE UN VIDEO, MOVERLO AL DIRECTORIO (DEBE EXISTIR AL MENOS UNA IMAGEN)
+      if(isset($data["packVideo"]) AND $data["packVideo"] != '' AND $data["packVideo"]['name'] != "" AND $data["images"])
+      {
+
+        // VIDEO
+        $packVideo = $data['packVideo'];
+        $token = generateUUID(15);
+        $target_dir    = "images/packsprogramados/";
+        $target_file   = $target_dir . basename($packVideo["name"]);
+        $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+        $filename      = $token . '.' . $imageFileType;
+        $dirMain        = $target_dir . $filename;
+
+        // COMPRUEBA QUE ES UN VIDEO Y MUEVELO AL DIRECTORIO PRINCIPAL
+        if(in_array($imageFileType,array('mp4','3gp','vid','avi')))
+        {
+          if(move_uploaded_file($packVideo["tmp_name"], $target_dir . $filename)){
+            $dirPackVideo = $dirMain;
+          }
+          else
+          {
+            setSwal(array('Se ha producido un error.','El video no se ha podido subir, Porfavor comprueba tu conexión o intenta mas tarde.','info'));
+            return false;
+          }
+        }
+        else
+        {
+          setSwal(array('El formato de este video no es compatible.','Formatos compatibles: <b>MP4, 3GP, VID, AVI','info'));
+          return false;
+        }
+      }
+
+      // CODIFICA LAS IMAGENES A JSON
+      $jsonImages = json_encode($Images);
+
+    // if($rowu['gender']=='mujer'){
+    //   $hidetochat = $data['hidetochat'];
+    // }else{
+      $hidetochat = 'no';
+    // }
+
+
+      $date = time();
+      /* Establecer fecha de programa */
+      if($data['dias'] > 0){
+        $d = $data['dias'] * (60*60*24);
+        $date = $date + $d;
+      }
+      if($data['horas'] > 0){
+        $d = $data['horas'] * (60*24);
+        $date = $date + $d;
+      }
+      if($data['minutos'] > 0){
+        $d = $data['minutos'] * (60);
+        $date = $date + $d;
+      }
+
+      // GUARDAR PACK
+      $consult = mysqli_query($connect, "INSERT INTO `packsprogramados` (`player_id`, `imagens`, `video`, `image_count`, `video_length`, `precio`, `descripcion`, `hidetochat`, `linkdedescarga`, `visible`, `time`) VALUES
+        (\"". $connect->real_escape_string($rowu['id']) ."\",
+        '$jsonImages', \"". $connect->real_escape_string($dirPackVideo) ."\",
+        '$countImages' , '$total_time' ,
+        \"". $connect->real_escape_string($precio) ."\",
+        \"". $connect->real_escape_string($descripcion) ."\",
+        \"". $connect->real_escape_string($hidetochat) ."\",
+        \"\",
+        \"". $connect->real_escape_string($json) ."\",
+        \"". $connect->real_escape_string($date) ."\")");
+
+      if($consult)
+      {
+        // ID DEL PACK
+        $idPack = mysqli_insert_id($connect);
+        return true;
+      }
+      return false;
+
+    }
+  }
+
+  /**
+  * Elimina un pack programado
+  * @param  array $pack
+  * @return boolean
+  */
+  function deletePackProgramado($idpack = null)
+  {
+    global $connect;
+
+    $consult = $connect->query("SELECT * FROM `packsprogramados` WHERE id=". $connect->real_escape_string($idpack));
+
+    if($consult AND $consult->num_rows > 0)
+    {
+      $pack = $consult->fetch_assoc();
+    // ELIMINA FOTOS Y VIDEO
+      deletePostImages($pack['imagens']);
+      deletePostImages($pack['video']);
+
+    // ELIMINA PACK
+      $query = $connect->query("DELETE FROM `packsprogramados` WHERE `id` = ". $connect->real_escape_string($idpack));
+    }
+  }
+
+  /**
+   * Publica un pack programado
+   */
+  function publicarPackProgramado($idPack)
+  {
+    global $connect;
+
+    /* Obtener la fila de datos del pack */
+    $consult = $connect->query("SELECT * FROM `packsprogramados` WHERE `id` = ". $connect->real_escape_string($idPack));
+
+    /* Comprueba que exista el pack */
+    if($consult AND $consult->num_rows > 0)
+    {
+      /* Ubicacion nueva de los videos y imagenes */
+      $path_video = "uploads/packs/videos" . DIRECTORY_SEPARATOR;
+
+      /* Ubicacion nueva de los videos y imagenes */
+      $path_image = 'images/packs' . DIRECTORY_SEPARATOR;
+
+      $packp = $consult->fetch_assoc();
+
+      /* Publica Pack */
+      $consult = $connect->query("
+        INSERT INTO `packsenventa`(`player_id`, `imagens`, `video`, `image_count`, `video_length`, `precio`, `descripcion`, `hidetochat`, `linkdedescarga`, `visible`)
+        VALUES
+        (\"". $packp['player_id'] ."\",
+        ". "'".reemplazarRutaPack($packp['imagens']). "'".",
+        \"". reemplazarRutaPack($packp['video'], 'video') ."\",
+        \"". $packp['image_count'] ."\",
+        \"". $packp['video_length'] ."\",
+        \"". $packp['precio'] ."\",
+        \"". $packp['descripcion'] ."\",
+        \"". $packp['hidetochat'] ."\",
+        \"". $packp['linkdedescarga'] ."\",
+        \"". $packp['visible'] ."\")");
+
+      if($consult)
+      {
+
+        $return = true;
+
+        $idPackRecently = mysqli_insert_id($connect);
+
+        /* Mover Fotos al Ubicacion de los Packs publicados */
+        if(!moverArchivo($packp['imagens'], $path_image))
+        {
+          error_log('No se pudo mover la imagen, '. $packp['imagens']);
+          /* Elimina el pack publicado de no poder subir el video o imagen */
+          $consult = $connect->query("DELETE FROM `packsenventa` WHERE `id` = ". $connect->real_escape_string($idPackRecently));
+          $return = false;
+        }
+
+        /* Mover Video */
+        if($packp['video']!= '')
+        {
+          if(!moverArchivo($packp['video'], $path_video))
+          {
+            error_log('No se pudo mover el video, ' . $packp['video']);
+            /* Elimina el pack publicado de no poder subir el video o imagen */
+            $consult = $connect->query("DELETE FROM `packsenventa` WHERE `id` = ". $connect->real_escape_string($idPackRecently));
+            $return = false;
+          }
+        }
+
+        /* Eliminar packprogramado */
+        $consult = $connect->query("DELETE FROM `packsprogramados` WHERE `id` = ". $connect->real_escape_string($idPack));
+
+        return $return;
+      }
+    }
+    else
+    {
+      error_log('No existe el Pack Programado');
+      return false;
+    }
+  }
+
+  function moverArchivo($images, $rutaDestino)
+  {
+    // SI ES UN STRING, SE CONVIERTE EN ARRAY
+    if(isJson($images))
+    {
+      $images = json_decode($images);
+    }
+    elseif( is_string($images) )
+    {
+      $images = explode(',', $images);
+    }
+    // BORRA LAS IMAGENES
+    foreach ($images as $imgName)
+    {
+      // MOVER LA IMAGEN
+      // Verificar si el archivo de origen existe
+      if (file_exists('../'.$imgName))
+      {
+        /* Toma el nombre del archivo para guardarlo en la nueva ubicacion
+         * con el mismo nombre y extension
+         */
+        $namefile   = basename($imgName);
+        // Mover el archivo a la ubicación de destino
+        if (rename('../'.$imgName, '../'.$rutaDestino . $namefile))
+        {
+          return true;
+        }
+        else
+        {
+          return false;
+        }
+      }
+      else
+      {
+        return false;
+      }
+    }
+    return false;
+  }
+
+  //moverArchivo('images\packsprogramados\68f475ff87e8d88.mp4', 'images\packs' . DIRECTORY_SEPARATOR);
+
+  /**
+   * Remplaza la ruta de un video o una imagen de un Pack
+   * Se utiliza para cambiar la ruta de los pack programados
+   * a los packs publicados
+   */
+  function reemplazarRutaPack($path, $type = 'image')
+  {
+    /* Decide si se requiere remplazar la ruta de un video o una imagen*/
+    if($type == 'image')
+    {
+      $buscar = "images/packsprogramados/";
+      $reemplazar = "images/packs/";
+
+    }
+    else
+    {
+      $buscar = "images/packsprogramados/";
+      $reemplazar = "uploads/packs/videos/";
+    }
+
+    $cadenaReemplazada = str_replace($buscar, $reemplazar, $path);
+
+    return $cadenaReemplazada;
+
+  }
