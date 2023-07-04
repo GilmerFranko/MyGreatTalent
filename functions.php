@@ -2217,38 +2217,35 @@ function checkFilterMessage($message = '')
 
 /**
  * Sube una foto para un mensaje de chat
- * @param  array 					$file     array tipo $_FILE del archivo
- * @param  int 						$idRoom ID del room
+ * Modificado para varias fotos utilizando base64
+ * funcion original en registros de git
+ * @param  array          $file     array tipo $_FILE del archivo
+ * @param  int            $idRoom ID del room
  * @return boolean/string
  */
 function upload_file_in_chat($file = null, $idRoom = null)
 {
-	$UUID = generateUUID(6);
 
-	$info = pathinfo($file['name']);
 
-	$filename = $idRoom . '-' . $UUID . "." . $info['extension'];
-	$directoryUploads = 'uploads/src_messages/';
-	// COMPRUEBA SI EL ARCHIVO ES UNA IMAGEN
-	if($file['type'] == 'image/jpeg' OR $file['type'] == 'image/png' OR $file['type'] == 'image/jpg')
-	{
-	  // SI EL ARCHIVO SE MOVIO CORRECTAMENTE
-		if(false === is_uploaded_file($file['tmp_name'])){
-			return false;
-		}
-		if(copy($file['tmp_name'], $directoryUploads.$filename))
-		{
-			return $directoryUploads.$filename;
-		}
-		else
-		{
-			return false;
-		}
-	}
-	else
-	{
-		return false;
-	}
+  /* Token */
+  $token = generateUUID(15);
+  /* Ubicacion */
+  $target_dir    = "uploads/src_messages/";
+  /* Nombre del archivo */
+  $filename      = 'msg' . '-' .$token. '.jpg';
+  /* Concatena ubicacion + nombre */
+  $target_dir    = $target_dir . $filename;
+
+
+  if(file_put_contents($target_dir, $file))
+  {
+    return $target_dir;
+  }
+  else
+  {
+    return false;
+  }
+
 }
 
 /**

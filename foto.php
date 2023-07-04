@@ -1,7 +1,6 @@
 <?php
 require("core.php");
 $fotoID = $_GET['fotoID'];
-
 if(isset($_GET["downloadImage"])){
 	$Id = $_GET["downloadImage"];
 
@@ -802,6 +801,7 @@ givecredits($fotoID, 1);
 				data: {'idPhoto': '<?php echo $_GET['fotoID']; ?>', 'noID': noID, 'selfBuG': self},
 				async: false,
 			}).done(function(response){
+				console.log(response)
 				let data = $.parseJSON(response);
 				if(data.status == true)
 				{

@@ -65,86 +65,89 @@ $count = 0;
 						<textarea id="inputMessage" placeholder="Escribe tu mensaje" class="form-control" name="inputMessage" style="width: 263px;"></textarea>
 						&nbsp;
 						<div align="center">
-							<div class="item" id="item-0" style="display: inline-block;"><span id="deselectFile" style="display: none;position: absolute; color: red;"><i class="fa fa-window-close"></i></span><img class="preview" src="assets/img/foto.png" style="width: 32px;height: 32px;"></div>
-							<span class="btn btn-primary btn-file float-left sdt-btn">
-								<i class="fas fa-camera"></i>
-								<div>
-									<input id="inputFile" onchange="readImage(this, $('.preview'));" class="float-left" type="file" name="inputFile" accept="image/png,image/jpeg">
+							<div class="items" align="center">
+								<div class="item" id="item-" style="display: inline-block;"><span id="deselectFile" style="display: none;position: absolute; color: red;"><i class="fa fa-window-close"></i></span>
+									<img class="preview" src="assets/img/foto.png" style="width: 32px;height: 32px;">
 								</div>
-							</span>
+								<span class="btn btn-primary btn-file float-left sdt-btn">
+									<i class="fas fa-camera"></i>
+									<div>
+										<input id="inputFile" onchange="/*readImage(this, $('.preview'));*/" class="float-left" type="file" name="inputFile" multiple accept="image/png,image/jpeg">
+									</div>
+								</span>
+							</div>
 						</div>
+						<input class="btn btn-success submitForm" type="submit" name="send">
 					</div>
-					<input class="btn btn-success submitForm" type="submit" name="send">
-				</div>
-				<li class="dropdown select-user select-user-menu">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown" style="padding: 0px!important;" aria-expanded="false">
-						Seleccionar usuarios
-					</a>
-					<ul class="dropdown-menu" style="text-align: center;">
-						<input id="selectFromUser" class="form-control" type="text" placeholder="Desde x usuario">
-						<input class="btn btn-warning" onclick="listenCheckboxUserFrom()" type="button" value="Escuchar">
-						<input id="selectToUser" class="form-control" type="text" placeholder="A x usuario">
-						<input class="btn btn-warning" onclick="listenCheckboxUserTo()" type="button" value="Escuchar"><br>
+					<li class="dropdown select-user select-user-menu">
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown" style="padding: 0px!important;" aria-expanded="false">
+							Seleccionar usuarios
+						</a>
+						<ul class="dropdown-menu" style="text-align: center;">
+							<input id="selectFromUser" class="form-control" type="text" placeholder="Desde x usuario">
+							<input class="btn btn-warning" onclick="listenCheckboxUserFrom()" type="button" value="Escuchar">
+							<input id="selectToUser" class="form-control" type="text" placeholder="A x usuario">
+							<input class="btn btn-warning" onclick="listenCheckboxUserTo()" type="button" value="Escuchar"><br>
 
-						<input class="btn btn-success" onclick="selectUsersCheckbox($('#selectFromUser').val(), $('#selectToUser').val())" type="button" value="Seleccionar" style="width: 100%;">
-					</ul>
-				</li>
-				<br>
-				<div id="scroll" class="box" style="border-top:0px;">
-					<table id="datatable" class="table table-bordered table-hover no-margin" style="min-width: 700px;">
-						<thead>
-							<tr>
-								<th></th>
-								<th></th>
-								<th></th>
-								<th colspan="3">
-									<?php if ($search==''): ?>
-										<h5><strong>Nombres agregados</strong></h5>
-									<?php else: ?>
-										<h5></h5>
-									<?php endif ?>
-								</th>
-								<th></th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr>
-								<?php
-								$countCheck = 0;
-								while($names =  mysqli_fetch_assoc($sqlNames)){
-									/* Determina si se debe colocar el checked */
-									$checked = (isset($names['checked']) and $names['checked']) ? 'checked=\'\'' : '';
-									?>
-									<td>
-										<span>
-											<input id="check<?php echo $names['id']; ?>" class="case countCheck<?php echo $countCheck ?>" data-idcheck="<?php echo $countCheck ?>" type="checkbox" name="namesId[]" value="<?php echo $names['id']; ?>" <?php echo $checked ?>>
-											<label>
-												<?php echo createLink('profile',$names['username'],array('profile_id' => $names['id'])); ?>
-											</label>
-											<div class="view_email"> <small><strong>Email:</strong><br><?php echo $names['email']; ?></small></div>
-											<div class="view_email"> <small><strong>Dirección Ip:</strong> <br><?php echo $names['ip']; ?></small></div>
-											<div class="view_email"> <small><strong>Ultima conexión:</strong> <br><?php echo TimeAgo($names['timeonline']); ?></small></div>
-											<!-- DE ESTAR AGREGADO EL NOMBRE EN LA LISTA -->
-											<?php if (isset($names['time'])): ?>
-												<div class="view_email"><small><strong>Fecha de agregado: </strong><br><?php echo date('d/m/Y  h:i',$names['time']); ?></small></div>
+							<input class="btn btn-success" onclick="selectUsersCheckbox($('#selectFromUser').val(), $('#selectToUser').val())" type="button" value="Seleccionar" style="width: 100%;">
+						</ul>
+					</li>
+					<br>
+					<div id="scroll" class="box" style="border-top:0px;">
+						<table id="datatable" class="table table-bordered table-hover no-margin" style="min-width: 700px;">
+							<thead>
+								<tr>
+									<th></th>
+									<th></th>
+									<th></th>
+									<th colspan="3">
+										<?php if ($search==''): ?>
+											<h5><strong>Nombres agregados</strong></h5>
+											<?php else: ?>
+												<h5></h5>
 											<?php endif ?>
-										</span>
-										<?php if ($names['f_id']!=null): ?>
-											&nbsp;
-											<i data-checkid="<?php echo $names['id']; ?>" class="fa fa-square isfriend" style="color:green;"></i>
-										<?php else: ?>
-											<i class="fa fa-square" style="color:red;"></i>
-										<?php endif ?>
-									</td>
-									<?php
-									$count++;
-									if ($count == 7): ?>
-									</tr><tr>
+										</th>
+										<th></th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
 										<?php
-										$count = 0;
-									endif;
-									$countCheck++;
-								}
+										$countCheck = 0;
+										while($names =  mysqli_fetch_assoc($sqlNames)){
+											/* Determina si se debe colocar el checked */
+											$checked = (isset($names['checked']) and $names['checked']) ? 'checked=\'\'' : '';
+											?>
+											<td>
+												<span>
+													<input id="check<?php echo $names['id']; ?>" class="case countCheck<?php echo $countCheck ?>" data-idcheck="<?php echo $countCheck ?>" type="checkbox" name="namesId[]" value="<?php echo $names['id']; ?>" <?php echo $checked ?>>
+													<label>
+														<?php echo createLink('profile',$names['username'],array('profile_id' => $names['id'])); ?>
+													</label>
+													<div class="view_email"> <small><strong>Email:</strong><br><?php echo $names['email']; ?></small></div>
+													<div class="view_email"> <small><strong>Dirección Ip:</strong> <br><?php echo $names['ip']; ?></small></div>
+													<div class="view_email"> <small><strong>Ultima conexión:</strong> <br><?php echo TimeAgo($names['timeonline']); ?></small></div>
+													<!-- DE ESTAR AGREGADO EL NOMBRE EN LA LISTA -->
+													<?php if (isset($names['time'])): ?>
+														<div class="view_email"><small><strong>Fecha de agregado: </strong><br><?php echo date('d/m/Y  h:i',$names['time']); ?></small></div>
+													<?php endif ?>
+												</span>
+												<?php if ($names['f_id']!=null): ?>
+													&nbsp;
+													<i data-checkid="<?php echo $names['id']; ?>" class="fa fa-square isfriend" style="color:green;"></i>
+													<?php else: ?>
+														<i class="fa fa-square" style="color:red;"></i>
+													<?php endif ?>
+												</td>
+												<?php
+												$count++;
+												if ($count == 7): ?>
+												</tr><tr>
+													<?php
+													$count = 0;
+												endif;
+												$countCheck++;
+											}
 
 								/**
 								* COMPLETA LAS FILAS VACIAS
@@ -201,9 +204,9 @@ $count = 0;
 	});
 
 	$("#postType").change(function(){
-		// AL SELECCIONAR Enviar Mensajes
+		/* AL SELECCIONAR Enviar Mensajes */
 		if($("#postType option:selected").val() == 'sendMessages'){
-			// Mostrar opciones
+			/* Mostrar opciones */
 			$("#modalMessage").css('display','flex')
 		}
 
@@ -217,39 +220,71 @@ $count = 0;
 				$(checkid).prop("checked", true);
 			})
 		}
-
-		// SI NO SE SELECCIONO
+		/* SI NO SE SELECCIONO */
 		else{
-			// Vacias Selecciones
+			/* Vacias Selecciones */
 			$("#modalMessage").hide()
 			$("#inputMessage").val(null)
 			$("#inputFile").val(null)
 			$("#inputFile").val(null)
 			$(".preview").prop("src", "assets/img/foto.png")
-			$("#deselectFile").hide()
+			$(".deselectFile").hide()
 			$("#inputMessage").removeAttr('disabled')
 		}
 	})
-	// SI SE SELECCIONO ALGUNA IMAGEN
+
+	/* SI SE SELECCIONO ALGUNA IMAGEN */
+  const Form = (data, index) => {
+    const f =
+    '<div class="item" id="item-'+ index +'" style="display: inline-block;"><span class="deselectFile" style="position: absolute; color: red;" onclick="deselectFile(this)" data-id="'+index+'"><i class="fa fa-window-close"></i></span><img class="preview" src="'+ data.image +'" style="width: 32px;height: 32px;">'
+    +'<input id="image-'+index+'" class="imagesinput" type="hidden" name="file['+ index +']" value="'+ data.image +'">';
+    return f
+  }
+  const FormModal = $(`.items`)
+  idcontinuidad = 0;
+
 	$('#inputFile').change(function(){
-		// Bloquear el formulario de mensaje (No se puede enviar una foto y un mensaje al mismo tiempo)
-		$("#inputMessage").prop('disabled', 'true')
-		// Vaciar formulario de mensaje
-		$("#inputMessage").val('')
-		// Mostrar deseleccionador de imagen
-		$("#deselectFile").show()
-	})
-	// Al deseleccionar una imagen
-	$("#deselectFile").click(function(){
-		// Vaciar input
-		$("#inputFile").val(null)
-		// Cambiar preview
-		$(".preview").prop("src", "assets/img/foto.png")
-		// Habilitar formulario de mensaje
-		$("#inputMessage").removeAttr('disabled')
-		// Ocultar deseleccionador de imagen
-		$("#deselectFile").hide()
-	})
+
+    /** Renderiza Imagenes **/
+    const input = this
+    if (input.files && input.files.length) {
+      [...input.files].map((File, index) => {
+        var reader = new FileReader();
+
+        reader.onload = function (e) {
+          idcontinuidad++;
+          const dataForm = Form({
+            image: e.target.result
+          }, idcontinuidad)
+          console.log(idcontinuidad)
+          /** cambiar append **/
+          FormModal.append(dataForm)
+        }
+
+        reader.readAsDataURL(File)
+      })
+    }
+    /* Bloquear el formulario de mensaje (No se puede enviar una foto y un mensaje al mismo tiempo) */
+    $("#inputMessage").prop('disabled', 'true')
+    /* Vaciar formulario de mensaje */
+    $("#inputMessage").val('')
+    /* Mostrar deseleccionador de imagen */
+    //$(".deselectFile").show()
+  })
+
+	/* Al deseleccionar una imagen */
+	function deselectFile(ths){
+		item =  '#item-' + $(ths).data('id')
+
+		/* quitar item */
+		$(item).remove()
+
+		if($(".imagesinput").length <= 0)
+		{
+			/* Habilitar formulario de mensaje */
+			$("#inputMessage").removeAttr('disabled')
+		}
+	}
 
 
 	function selectUsersCheckbox(checkbox1, checkbox2)
@@ -265,31 +300,31 @@ $count = 0;
 	 * @param {number} endId - El id numérico final de los elementos a seleccionar
 	 * @param {boolean}activeAlways - Determina si siempre se debe activar los checkbox o si se activan si no están activados
 	 */
-	function selectCheckboxesById(startId, endId, activeAlways = true) {
-		for (let i = startId; i <= endId; i++) {
-			let idChecked = '.countCheck' + i.toString();
-			let checkbox = $(idChecked);
-			if (checkbox.is(':checkbox')) {
+	 function selectCheckboxesById(startId, endId, activeAlways = true) {
+	 	for (let i = startId; i <= endId; i++) {
+	 		let idChecked = '.countCheck' + i.toString();
+	 		let checkbox = $(idChecked);
+	 		if (checkbox.is(':checkbox')) {
 
-				if(!activeAlways){
-					if (checkbox.is(':checked')) {
+	 			if(!activeAlways){
+	 				if (checkbox.is(':checked')) {
   				// Si el checkbox está seleccionado, deseleccionarlo
-						checkbox.prop('checked', false);
-					} else {
+  				checkbox.prop('checked', false);
+  			} else {
   				// Si el checkbox no está seleccionado, seleccionarlo
-						checkbox.prop('checked', true);
-					}
-				}
-				else
-				{
-					checkbox.prop('checked', true);
-				}
-			}
-		}
-	}
+  				checkbox.prop('checked', true);
+  			}
+  		}
+  		else
+  		{
+  			checkbox.prop('checked', true);
+  		}
+  	}
+  }
+}
 
-	function listenCheckboxUserFrom()
-	{
+function listenCheckboxUserFrom()
+{
 		// Selecciona todos los elementos input de tipo checkbox y agrega la clase "listenCheckbox"
 		$('input[type="checkbox"]').addClass('listenCheckboxFrom');
 	}
@@ -303,22 +338,22 @@ $count = 0;
 	// Agrega un controlador de eventos para cuando se haga clic en un checkbox con la clase "listenCheckboxFrom"
 	$(document).on('click', '.listenCheckboxFrom', function() {
   // Coloca el id del checkbox en un input (reemplaza 'selector' con el selector del input)
-		$('#selectFromUser').val($(this).data('idcheck'));
-		console.log($(this).data('id'))
+  $('#selectFromUser').val($(this).data('idcheck'));
+  console.log($(this).data('id'))
 
   	// Quita la clase "listenCheckbox" de todos los checkboxes
-		$('input[type="checkbox"]').removeClass('listenCheckboxFrom');
-	});
+  	$('input[type="checkbox"]').removeClass('listenCheckboxFrom');
+  });
 
 	// Agrega un controlador de eventos para cuando se haga clic en un checkbox con la clase "listenCheckboxTo"
 	$(document).on('click', '.listenCheckboxTo', function() {
   // Coloca el id del checkbox en un input (reemplaza 'selector' con el selector del input)
-		$('#selectToUser').val($(this).data('idcheck'));
-		console.log($(this).data('id'))
+  $('#selectToUser').val($(this).data('idcheck'));
+  console.log($(this).data('id'))
 
   	// Quita la clase "listenCheckbox" de todos los checkboxes
-		$('input[type="checkbox"]').removeClass('listenCheckboxTo');
-	});
+  	$('input[type="checkbox"]').removeClass('listenCheckboxTo');
+  });
 </script>
 
 
@@ -423,22 +458,20 @@ if (isset($_POST['namesId']) AND isset($_POST['option']))
 			setSwalFire(array('Excelente', 'Chats iniciados: '. $countchats, ''));
 		}
 	}
-	// ENVIA MENSAJES MASIVOS
+/* Si hay que enviar mensajes masivos */
 	elseif($option == 'sendMessages')
 	{
 		$success = 0;
 		$error_room_no_exist = 0;
 		$error_room_is_closed = 0;
+
 		$errors = array('file-no-uploaded' => 0, 'room-is-closed' => 0, 'room-no-exist' => 0);
+
 		if((isset($_FILES['inputFile']) AND !empty($_FILES['inputFile']) OR (isset($_POST['inputMessage']) AND !empty($_POST['inputMessage']))))
 		{
-			/* Almacena mensaje de existir*/
 			$message = (isset($_POST['inputMessage']) and !empty($_POST['inputMessage'])) ? $_POST['inputMessage'] : null;
-			/* Almacena imagen de existir */
-			$file = (isset($_FILES['inputFile']) and !empty($_FILES['inputFile'])) ? $_FILES['inputFile'] : null;
-			/**/
-			$response = array();
 
+			$response = array();
 			/* Determina si hay que consultar el
 			 * nombre del usuario receptor si existe
 		 	 * en el mensaje la propiedad -user-
@@ -447,68 +480,100 @@ if (isset($_POST['namesId']) AND isset($_POST['option']))
 		 	 */
 			$consultUserData = detect_user_String($message);
 
-			// COMBPRUEBA SI SE DEBE SUBIR UNA FOTO
-			$filename = '';
-			if(!empty($file) and !empty($file['tmp_name']))
+
+			/* COMBPRUEBA SI SE DEBE SUBIR UNA FOTO */
+			$filename = [];
+			if(!empty($_POST['file']) and !empty($_POST['file']))
 			{
-				if(!$filename = upload_file_in_chat($file, 21)) return array(false, 'file-no-uploaded');
-			}
-			foreach ($NamesId as $key => $nameId)
-			{
-				// EVITAR ENVIAR A ESTE ID
-				if($nameId != $rowu['id'])
-				{
-					$SQLroom = $connect->query("SELECT `id` FROM `nuevochat_rooms` WHERE (`player1` = $rowu[id] and `player2` = $nameId) or (`player2` = $rowu[id] and `player1` = $nameId)");
-					// COMPRUEBA QUE EXISTA UN CHATROOM ENTRE LOS DOS USUARIOS
-					if($SQLroom and $SQLroom->num_rows > 0)
-					{
-						$room = $SQLroom->fetch_assoc();
+        foreach ($_POST['file'] as $index => $File) {
 
-						$message1 = $message;
-						/* Optiene el usuario */
-						if($consultUserData)
-						{
-							$recipientUser = getUser($nameId, false, 'username');
-							if($recipientUser AND $recipientUser->num_rows > 0)
-							{
-								$r = $recipientUser->fetch_assoc();
-								/* Cambia -user- por el nombre del usuario*/
-								$message1 = detectUserString($message, $r['username']);
-							}
-						}
+          $image = str_replace("data:image/png;base64,", '', $File);
+          $image = str_replace("data:image/jpg;base64,", '', $image);
+          $image = str_replace("data:image/jpeg;base64,", '', $image);
+          $image = str_replace("data:image/gif;base64,", '', $image);
+          $image = base64_decode($image);
 
-						// Envia mensaje a usuario
-						$response = sendMessage($room['id'], $rowu['id'], $message1, $filename);
+        //file_put_contents($target_dir . $FileName, $image);
+          if(!$filename[] = upload_file_in_chat($image, 21)) return array(false, 'file-no-uploaded');
+        }
 
-						// SI OCURRIO ALGUN ERROR
-						if (!$response[0]) {
-							// Guardar error
-							$errors[$response[1]]++;
-						}
-						else
-						{
-							$success++;
-						}
-					}
-					else
-					{
-						// Guardar error
-						$errors['room-no-exist']++;
-					}
-				}
-			}
-		}
-		else
-		{
-			setSwalFire(array('No se ha realizado ninguna acci&oacute;n porque los formularios est&aacute;n vac&iacute;os','', 'warning'));
-			return false;
-		}
-		$string_error = '';
-		// DE HABER ERRORES, CREA UN PARRAFO INDICANDOLOS
-		if($errors['file-no-uploaded'] > 0 or $errors['room-no-exist'] > 0 or $errors['room-is-closed'] > 0) $string_error = '<br><h3>Mensajes no enviados por las siguientes causas:</h3><br>'.$errors['file-no-uploaded'].': Fotos no se subieron al servidor.<br>'.$errors['room-is-closed'].': Room cerrada.<br>'.$errors['room-no-exist'].': No existió una room_chat al cual enviar el mensaje.';
-		// Mostrar mensaje de resultados
-		setSwalFire(array('Operación realizada con éxito', '<h3>Mensajes enviados con exito: '.$success.'</h3>'.$string_error,''));
-	}
+      }
+      foreach ($NamesId as $key => $nameId)
+      {
+        /* EVITAR ENVIAR A ESTE ID */
+        if($nameId != $rowu['id'])
+        {
+         $SQLroom = $connect->query("SELECT `id` FROM `nuevochat_rooms` WHERE (`player1` = $rowu[id] and `player2` = $nameId) or (`player2` = $rowu[id] and `player1` = $nameId)");
+         /* COMPRUEBA QUE EXISTA UN CHATROOM ENTRE LOS DOS USUARIOS */
+         if($SQLroom and $SQLroom->num_rows > 0)
+         {
+          $room = $SQLroom->fetch_assoc();
+          $message1 = $message;
+
+          /* Optiene el usuario */
+          if($consultUserData)
+          {
+            $recipientUser = getUser($nameId, false, 'username');
+            if($recipientUser AND $recipientUser->num_rows > 0)
+            {
+              $r = $recipientUser->fetch_assoc();
+              /* Cambia -user- por el nombre del usuario*/
+              $message1 = detectUserString($message, $r['username']);
+            }
+          }
+
+          /**
+           * Si es una o varias fotos las que se deben enviar
+           */
+          if(count($filename) > 0)
+          {
+            /**
+             * Envia cada imagen
+             */
+            foreach ($filename as $filen) {
+              /* Envia mensaje a usuario */
+              $response = sendMessage($room['id'], $rowu['id'], $message1, $filen);
+            }
+          }
+          else
+          {
+            $response = sendMessage($room['id'], $rowu['id'], $message1, '');
+          }
+
+
+          /* SI OCURRIO ALGUN ERROR */
+          if (!$response[0]) {
+            /* Guardar error */
+            $errors[$response[1]]++;
+          }
+          else
+          {
+            $success++;
+          }
+
+        }
+        else
+        {
+          /* Guardar error */
+          $errors['room-no-exist']++;
+        }
+      }
+    }
+  }
+  else
+  {
+   setSwalFire(array('No se ha realizado ninguna acci&oacute;n porque los formularios est&aacute;n vac&iacute;os','', 'warning'));
+   return false;
+ }
+ $string_error = '';
+ /* DE HABER ERRORES, CREA UN PARRAFO INDICANDOLOS */
+ if($errors['file-no-uploaded'] > 0 or $errors['room-no-exist'] > 0 or $errors['room-is-closed'] > 0) $string_error = '<br><h3>Mensajes no enviados por las siguientes causas:</h3><br>'.$errors['file-no-uploaded'].': Fotos no se subieron al servidor.<br>'.$errors['room-is-closed'].': Room cerrada.<br>'.$errors['room-no-exist'].': No existió una room_chat al cual enviar el mensaje.';
+ /* Mostrar mensaje de resultados */
+ setSwalFire(array('Operación realizada con éxito', '<h3>Mensajes enviados con exito: '.$success.'</h3>'.$string_error));
+}
+
+
+
 	/* Inicia roomchats con usuarios que este
 	 * en la lista y que exista amistad mutua
 	 */
