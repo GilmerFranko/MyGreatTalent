@@ -65,7 +65,7 @@ function sendMassMessage($data) {
 		}else{
 			$toid = $sala['player1'];
 		}
-		
+
 		// OPTIENE EL USUARIO DESTINARIO
 		$r = $connect->query("SELECT id, username, timeonline FROM `players` WHERE id = '$toid'");
 
@@ -121,8 +121,14 @@ if($querycp && mysqli_num_rows($querycp)>0){
 
 		// ENVIA EL MENSAJE PROGRAMADO
 		sendMassMessage($Mensaje);
-		
+
 		// BORRA EL MENSAJE PROGRAMADO DE LA LISTA
 		mysqli_query($connect, "DELETE FROM `mensajesprogramados` WHERE id='". $Mensaje["id"] ."'");
 	}
 }
+
+
+
+
+/* Esta función se encarga de eliminar todas las compras que han alcanzado su fecha de vencimiento en los packs */
+borrarComprasVencidas();

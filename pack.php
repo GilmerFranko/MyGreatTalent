@@ -13,8 +13,11 @@ if (!isset($_GET['ID']) && !is_numeric($_GET['ID'])){
 
 $ID = $_GET['ID'];
 $UID = $rowu['id'];
+$fechaActual = time();
 
-$queryccc = mysqli_query($connect, "SELECT * FROM `packscomprados` WHERE foto_id='$ID' AND comprador_id='$UID'");
+
+$queryccc = mysqli_query($connect, "SELECT * FROM `packscomprados` WHERE foto_id='$ID' AND comprador_id='$UID' AND `vence` >= $fechaActual");
+
 $countcompradoc = mysqli_num_rows($queryccc);
 //SELECCIONAR EL LINK DEL PACK
 $querycp = mysqli_query($connect, "SELECT player_id,linkdedescarga FROM `packsenventa` WHERE id='$ID'");
@@ -125,7 +128,7 @@ if (!$countcompradoc AND $rowu['id']!=$link['player_id']){
 </div>
 <?php
 }
-?> 
+?>
 </div>
 <!--===================================================-->
 <!--END CONTENT CONTAINER-->

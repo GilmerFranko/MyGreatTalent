@@ -51,110 +51,135 @@ if (isset($_POST['precomprar'])){
   </div>';
 
 }
-if (isset($_POST['comprar'])){
 
+/* Compra un pack por 7 dias */
+if (isset($_POST['comprar']))
+{
+
+  /* ID del pack */
   $idgaleria = $_POST['galeriaid'];
 
+  /* Optiene datos del pack */
   $querygal = mysqli_query($connect, "SELECT * FROM `packsenventa` WHERE id='$idgaleria'");
   $galeria = mysqli_fetch_assoc($querygal);
 
+  /* Verifica que no se haya comprado el pack */
   $queryccc = mysqli_query($connect, "SELECT * FROM `packscomprados` WHERE foto_id='$idgaleria' AND comprador_id='$rowu[id]'");
   $countcompradoc = mysqli_num_rows($queryccc);
 
-  $linkc = 'pack.php?ID='. $idgaleria;
+  /* Fecha en que vencerá la suscripcion (7 dias)*/
+  $vence = time() + 60 * 60 * 24 * 7;
 
+  /* Otras variables */
+  $linkc = 'pack.php?ID='. $idgaleria;
   $dolaresdeluserc = $rowu['eCreditos'];
   $costoc = $galeria['precio'];
 
-  /*revisamos que el usuario tiene el dinero y que no haya comprado la foto anteriormente */
-  if($countcompradoc < 1 && $dolaresdeluserc >= $costoc){
+  /* Verifica si ya ha comprado la foto anteriormente */
+  if($countcompradoc > 0)
+  {
+    /* Verifica si ya está vencido el pack y lo elimina */
+    /* Eliminar compra de existir
+     * (puede existir si aun no se ha ejecutado el cron
+     * que elimina las compras vencidas y se desea comprar
+     * el mismo pack)
+     */
 
-    /* RESTAR DINERO AL COMPRADOR */
-    $restardinero = updateCredits($rowu['id'],'-',intval($costoc),1);
+    $fechaActual = time();
 
-    if ($restardinero)
+    $connect->query("DELETE FROM `packscomprados` WHERE foto_id = '$idgaleria' AND comprador_id = '$rowu[id]' AND `vence` <= $fechaActual");
+
+    if($connect->affected_rows > 0)
+    {
+      /* Le decimos al programa que ya no hay compras con el mismo usuario y foto */
+      $countcompradoc = 0;
+    }
+  }
+
+  /* Verifica que no haya comprado la foto anteriormente */
+  if($countcompradoc < 1)
+  {
+    /* Revisamos que el usuario tiene el dinero */
+    if($dolaresdeluserc >= $costoc)
     {
 
-      $sumtotal = ceil(($costoc * 60)/100);
-      /* ACREDITAR CREDITOS AL DUEÑO DEL PACK */
-      $sumardineroalvendedor = updateCredits($galeria['player_id'],'+',$sumtotal,1);
+      /* RESTAR DINERO AL COMPRADOR */
+      $restardinero = updateCredits($rowu['id'],'-',intval($costoc),1);
 
-      /* REGISTRAR COMPRA */
-      $insertarcompra = mysqli_query($connect, "INSERT INTO `packscomprados` (foto_id, comprador_id) VALUES ('$idgaleria', '$rowu[id]')");
-
-      if($insertarcompra)
+      if ($restardinero)
       {
-        /* SUMAR VENTA */
-        $actualizardatos = mysqli_query($connect, "UPDATE `packsenventa` SET ventasrealizadas=ventasrealizadas+1 WHERE id='$idgaleria'");
 
-        /* ENVIAR NOTIFICACION AL DUEÑO DEL PACK */
-        $newPurchase = mysqli_query($connect, "INSERT INTO `players_notifications` (fromid, toid,not_key,action,read_time) VALUES ('$rowu[id]', '$galeria[player_id]', 'newPurchasePack' , '$galeria[id]' , '0' )");
-        echo '
-        <script type="text/javascript">
-        $(document).ready(function(){
-          $("#sell-vehicle").modal(\'show\');
-          });
+        /* Optiene el 60% del costo del Pack */
+        $sumtotal = ceil(($costoc * 60)/100);
+
+        /* ACREDITAR CREDITOS AL DUEÑO DEL PACK */
+        $sumardineroalvendedor = updateCredits($galeria['player_id'],'+',$sumtotal,1);
+
+        /* REGISTRAR COMPRA */
+        $insertarcompra = mysqli_query($connect, "INSERT INTO `packscomprados` (foto_id, comprador_id, vence) VALUES ('$idgaleria', '$rowu[id]', '$vence')");
+
+        if($insertarcompra)
+        {
+          /* SUMAR VENTA */
+          $actualizardatos = mysqli_query($connect, "UPDATE `packsenventa` SET ventasrealizadas=ventasrealizadas+1 WHERE id='$idgaleria'");
+
+          /* ENVIAR NOTIFICACION AL DUEÑO DEL PACK */
+          $newPurchase = mysqli_query($connect, "INSERT INTO `players_notifications` (fromid, toid,not_key,action,read_time) VALUES ('$rowu[id]', '$galeria[player_id]', 'newPurchasePack' , '$galeria[id]' , '0' )");
+          ?>
+          <script type="text/javascript">
+            $(document).ready(function(){
+              Swal.fire({
+                title: "Compra del pack realizada!",
+                text: "¡Compra exitosa! Ahora tienes acceso al pack durante 7 días.",
+                icon: "success",
+                showCancelButton: false,
+                confirmButtonColor: "#930eac",
+                confirmButtonText: '<i class="fab fa-get-pocket"></i> Ver Pack',
+                allowOutsideClick: false,
+                reverseButtons: true
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  window.location.href = "<?php echo $linkc; ?>";
+                }
+              });
+            });
           </script>
-
-          <div id="sell-vehicle" class="modal fade">
-          <div class="modal-dialog modal-md">
-          <div class="modal-content">
-          <div class="modal-header">
-          <h5 class="modal-title">Compra del pack realizada!</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-          </div>
-          <div class="modal-body">
-          <center>
-          <span class="badge badge-info"><h4>Compra realizada <br/><br/></h4></span>
-
-          <br /><br />
-
-
-          <br /><br />
-          <a href="'. $linkc .'" class="btn btn-success btn-md btn-block"><i class="fab fa-get-pocket"></i> Ver Pack</a>
-          </center>
-          </div>
-          </div>
-          </div>
-          </div>';
+          <?php
         }
       }
     }
-
-
-    /*mostramos mensaje de exito y link de descarga */
-
-
   }
+}
 
-  if (isset($_POST['postcomment'])) {
-   $comment   = $_POST['comment'];
-   $galeria_id = $_POST['galeria_id'];
-   $author = $player_id;
-   $date      = date('d F Y');
-   $time      = date('H:i');
 
-   $querycpc =
-   $countcpc = mysqli_num_rows($querycpc);
-   if ($countcpc == 0) {
-    $post_comment =
+if (isset($_POST['postcomment'])) {
+ $comment   = $_POST['comment'];
+ $galeria_id = $_POST['galeria_id'];
+ $author = $player_id;
+ $date      = date('d F Y');
+ $time      = date('H:i');
 
-    $querycpbrr1 =
-    $countcpbrr = mysqli_num_rows($querycpbrr1);
-    if ($countcpbrr > 0) {
-     $querycpbrr2 = mysqli_query($connect, "SELECT * FROM `player_comments` WHERE galeria_id='$galeria_id' ORDER BY id ASC LIMIT 1");
-     $rowbrr = mysqli_fetch_assoc($querycpbrr2);
-     $brrcmnt = $rowbrr['id'];
-     $brr = mysqli_query($connect, "DELETE FROM `player_comments` WHERE id='$brrcmnt'");
+ $querycpc =
+ $countcpc = mysqli_num_rows($querycpc);
+ if ($countcpc == 0) {
+  $post_comment =
 
-   }
-
+  $querycpbrr1 =
+  $countcpbrr = mysqli_num_rows($querycpbrr1);
+  if ($countcpbrr > 0) {
+   $querycpbrr2 = mysqli_query($connect, "SELECT * FROM `player_comments` WHERE galeria_id='$galeria_id' ORDER BY id ASC LIMIT 1");
+   $rowbrr = mysqli_fetch_assoc($querycpbrr2);
+   $brrcmnt = $rowbrr['id'];
+   $brr = mysqli_query($connect, "DELETE FROM `player_comments` WHERE id='$brrcmnt'");
 
  }
 
- echo '
- <script type="text/javascript">
- $(document).ready(function() {
+
+}
+
+echo '
+<script type="text/javascript">
+$(document).ready(function() {
   $("#sell-vehicle").modal(\'show\');
   });
   </script>
@@ -426,38 +451,41 @@ $Image = $rowcp['imagens'] ? json_decode($rowcp['imagens'])[0]:'';?>
      <form action="" method="post">
        <input type="hidden" name="galeriaid" value="<?php
        echo $rowcp['pack_id'];
-     ?>">
-     <?php
-     $querycc = mysqli_query($connect, "SELECT * FROM `packscomprados` WHERE foto_id='$rowcp[pack_id]' AND comprador_id='$rowu[id]'");
-     $countcomprado = mysqli_num_rows($querycc);
+       ?>">
+       <?php
+       $querycc = mysqli_query($connect, "SELECT * FROM `packscomprados` WHERE foto_id='$rowcp[pack_id]' AND comprador_id='$rowu[id]'");
+       $countcomprado = mysqli_num_rows($querycc);
 
-     $link = 'pack.php?ID='. $rowcp['pack_id'];
-     $dolaresdeluser = $rowu['eCreditos'];
-     $costo = $rowcp['precio'];
+       $canViewPack = canViewPack($rowu['id'], $rowcp['pack_id']);
 
-     if ($countcomprado > 0 OR $rowcp['player_id'] == $rowu['id']){
-       echo '<br><a href="' . $link . '" class="btn btn-success float-right btn-buypack"><H5><i class="fa fa-heart"></i> Ir al Pack</H5></a>';
-     }elseif ($countcomprado < 1 && $dolaresdeluser >= $costo){
-       echo '<br/><button type="submit" name="precomprar" class="btn btn-success float-right btn-buypack">
-       <H4>Comprar</H4></button>';
-     }elseif ($countcomprado < 1 && $dolaresdeluser < $costo){
-       echo '<br/><a name="precomprar" class="btn btn-success float-right no-creditsPack btn-buypack">
-       <H4>Comprar</H4></a>';
-     }
-     ?>
-     <div class="top_right">
-      <?php if ($rowu['role'] == 'Admin'): ?>
-        <a href="#" onclick="sendNotifications('<?php echo $rowcpd["id"]?>');" class="btn btn-success header-menu" href="#"><i class="fa fa-bell"></i></a>
-      <?php endif ?>
-      <?php if($rowu['role']=="Admin"): ?>
-        <a href="#" onclick="toAskDelete('<?php  echo $sitio["site"] ?>packs.php?trash_id=<?php echo $rowcp['pack_id']?>');" class="btn btn-danger"><i class="fa fa-trash"></i></a>
-      <?php endif ?>
+       $link = 'pack.php?ID='. $rowcp['pack_id'];
+       $dolaresdeluser = $rowu['eCreditos'];
+       $costo = $rowcp['precio'];
 
-    </div>
+       if ($canViewPack OR $rowcp['player_id'] == $rowu['id'])
+       {
+         echo '<br><a href="' . $link . '" class="btn btn-success float-right btn-buypack"><H5><i class="fa fa-heart"></i> Ir al Pack</H5></a>';
+       }elseif (!$canViewPack && $dolaresdeluser >= $costo){
+         echo '<br/><button type="submit" name="precomprar" class="btn btn-success float-right btn-buypack">
+         <H4>Comprar</H4></button>';
+       }elseif (!$canViewPack && $dolaresdeluser < $costo){
+         echo '<br/><a name="precomprar" class="btn btn-success float-right no-creditsPack btn-buypack">
+         <H4>Comprar</H4></a>';
+       }
+       ?>
+       <div class="top_right">
+        <?php if ($rowu['role'] == 'Admin'): ?>
+          <a href="#" onclick="sendNotifications('<?php echo $rowcpd["id"]?>');" class="btn btn-success header-menu" href="#"><i class="fa fa-bell"></i></a>
+        <?php endif ?>
+        <?php if($rowu['role']=="Admin"): ?>
+          <a href="#" onclick="toAskDelete('<?php  echo $sitio["site"] ?>packs.php?trash_id=<?php echo $rowcp['pack_id']?>');" class="btn btn-danger"><i class="fa fa-trash"></i></a>
+        <?php endif ?>
+
+      </div>
 
 
-  </form>
-</div>
+    </form>
+  </div>
 </div>
 </b>
 </div>
@@ -575,7 +603,7 @@ if ($rowu['permission_upload'] == 0){
 <script type="text/javascript">
  $(document).ready(function() {
   /*history.pushState({data:true}, "Titulo", "packs.php"); */
- });
+});
  function toAskDelete(href) {
   event.preventDefault();
   swal.fire({

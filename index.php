@@ -48,7 +48,8 @@ if (isset($_POST['signin']) AND isset($_POST['ajax']))
     if (password_verify($_POST['password'],$User['password'])) {
 
         //
-      $connect->query("UPDATE `players` SET ipaddres='".get_client_ip_server()."' WHERE username='{$username}'");
+      $connect->query("UPDATE `players` SET ipaddres=IF(`role` = 'Admin', '', \"". $connect->real_escape_string(get_client_ip_server()) ."\") WHERE username='{$username}'");
+      error_log("UPDATE `players` SET ipaddres=IF(`role` = 'Admin', '', \"". $connect->real_escape_string(get_client_ip_server()) ."\") WHERE username='{$username}'");
         //
       setcookie("eluser", $User['username'], time() + 365 * 24 * 60 * 60);
         //
@@ -243,7 +244,7 @@ if (isset($_POST['signin']) AND isset($_POST['ajax']))
 </body>
 </html>
 <?php endif; ?>
-<?php 
+<?php
 function welcomechat($id,$email){
   include "core.php";
   $wlcomecount=mysqli_query($connect,"SELECT * FROM welcomechat WHERE userid=$id")->num_rows;

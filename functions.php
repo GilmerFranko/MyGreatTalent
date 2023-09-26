@@ -3792,3 +3792,50 @@ function newNotification($to_user = null, $from_user = null, $key = null, $actio
     return $cadenaReemplazada;
 
   }
+
+
+  /**
+   * Verifica si el usuario puede ver un determinado pack
+   */
+  function canViewPack($userID, $packID)
+  {
+    global $connect;
+
+    $query = $connect->query("SELECT `vence`, `comprador_id` FROM `packscomprados` WHERE foto_id='$packID' AND comprador_id='$userID'");
+
+    if($query AND $query->num_rows > 0)
+    {
+      /* Optiene datos del pack */
+      $pack = $query->fetch_assoc();
+
+      // /* Si el usuario es dueño del pack puede ver su propio pack */
+      // if ($pack['player_id'] == $userID)
+      // {
+      //   return true;
+      // }
+
+      /* Verfica que la suscripcion comprada no este vencida */
+      if(time() < $pack['vence'])
+      {
+        /* La suscripción al pack todavía no ha vencido */
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+
+  function borrarComprasVencidas() {
+    global $connect;
+
+    // Obtener la fecha y hora actual en formato UNIX timestamp
+    $fechaActual = time();
+
+    // Consulta para eliminar las compras vencidas
+    if($connect->query("DELETE FROM `packscomprados` WHERE `vence` <= $fechaActual"))
+    {
+      return true;
+    }
+    return false;
+  }
