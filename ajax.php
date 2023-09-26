@@ -1702,32 +1702,11 @@ if(isset($_GET['loginAsThisUser']) AND isset($_POST['userTo']) AND !empty($_POST
 	echo json_encode($msg);
 }
 
-// SALIR DE UN PERFIL (SALE DE UN PERFIL DEL QUE ESTÁ MIRANDO EL ADMIN)
+/* SALIR DE UN PERFIL (SALE DE UN PERFIL DEL QUE ESTÁ MIRANDO EL ADMIN) */
 if(isset($_GET['logoutProfileGuest']))
 {
-	// COMPRUEBA QUE SE PUEDA RETORNAR USUARIO
-	if(isset($_COOKIE['returnUser']) AND !empty($_COOKIE['returnUser']))
-	{
-		//
-		$returnUser = getColumns('players', array('id'), array('username', base64_decode($_COOKIE['returnUser'])), 1, true);
-		if($returnUser AND $returnUser->num_rows > 0)
-		{
+	$msg = returnUser();
 
-			setcookie('returnUser', '', time() - 1);
-			// CAMBIAR DE USUARIO
-			setcookie('eluser', base64_decode($_COOKIE['returnUser']), time() + (60*60*24*90));
-
-			$msg = array('status' => true);
-		}
-		else
-		{
-			$msg = array('status' => false);
-		}
-	}
-	else
-	{
-		$msg = array('status' => false);
-	}
 	echo json_encode($msg);
 }
 

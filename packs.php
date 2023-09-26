@@ -2,9 +2,7 @@
 require("core.php");
 head();
 
-$uname = $_COOKIE['eluser'];
-$suser = mysqli_query($connect, "SELECT * FROM `players` WHERE username='$uname' LIMIT 1");
-$rowu = mysqli_fetch_assoc($suser);
+
 view_Notification_pack();
 if (isset($_POST['precomprar'])){
  $idPack = $_POST['galeriaid'];

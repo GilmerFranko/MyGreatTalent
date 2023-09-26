@@ -2,9 +2,7 @@
 
 require("core.php");
 
-$uname = $_COOKIE['eluser'];
-$suser = mysqli_query($connect, "SELECT * FROM `players` WHERE username='$uname' LIMIT 1");
-$rowu  = mysqli_fetch_assoc($suser);
+$rowu  = $session;
 
 //SELECCIONAR SECCION
 $WHERE="";

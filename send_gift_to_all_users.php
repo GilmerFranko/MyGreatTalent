@@ -1,7 +1,11 @@
 <?php
 require("core.php");
 head();
-// COLOCAR EN VISTO TODAS LAS NOTIFICACIONES
+
+// SOLO ADMIN Y BOTS
+if($rowu['role'] != 'Admin' AND $rowu['role'] != 'BOT') echo '<meta http-equiv="refresh" content="0; url='.$sitio['site'].'index.php" />';
+?>
+
 ?>
 <style type="text/css">
 	.ntification{

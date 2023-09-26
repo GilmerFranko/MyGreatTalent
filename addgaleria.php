@@ -2,27 +2,24 @@
 require("core.php");
 head();
 
-if ($rowu['gender'] == 'hombre'){ 
-		
+if ($rowu['gender'] == 'hombre'){
+
 	echo '<meta http-equiv="refresh" content="0; url=messages.php" />';
   exit;
 }
 
-$uname = $_COOKIE['eluser'];
-$suser = mysqli_query($connect, "SELECT * FROM `players` WHERE username='$uname' LIMIT 1");
-$rowu  = mysqli_fetch_assoc($suser);
 
 if (isset($_POST['save'])){
-		
-	
+
+
 	$precio = $_POST['precio'];
-	
+
 	if ($precio >= 1){
-		
+
 	$descripcion = $_POST['descripcion'];
 	$link = $_POST['linkdedescarga'];
 
- 
+
 	/// imagen
 	$token = rand(111,999) / time();
 	$target_dir    = "images/galerias/";
@@ -33,15 +30,15 @@ if (isset($_POST['save'])){
 	move_uploaded_file($_FILES["avafile"]["tmp_name"], "images/galerias/" . $filename);
 	///
 
-		
+
 	$insertarcompra = mysqli_query($connect, "INSERT INTO `fotosenventa` (player_id, imagen, precio, descripcion, linkdedescarga) VALUES ('$rowu[id]', '$imagen', '$precio', '$descripcion', '$link')");
 
-	 
+
 	//enviando notificacion a amigos
-	 
+
 	$sqlnotificandoamigos = mysqli_query($connect, "SELECT * FROM `friends` WHERE player1 = '$player_id' OR player2 = '$player_id'");
 	while ($rowamigo = mysqli_fetch_assoc($sqlnotificandoamigos)) {
-	
+
 		if ($rowamigo['player2'] == $player_id){
 			$amigo = $rowamigo['player1'];
 		}elseif ($rowamigo['player1'] == $player_id){
@@ -50,12 +47,12 @@ if (isset($_POST['save'])){
 		$insertarcompra = mysqli_query($connect, "INSERT INTO `notificaciones_fotosnuevas` (player_notificador, player_notificado) VALUES ('$player_id', '$amigo')");
 
 
-}	 
+}
 	 //
-	 
-	 
+
+
 		//mostramos mensaje de exito
-		
+
 		echo '
         <script type="text/javascript">
             $(document).ready(function() {
@@ -67,16 +64,16 @@ if (isset($_POST['save'])){
             <div class="modal-dialog modal-md">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Nueva Publicacion</h5> 
+                        <h5 class="modal-title">Nueva Publicacion</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                     </div>
                     <div class="modal-body">
                         <center>
                             <h4><span class="badge badge-info">Foto Publicada!</span></h5>
-                                
-                            
-								
-                          
+
+
+
+
                             <button type="button" class="btn btn-success btn-md btn-block" data-dismiss="modal" aria-hidden="true"><i class="fab fa-get-pocket"></i> Ok</button>
                         </center>
                     </div>
@@ -84,10 +81,10 @@ if (isset($_POST['save'])){
             </div>
         </div>';
 	}else{
-		
-		
+
+
 		///mensaje de minimo 1 credito
-		
+
 		echo '
         <script type="text/javascript">
             $(document).ready(function() {
@@ -99,31 +96,31 @@ if (isset($_POST['save'])){
             <div class="modal-dialog modal-md">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Nueva Publicacion</h5> 
+                        <h5 class="modal-title">Nueva Publicacion</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                     </div>
                     <div class="modal-body">
                         <center>
                             <h4><span class="badge badge-info">Venta Publicada!, el precio minimo es de 1 credito</span></h5>
-                                
-                            
-								
-                          
+
+
+
+
                             <button type="button" class="btn btn-success btn-md btn-block" data-dismiss="modal" aria-hidden="true"><i class="fab fa-get-pocket"></i> OK</button>
                         </center>
                     </div>
                 </div>
             </div>
         </div>';
-	
+
 
 }
 }
 ?>
  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js">
- 
 
- 
+
+
  </script>
 <div class="content-wrapper">
 	<div id="content-container">
