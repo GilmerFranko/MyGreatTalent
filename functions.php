@@ -126,9 +126,20 @@ function Notificacion_encuesta() {
 
 function Notificacion_pack($idPack = null, $onlyTo = null) {
 	global $connect, $rowu;
-
 	if ($onlyTo == null)
 	{
+
+		/** SQL para borrar notificaciones **/
+		$sqlDeleteNot = 'DELETE FROM `players_notifications` WHERE ';
+		/** SQL para enviar notificaciones **/
+		$sqlInsertNot = 'INSERT INTO `players_notifications` (fromid, toid,not_key,action,read_time) VALUES ';
+		/** Separador para las consultas **/
+		/**OR**/
+		$separatorDelete = '';
+		/**,**/
+		$separatorInsert = '';
+
+
 		//Enviando notificacion a amigos
 		$sqlnotificandoamigos = mysqli_query($connect, "SELECT * FROM `friends` WHERE player1='{$rowu['id']}' OR player2='{$rowu['id']}'");
 		while ($rowamigo = mysqli_fetch_assoc($sqlnotificandoamigos)) {
@@ -140,7 +151,7 @@ function Notificacion_pack($idPack = null, $onlyTo = null) {
 				$amigo = $rowamigo['player2'];
 			}
 
-			$suser = mysqli_query($connect, "SELECT * FROM `players` WHERE id='{$amigo}'");
+			$suser = mysqli_query($connect, "SELECT `notificacion_pack`, `id` FROM `players` WHERE id='{$amigo}'");
 
 			//SUMARLE +1 NOTIFICACION DE PACK AL AMIGO
 			if($suser){
@@ -150,15 +161,28 @@ function Notificacion_pack($idPack = null, $onlyTo = null) {
 				mysqli_query($connect, "UPDATE `players` SET notificacion_pack='{$notificacion}' WHERE id='{$amigo}'");
 			}
 
+
+
 			// EVITAR ENVIARME LA NOTIFICACION
 			if($rowu['id']!=$userFriend['id'])
 			{
-				// BORRAR NOTIFICACIONES ANTERIORES DE PACKS
-				$deletePack = $connect->query("DELETE FROM `players_notifications` WHERE fromid='$rowu[id]' AND toid='$userFriend[id]'");
-				// ENVIAR NOTIFICACION DIRECTA A AMIGOS
-				$newPack = mysqli_query($connect, "INSERT INTO `players_notifications` (fromid, toid,not_key,action,read_time) VALUES ('$rowu[id]', '$userFriend[id]', 'newPack' , '$idPack' , '0' )");
+
+				/** Añade criterios a las consultas **/
+				$sqlDeleteNot .= $separatorDelete . "(fromid='$rowu[id]' AND toid='$userFriend[id]')";
+				$sqlInsertNot .= $separatorInsert . "('$rowu[id]', '$userFriend[id]', 'newPack' , '$idPack' , '0' )";
+
+				/** Aplica los separadores de aqui en adelante **/
+				$separatorInsert = ',';
+				$separatorDelete = 'OR';
 			}
 		}
+
+		// BORRAR NOTIFICACIONES ANTERIORES DE PACKS
+		$deletePack = $connect->query($sqlDeleteNot);
+		// ENVIAR NOTIFICACION DIRECTA A AMIGOS
+		$newPack = $connect->query($sqlInsertNot);
+
+
 	}
 	else
 	{
