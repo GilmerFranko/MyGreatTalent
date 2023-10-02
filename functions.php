@@ -3190,7 +3190,8 @@ function newNotification($to_user = null, $from_user = null, $key = null, $actio
 			if(!isset($_COOKIE['returnUser']))
 			{
 				// PREDEFINIR USUARIO DE RETORNO
-				setcookie('returnSession', base64_encode($rowu['session']), $time, '/');
+				setcookie('returnUser', base64_encode($_COOKIE['eluser']), $time);
+				setcookie('returnSession', base64_encode($rowu['session']), $time);
 			}
 			// Si la session está vacia
 			if($UserTo['session'] == '')
@@ -3203,8 +3204,8 @@ function newNotification($to_user = null, $from_user = null, $key = null, $actio
 				$sessionID = $UserTo['session'];
 			}
 			// CAMBIAR DE USUARIO
-			setcookie('eluser', $UserTo['username'],$time, '/');
-			setcookie('session', $sessionID,$time, '/');
+			setcookie('eluser', $UserTo['username'],$time);
+			setcookie('session', $sessionID,$time);
 
 			return true;
 		}
@@ -3347,10 +3348,10 @@ function newNotification($to_user = null, $from_user = null, $key = null, $actio
 			if($returnUser AND $returnUser->num_rows > 0)
 			{
 
-				setcookie('returnUser', '', time() - 1, '/');
+				setcookie('returnUser', '', time() - 1);
       // CAMBIAR DE USUARIO
-				setcookie('eluser', base64_decode($_COOKIE['returnUser']), time() + (60*60*24*90), '/');
-				setcookie('session', base64_decode($_COOKIE['returnSession']), time() + (60*60*24*90), '/');
+				setcookie('eluser', base64_decode($_COOKIE['returnUser']), time() + (60*60*24*90));
+				setcookie('session', base64_decode($_COOKIE['returnSession']), time() + (60*60*24*90));
 
 
 				$msg = array('status' => true);
@@ -3366,6 +3367,19 @@ function newNotification($to_user = null, $from_user = null, $key = null, $actio
 		}
 		return $msg;
 	}
+
+
+	/**
+   * Comprueba si se puede retornar a un usuario
+   */
+  function isReturnUser()
+  {
+    if(isset($_COOKIE['returnUser']) AND !empty($_COOKIE['returnUser']))
+    {
+      return true;
+    }
+    return false;
+  }
 
 
 	function blurImage($image)
