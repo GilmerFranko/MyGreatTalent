@@ -373,121 +373,144 @@ else{
 
 $countcp = mysqli_num_rows($querycp);
 if ($countcp > 0) {
- echo "<style>.loadingpacks{display:none;}</style>";
- while ($rowcp = mysqli_fetch_assoc($querycp)) {
-  if ($rowcp['visible']!="null" and $rowcp['visible']!="" and $rowcp['visible']!=null and $rowcp['visible']!="[]" ) {
-   $json=json_decode($rowcp['visible']);
-   if (!in_array($rowu['username'], $json) and $rowu['id']!=$rowcp['player_id'] ) {
-    continue;
-  }
-}
+  echo "<style>.loadingpacks{display:none;}</style>";
+  while ($rowcp = mysqli_fetch_assoc($querycp)) {
+    if ($rowcp['visible']!="null" and $rowcp['visible']!="" and $rowcp['visible']!=null and $rowcp['visible']!="[]" ) {
+      $json=json_decode($rowcp['visible']);
+      if (!in_array($rowu['username'], $json) and $rowu['id']!=$rowcp['player_id'] ) {
+        continue;
+      }
+    }
 
-$author_id = $rowcp['player_id'];
-$querycpd  = mysqli_query($connect, "SELECT * FROM `players` WHERE id='$author_id' LIMIT 1");
-$rowcpd    = mysqli_fetch_assoc($querycpd);
-$iamfrom = ($rowu['registerfrom'] == 'chat' ? 'chat' : "bellasgram");
+    $author_id = $rowcp['player_id'];
+    $querycpd  = mysqli_query($connect, "SELECT * FROM `players` WHERE id='$author_id' LIMIT 1");
+    $rowcpd    = mysqli_fetch_assoc($querycpd);
+    $iamfrom = ($rowu['registerfrom'] == 'chat' ? 'chat' : "bellasgram");
 
 
-/*SI EL USUARIO TIENE EL PERFIL OCULTO Y YO NO SOY UN USUARIO REGISTRADO DESDE EL CHAT */
-if($rowcpd['perfiloculto']!='no' or $rowcp['hidetochat']=='si' and $iamfrom!='chat')
-{
-  /*SI EL USUARIO ES DIFERENTE AL PROPIETARO DEL PACK */
-  if($uname != $rowcpd['username'])
-  {
+    /*SI EL USUARIO TIENE EL PERFIL OCULTO Y YO NO SOY UN USUARIO REGISTRADO DESDE EL CHAT */
+    if($rowcpd['perfiloculto']!='no' or $rowcp['hidetochat']=='si' and $iamfrom!='chat')
+    {
+      /*SI EL USUARIO ES DIFERENTE AL PROPIETARO DEL PACK */
+      if($uname != $rowcpd['username'])
+      {
 
-    $friend = mysqli_query($connect, "SELECT * FROM `friends` WHERE player1='$player_id' AND player2='$author_id'");
-    $friend01 = mysqli_num_rows($friend);
+        $friend = mysqli_query($connect, "SELECT * FROM `friends` WHERE player1='$player_id' AND player2='$author_id'");
+        $friend01 = mysqli_num_rows($friend);
 
-    $friend2 = mysqli_query($connect, "SELECT * FROM `friends` WHERE player1='$author_id' AND player2='$player_id'");
-    $friend02 = mysqli_num_rows($friend2);
+        $friend2 = mysqli_query($connect, "SELECT * FROM `friends` WHERE player1='$author_id' AND player2='$player_id'");
+        $friend02 = mysqli_num_rows($friend2);
 
-    if($friend02==false && $friend01==false){
+        if($friend02==false && $friend01==false){
+         continue;
+       }
+     }
+   }
+
+   if(!islookContentUser($player_id, $author_id)){
+     $total_pages--;
      continue;
    }
- }
-}
 
-if(!islookContentUser($player_id, $author_id)){
- $total_pages--;
- continue;
-}
+   $Image = $rowcp['imagens'] ? json_decode($rowcp['imagens'])[0]:'';
 
-$Image = $rowcp['imagens'] ? json_decode($rowcp['imagens'])[0]:'';?>
-<tr>
- <td class="items box">
-  <div class="">
-   <div class="">
-    <img src="<?php echo $sitio['site'].$rowcpd['avatar']; ?>" class="img-circle" style="width:65px;">
-    &nbsp;&nbsp;<strong><?php echo '<a href="'.$sitio['site'].'profile.php?profile_id=' . $rowcpd['id'] . '">' . $rowcpd['username'] . '</a>
-    '; if ($rowcpd['timeonline'] > $timeonline) ?> </strong>
-    <br>
-  </div><br>
-  <div class="card-body comment-emoticons">
-    <center><img src="<?php echo $sitio['site'].$Image;?>" width="80%"> </center><br> <?php
-    echo $rowcp['descripcion'];
-    ?>
+   /** Verifica si el usuario puede ver el pack (Si es dueño o si lo compró)*/
+   $canViewPack = canViewPack($rowu['id'], $rowcp['pack_id']);
+   /** Enlace directo para ver el pack **/
+   $link = 'pack.php?ID='. $rowcp['pack_id'];
+   /** Dinero actual del usuario */
+   $dolaresdeluser = $rowu['eCreditos'];
+   /* Precio del pack */
+   $costo = $rowcp['precio'];
+   ?>
+   <tr>
+     <td class="items box">
+      <div class="">
+       <div class="">
+        <img src="<?php echo $sitio['site'].$rowcpd['avatar']; ?>" class="img-circle" style="width:65px;">
+        &nbsp;&nbsp;<strong><?php echo '<a href="'.$sitio['site'].'profile.php?profile_id=' . $rowcpd['id'] . '">' . $rowcpd['username'] . '</a>
+        '; if ($rowcpd['timeonline'] > $timeonline) ?> </strong>
+        <br>
+      </div><br>
+      <div class="card-body comment-emoticons">
+        <center>
+          <div class="" id="" bis_skin_checked="1">
+            <!-- Muestra botón de reproducir de ser propietario del pack o si ya esta comprado y si el pack contiene un video -->
+            <?php if (($rowcp['video'] != '') AND ($canViewPack OR $rowcp['player_id'] == $rowu['id'])): ?>
+            <div class="contenedor" onclick="location.href = '<?php echo $link ?>'" bis_skin_checked="1" style="background: url('<?php echo $sitio['site'].$Image;?>'); background-repeat: no-repeat; background-size: contain; background-position: center; position: relative;">
+              <i class="fa fa-play" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);font-size: 40px;background: var(--colorPrimary);color: white;width: 80px;padding: 10px 0;border-radius: 10px;text-align: center;"></i>
+              <img src="<?php echo $sitio['site'].$Image;?>" width="80%" style="opacity: 0;">
+            </div>
+            <br>
+            <?php echo $rowcp['descripcion'];?>
+
+            <!-- Si no-->
+            <?php else: ?>
+              <center>
+                <img src="<?php echo $sitio['site'].$Image;?>" width="80%">
+              </center>
+              <br> <?php
+              echo $rowcp['descripcion'];
+              ?>
+            <?php endif ?>
+          </div>
+          <hr />
+          <div class="card-footer">
+            <b>
+             <span>Precio: <?php echo $rowcp['precio']; ?> Creditos Especiales<br>
+
+              <!-- SI EL USUARIO INGRESO UNA CANTIDAD DE FOTOS -->
+              <?php if ($rowcp['image_count']>0): ?>
+
+               <span>Cantidad de Fotos: <?php echo $rowcp['image_count']; ?></span>
+               <br>
+
+             <?php endif ?>
+
+             <!-- SI EL USUARIO INGRESO UNA DURACION DEL VIDEO -->
+             <?php if ($rowcp['video_length']>0): ?>
+               <span>Duracion del Video: <?php echo SecondsToHours($rowcp['video_length']); ?></span>
+
+             <?php endif ?>
+
+             <form action="" method="post">
+               <input type="hidden" name="galeriaid" value="<?php
+               echo $rowcp['pack_id'];
+               ?>">
+               <?php
+               $querycc = mysqli_query($connect, "SELECT * FROM `packscomprados` WHERE foto_id='$rowcp[pack_id]' AND comprador_id='$rowu[id]'");
+               $countcomprado = mysqli_num_rows($querycc);
+
+
+
+               if ($canViewPack OR $rowcp['player_id'] == $rowu['id'])
+               {
+                 echo '<br><a href="' . $link . '" class="btn btn-success float-right btn-buypack"><H5><i class="fa fa-heart"></i> Ir al Pack</H5></a>';
+               }elseif (!$canViewPack && $dolaresdeluser >= $costo){
+                 echo '<br/><button type="submit" name="precomprar" class="btn btn-success float-right btn-buypack">
+                 <H4>Comprar</H4></button>';
+               }elseif (!$canViewPack && $dolaresdeluser < $costo){
+                 echo '<br/><a name="precomprar" class="btn btn-success float-right no-creditsPack btn-buypack">
+                 <H4>Comprar</H4></a>';
+               }
+               ?>
+               <div class="top_right">
+                <?php if ($rowu['role'] == 'Admin'): ?>
+                  <a href="#" onclick="sendNotifications('<?php echo $rowcpd["id"]?>');" class="btn btn-success header-menu" href="#"><i class="fa fa-bell"></i></a>
+                <?php endif ?>
+                <?php if($rowu['role']=="Admin"): ?>
+                  <a href="#" onclick="toAskDelete('<?php  echo $sitio["site"] ?>packs.php?trash_id=<?php echo $rowcp['pack_id']?>');" class="btn btn-danger"><i class="fa fa-trash"></i></a>
+                <?php endif ?>
+
+              </div>
+
+
+            </form>
+          </div>
+        </div>
+      </b>
+    </div>
   </div>
-  <hr />
-  <div class="card-footer">
-    <b>
-     <span>Precio: <?php echo $rowcp['precio']; ?> Creditos Especiales<br>
-
-      <!-- SI EL USUARIO INGRESO UNA CANTIDAD DE FOTOS -->
-      <?php if ($rowcp['image_count']>0): ?>
-
-       <span>Cantidad de Fotos: <?php echo $rowcp['image_count']; ?></span>
-       <br>
-
-     <?php endif ?>
-
-     <!-- SI EL USUARIO INGRESO UNA DURACION DEL VIDEO -->
-     <?php if ($rowcp['video_length']>0): ?>
-       <span>Duracion del Video: <?php echo SecondsToHours($rowcp['video_length']); ?></span>
-
-     <?php endif ?>
-
-     <form action="" method="post">
-       <input type="hidden" name="galeriaid" value="<?php
-       echo $rowcp['pack_id'];
-       ?>">
-       <?php
-       $querycc = mysqli_query($connect, "SELECT * FROM `packscomprados` WHERE foto_id='$rowcp[pack_id]' AND comprador_id='$rowu[id]'");
-       $countcomprado = mysqli_num_rows($querycc);
-
-       $canViewPack = canViewPack($rowu['id'], $rowcp['pack_id']);
-
-       $link = 'pack.php?ID='. $rowcp['pack_id'];
-       $dolaresdeluser = $rowu['eCreditos'];
-       $costo = $rowcp['precio'];
-
-       if ($canViewPack OR $rowcp['player_id'] == $rowu['id'])
-       {
-         echo '<br><a href="' . $link . '" class="btn btn-success float-right btn-buypack"><H5><i class="fa fa-heart"></i> Ir al Pack</H5></a>';
-       }elseif (!$canViewPack && $dolaresdeluser >= $costo){
-         echo '<br/><button type="submit" name="precomprar" class="btn btn-success float-right btn-buypack">
-         <H4>Comprar</H4></button>';
-       }elseif (!$canViewPack && $dolaresdeluser < $costo){
-         echo '<br/><a name="precomprar" class="btn btn-success float-right no-creditsPack btn-buypack">
-         <H4>Comprar</H4></a>';
-       }
-       ?>
-       <div class="top_right">
-        <?php if ($rowu['role'] == 'Admin'): ?>
-          <a href="#" onclick="sendNotifications('<?php echo $rowcpd["id"]?>');" class="btn btn-success header-menu" href="#"><i class="fa fa-bell"></i></a>
-        <?php endif ?>
-        <?php if($rowu['role']=="Admin"): ?>
-          <a href="#" onclick="toAskDelete('<?php  echo $sitio["site"] ?>packs.php?trash_id=<?php echo $rowcp['pack_id']?>');" class="btn btn-danger"><i class="fa fa-trash"></i></a>
-        <?php endif ?>
-
-      </div>
-
-
-    </form>
-  </div>
-</div>
-</b>
-</div>
-</div>
 </td>
 </tr>
 <tr>
