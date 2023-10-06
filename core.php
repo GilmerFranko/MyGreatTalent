@@ -469,13 +469,13 @@ function head()
   </a>
 </li>
 
-
-    <!-- OCULTO  <li <?php Echo basename($_SERVER['SCRIPT_NAME']) == 'packs.php' ? 'class="active"':'';?> id="NotifyPack">
+<li <?php Echo basename($_SERVER['SCRIPT_NAME']) == 'packs.php' ? 'class="active"':'';?> id="NotifyPack">
 			<a href="packs.php">
 				<i class="fas fa-images"></i>&nbsp; <span>Packs en Venta</span>
 				<?php Echo get_Notification_pack();	?>
 			</a>
-    </li> -->
+        </li>
+
 
     <li <?php
     if (basename($_SERVER['SCRIPT_NAME']) == 'comprar.php') {
