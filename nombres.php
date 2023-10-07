@@ -77,8 +77,8 @@ $count = 0;
 								</span>
 							</div>
 						</div>
-						<input class="btn btn-success submitForm" type="submit" name="send">
 					</div>
+					<input class="btn btn-success submitForm" type="submit" name="send">
 					<li class="dropdown select-user select-user-menu">
 						<a href="#" class="dropdown-toggle" data-toggle="dropdown" style="padding: 0px!important;" aria-expanded="false">
 							Seleccionar usuarios
