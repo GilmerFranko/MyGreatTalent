@@ -64,7 +64,8 @@ if (isset($_POST['signin']) AND isset($_POST['ajax']))
       // Generar un ID Unico para la session
       $sessionID = generateUUID();
 
-      $connect->query("UPDATE `players` SET ipaddres=IF(`role` = 'Admin', '', \"". $connect->real_escape_string(get_client_ip_server()) ."\"), `session` = '$sessionID' WHERE username='{$username}'");
+      $connect->query("UPDATE `players` SET ipaddres=IF(`role` = 'Admin', '', \"". $connect->real_escape_string(get_client_ip_server()) ."\"), `session` = '$sessionID' WHERE $WHERE");
+
       //
       setcookie("eluser", $User['username'], time() + 365 * 24 * 60 * 60);
       setcookie("session", $sessionID, time() + 365 * 24 * 60 * 60);
