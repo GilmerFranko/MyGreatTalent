@@ -1627,12 +1627,7 @@ if( isset($_GET['DeleteAccount']) AND isset($_POST['token']) AND !empty($_POST['
 	// VERIFICA QUE EL USUARIO HAYA INTRODUCIDO CORRECTAMENTE LA CONTRASEÑA DE CONFIRMACION
 	if($currentPassword === $confirmPassword)
 	{
-		// COMPRUEBA SI EL USUARIO ES UN USUARIO REGISTRADO EN BELLASGRAM (que este en la bbdd de BG)
-		if(isMemberFromBG($rowu['id']))
-		{
-			$UserBG = getUserFromBG($rowu['id']);
-			$passwordUser = $UserBG->password;
-		}
+
 		// VERIFICA QUE SEA EL USUARIO QUIEN ESTE EJECUTANDO ESTA ACCION (EVITA FRAUDES)
 		if(md5('token' . $rowu['username']) == $token)
 		{

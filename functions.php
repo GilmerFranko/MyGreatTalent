@@ -2504,7 +2504,7 @@ foreach($array as $sql)
   {
   	$connect->query("DELETE FROM `players` WHERE `id` = \"". $user_id ."\"");
   	/* Cierra la session */
-  	logout();
+  	//logout();
   	return true;
   }
 
