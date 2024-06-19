@@ -4100,9 +4100,7 @@ function newNotification($to_user = null, $from_user = null, $key = null, $actio
 
     // Construye la consulta de actualización
     $consulta = "UPDATE nuevochat_rooms SET time='$timeroom' WHERE id IN ($ids_str)";
-
-    error_log($consulta);
-    exit;
+	
     // Ejecuta la consulta
     $resultado = $connect->query($consulta);
 

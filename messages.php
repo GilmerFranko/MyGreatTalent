@@ -262,9 +262,9 @@ if (isset($_GET["welcomechat"]))
 												}
 
 												echo '<tr' . $view . '>
-																				<td><center><a href="' . $sitio['site'] . 'profile.php?profile_id=' . $rowsuser['id'] . '">
-																				<img src="' . $sitio['site'] . $rowsuser['avatar'] . '" class="img-circle img-avatar"><br><br>
-																				<b>' . $Messages . $rowsuser['username'] . '</a></b><br><H3>';
+												<td><center><a href="' . $sitio['site'] . 'profile.php?profile_id=' . $rowsuser['id'] . '">
+												<img src="' . $sitio['site'] . $rowsuser['avatar'] . '" class="img-circle img-avatar"><br><br>
+												<b>' . $Messages . $rowsuser['username'] . '</a></b><br><H3>';
 												//// si está activa la opcion de primer mensaje
 
 												if ($sitio['mostrarprimermensaje'] == 'si')
