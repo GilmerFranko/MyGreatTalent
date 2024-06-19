@@ -53,6 +53,10 @@
       background-color: var(--foreground)!important;
       border-top: 3px solid #31393c;
     }
+    body.--dark .card {
+      background-color: var(--foreground)!important;
+      border-top: 3px solid #31393c;
+    }
     body.--dark .table-striped>tbody>tr {
       background-color: transparent!important;
     }

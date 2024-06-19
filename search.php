@@ -151,20 +151,11 @@ function Search (){
 		if($query){
 
 			while ($userbuscado = mysqli_fetch_assoc($query)) {
-			//SI EL USUARIO TIENE EL PERFIL OCULTO Y YO NO SOY UN USUARIO REGISTRADO DESDE EL CHAT PERO QUE NO HAGA REFRESH SI SOY YO EL USUARIO
-			if($userbuscado['perfiloculto']!='no' or $userbuscado['hidetochat']=='si'){
-				if ($iamfrom!='chat' or $userbuscado['perfiloculto']!='no'){
-				$friend = mysqli_query($connect, "SELECT * FROM `friends` WHERE player1='$rowu[id]' AND player2='$userbuscado[id]'");
-					$friend01 = mysqli_num_rows($friend);
 
-					$friend2 = mysqli_query($connect, "SELECT * FROM `friends` WHERE player1='$userbuscado[id]' AND player2='$rowu[id]'");
-					$friend02 = mysqli_num_rows($friend2);
-					//NO EJECUTAR LO DE ABAJO Y VOLVER AL CICLO
-					if($friend02==false && $friend01==false){
-						$total_pages--;
-						continue;
-					}
-				}
+			// MOSTRAR SOLO PERFILES PERMITIDOS *NO BLOQUEADOS *NO OCULTOS
+			if (!canSeeYourProfile($userbuscado['id'])) {
+				$total_pages--;
+				continue;
 			}
 
 				$sqlbuscarbloqueo = mysqli_query($connect, "SELECT * FROM `bloqueos` WHERE toid='$player_id' AND fromid='$userbuscado[id]'");

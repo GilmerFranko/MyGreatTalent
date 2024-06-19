@@ -105,7 +105,7 @@ head();
                     <tbody>
                       <center>
                         <p>
-                          Los mensajes masivos se enviarán a todas las conversaciones
+                          Los mensajes masivos se enviarán a todas las conversaciones, para nombrar a las peronas usar -user- ejemplo, Hola -user- comos estas?
                         </p>
                       </center>
                       <button class="btn btn-success" id="AddMessages" style="position:relative;">

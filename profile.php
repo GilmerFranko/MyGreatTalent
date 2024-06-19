@@ -237,6 +237,13 @@ if ($rowu['role'] == 'Admin' && isset($_GET["permission_upload"]) && $userbuscad
 	exit;
 }
 
+if ($rowu['role'] == 'Admin' && isset($_GET["permission_send_gift"]) && $userbuscado){
+	$permission_send_gift = $_GET["permission_send_gift"];
+	$player_update2 = mysqli_query($connect, "UPDATE `players` SET permission_send_gift={$permission_send_gift} WHERE id='{$id}'");
+	echo '<meta http-equiv="refresh" content="0; url='.$sitio['site'].'profile.php?profile_id='.$_GET['profile_id'].'" />';
+	exit;
+}
+
 if ($rowu['role'] == 'Admin' && isset($_GET["banear"]) && $userbuscado){
 	$Action = 0;
 	$userbuscado["baneado"] = 0;
@@ -459,7 +466,7 @@ if ($rowu['role'] == 'Admin' && isset($_GET["banear"]) && $userbuscado){
 												endif;
 
 												if($rowu['role'] == 'Admin'): ?>
-													<p>IP: <strong><a href="buscaip.php?nombre=<?php echo $userbuscado['ipaddres'] ?>"> <?php echo $userbuscado['ipaddres']?></a></strong></p>
+												
 												<?php endif;
 												if(isset($mensajebloqueado)){
 													if ($mensajebloqueado == 1){
@@ -492,25 +499,29 @@ if ($rowu['role'] == 'Admin' && isset($_GET["banear"]) && $userbuscado){
 												}
 												if (isLogged()) {
 													if ($rowu['role'] == 'Admin'){
-														if(!isset($_COOKIE['returnUser'])): ?>
-															<a href="javascript:loginAsThisUser('<?php echo $userbuscado['id'] ?>')" class="btn btn-primary dropdown-item width" ><i class="fa fa-times"></i> Entrar como <strong><?php echo getFirstWord($userbuscado['username']) ?></strong></a><br class="br">
-														<?php endif;
+														
 													// SI NO ESTA BANEADO
 														if ($userbuscado["baneado"] == 0)
 														{
-															echo '<a href="'.$sitio['site'].'profile.php?profile_id=' . $userbuscado['id'] . '&banear='. $userbuscado["baneado"] .'" class="btn btn-danger dropdown-item width" ><i class="fa fa-times"></i> Banear Usuario</a><br class="br">';
+														
 														}else{
-															echo '<a href="'.$sitio['site'].'profile.php?profile_id=' . $userbuscado['id'] . '&banear='. $userbuscado["baneado"] .'" class="btn btn-danger dropdown-item width" ><i class="fa fa-handshake"></i> Perdonar Usuario</a><br class="br">';
+														
 														}
 													#-> BOTON NO-PUBLIC
 													/*$page = isset($_GET['page']) && is_numeric($_GET['page']) ? $_GET['page'] : 1;
 													echo '<a href="'.$sitio['site'].'profile.php?page='.$page.'&profile_id=' . $userbuscado['id'] . '&action_nopublic='. $userbuscado["id"] .'" class="btn btn-primary dropdown-item width" ><i class="fa fa-action"></i> Cambiar a No-Public</a><br class="br">';*/
 													#-> BOTON EDITAR PERFIL
-													echo '<a href="'.$sitio['site'].'edituser.php?edit-id=' . $userbuscado['id'].'" class="btn btn-primary dropdown-item width" ><i class="fa fa-action"></i>Editar Perfil</a><br class="br">';
+												
 													if ($userbuscado["permission_upload"] == 0){
-														echo '<a href="'.$sitio['site'].'profile.php?profile_id=' . $userbuscado['id'] . '&permission_upload=1" class="btn btn-success dropdown-item width" ><i class="fa fa-check"></i> Permitir subir fotos</a><br class="br">';
+													
 													}else{
-														echo '<a href="'.$sitio['site'].'profile.php?profile_id=' . $userbuscado['id'] . '&permission_upload=0" class="btn btn-danger dropdown-item width" ><i class="fa fa-lock"></i> Bloquear subir fotos</a><br class="br">';
+													
+													}
+
+													if ($userbuscado["permission_send_gift"] == 0){
+														
+													}else{
+													
 													}
 												}
 
@@ -599,7 +610,7 @@ if ($rowu['role'] == 'Admin' && isset($_GET["banear"]) && $userbuscado){
 													}
 													?>
 													<?php if ($rowu['role']=='Admin'): ?>
-														<a class="btn btn-warning dropdown-item width" href="<?php echo createLink('transacciones','',array('profile_id' => $id),true) ?>">Ver Transacciones</a>
+														
 													<?php endif ?>
 													<?php
 													echo '<form method="POST" action="'. $sitio['site'] .'report.php">

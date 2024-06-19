@@ -45,9 +45,25 @@ function sendMassMessage($data) {
 	$rutadefoto = $data['rutadefoto'];
 	$foto = ($rutadefoto != '' && $rutadefoto) ? 'Yes':'No';
 
+	/*
+   * Si es una foto, se le debe indicar
+   * Al sistema que esta misma foto
+   * Se usará para muchos mensajes
+   */
+	$foto_unica = ($rutadefoto != '' && $rutadefoto) ? 1:0;
+
 	// ALMACENA LA FECHA ACTUAL
 	$time    = time();
 	$timeroom = time();
+
+	/* Contiene el conjunto de consultas para insert */
+	$sqlInsert = '';
+
+	/* Contiene los ids de los chatsroom a actualizar el time */
+	$idsChatRoom = [];
+
+	/* Separador */
+	$separator = '';
 
 	/* Determina si hay que consultar el
 	 * nombre del usuario receptor si existe
@@ -65,7 +81,7 @@ function sendMassMessage($data) {
 		}else{
 			$toid = $sala['player1'];
 		}
-		
+
 		// OPTIENE EL USUARIO DESTINARIO
 		$r = $connect->query("SELECT id, username, timeonline FROM `players` WHERE id = '$toid'");
 
@@ -74,12 +90,12 @@ function sendMassMessage($data) {
 		$id_chat = $sala['id'];
 
 		// COMPRUEBA QUE NO EXISTA OTRO MENSAJE IDENTICO (evita enviar mesajes repetidos)
-		$exist = $connect->query("SELECT * FROM `nuevochat_mensajes` WHERE id_chat='{$id_chat}' AND author='{$uid}' AND toid='{$toid}' AND mensaje='{$mensaje}' AND foto='{$foto}' AND rutadefoto='{$rutadefoto}'");
+		$exist = $connect->query("SELECT id FROM `nuevochat_mensajes` WHERE id_chat='{$id_chat}' AND author='{$uid}' AND toid='{$toid}' AND mensaje='{$mensaje}' AND foto='{$foto}' AND rutadefoto='{$rutadefoto}' AND `time` >= \"". (time() - (60 * 60)) ."\" ");
 
 		// SELECCIONA EL ULTIMO MENSAJE DEL CHAT
-		$lastAnswer = $connect->query("SELECT * FROM `nuevochat_mensajes` WHERE id_chat='$id_chat' ORDER BY id DESC LIMIT 1");
+		$lastAnswer = $connect->query("SELECT author FROM `nuevochat_mensajes` WHERE id_chat='$id_chat' ORDER BY id DESC LIMIT 1");
 
-		if ($lastAnswer)
+		if ($lastAnswer AND $exist->num_rows <= 1)
 		{
 
 			$lA = ($lastAnswer->num_rows > 0) ? $lastAnswer->fetch_assoc() : false;
@@ -87,42 +103,65 @@ function sendMassMessage($data) {
 			// COMPRUEBA QUE EL CHAT ESTE ABIERTO(DESBLOQUEADO)
 			if(checkStateChatRoom($id_chat) == 'open')
 			{
-				//
-				if(true)
-				{
 
-					// SELECCIONAR TIPO. 1: ENVIAR A TODOS. 2: ENVIAR A USUARIOS CON INACTIVAD DE 5 O MAS DIAS. 3: ENVIAR SI EL ULTIMO MENSAJE ES DEL DESTINARIO.
-					if (($data['type'] == 1 OR is_null($data['type'])) OR ($data['type'] == 2 AND $r AND TimeAgo($recipient['timeonline'],true) >= 5) OR ($data['type'] == 3 AND $lA != false AND $lA['author'] != $uid)) {
+				// SELECCIONAR TIPO. 1: ENVIAR A TODOS. 2: ENVIAR A USUARIOS CON INACTIVAD DE 5 O MAS DIAS. 3: ENVIAR SI EL ULTIMO MENSAJE ES DEL DESTINARIO.
+				if (($data['type'] == 1 OR is_null($data['type'])) OR ($data['type'] == 2 AND $r AND TimeAgo($recipient['timeonline'],true) >= 5) OR ($data['type'] == 3 AND $lA != false AND $lA['author'] != $uid)) {
 
-						/* Transforma '-user-' al nombre del usuario al que se le envía el mensaje */
-						$mensaje1 = detectUserString($mensaje, $recipient['username']);
+					/* Transforma '-user-' al nombre del usuario al que se le envía el mensaje */
+					$mensaje1 = detectUserString($mensaje, $recipient['username']);
 
-						// ENVIAR MENSAJE PROGRAMADO
-						$addmensaje = mysqli_query($connect, "INSERT INTO `nuevochat_mensajes` (id_chat, author, toid, mensaje, time, foto, rutadefoto) VALUES
-							('{$id_chat}', '{$uid}', '{$toid}', '{$mensaje1}', '{$time}', '{$foto}', '{$rutadefoto}')");
+					$sqlInsert .= $separator . "('{$id_chat}', '{$uid}', '{$toid}', '{$mensaje1}', '{$time}', '{$foto}', '{$rutadefoto}')";
 
-						// ACUTALIZAR FECHA DEL CHAT
-						$update_time_room = mysqli_query($connect, "UPDATE `nuevochat_rooms` SET time='$timeroom' WHERE id='$id_chat'");
-					}
+					$idsChatRoom[] = $id_chat;
+
+					$separator = ',';
 				}
 			}
 		}
 	}
+	return [$sqlInsert, $idsChatRoom];
 }
 
 $ActualTime = time();
+$insertMensaje = '';
 
-// SELECCIONA TODOS LOS MENSAJES PROGRAMADOS QUE ESTEN CADUCADOS
-$querycp = mysqli_query($connect, "SELECT * FROM `mensajesprogramados` WHERE time<='{$ActualTime}'");
+$a = 0;
+while($a < 100)
+{
+  // SELECCIONA UN MENSAJE PROGRAMADO QUE ESTE CADUCADO
+	$querycp = mysqli_query($connect, "SELECT * FROM `mensajesprogramados` WHERE time<='{$ActualTime}' LIMIT 1");
 
-if($querycp && mysqli_num_rows($querycp)>0){
-	//
-	while($Mensaje = mysqli_fetch_assoc($querycp)){
+	/* Si existe almenos uno; continuar con la ejecucion */
+	if($querycp && mysqli_num_rows($querycp)>0)
+	{
 
-		// ENVIA EL MENSAJE PROGRAMADO
-		sendMassMessage($Mensaje);
-		
-		// BORRA EL MENSAJE PROGRAMADO DE LA LISTA
-		mysqli_query($connect, "DELETE FROM `mensajesprogramados` WHERE id='". $Mensaje["id"] ."'");
-	}
+    /**
+     * Borra el mensaje programado
+     * Evita que al ejecutarse denuevo el cron
+     * Se vuelva a enviar este mensaje
+     */
+    $Mensaje = mysqli_fetch_assoc($querycp);
+
+    // BORRA EL MENSAJE PROGRAMADO DE LA LISTA
+    mysqli_query($connect, "DELETE FROM `mensajesprogramados` WHERE id='". $Mensaje["id"] ."'");
+
+		// ENVIA EL MENSAJE PROGRAMADO (Enviaba, ahora sencillamente genera las consultas sql para enviar los mensajes y las devuelve)
+    $data = sendMassMessage($Mensaje);
+
+    $connect->query("INSERT INTO `nuevochat_mensajes` (id_chat, author, toid, mensaje, time, foto, rutadefoto) VALUES $data[0]");
+
+    actualizarRegistros($data[1]);
+
+    $a++;
+  }
+  else
+  {
+  	break;
+  }
 }
+
+
+
+
+/* Esta función se encarga de eliminar todas las compras que han alcanzado su fecha de vencimiento en los packs */
+borrarComprasVencidas();

@@ -43,6 +43,8 @@ if(isset($_GET["welcomechat"])){
 								<div class="box-header">
 									<h3 class="box-title"></h3>
 									<!-- Poner aqui aviso y textos-->
+<img src="https://bellasgram.com/chat/assets/img/flecha-correcta.png"> Las fotos enviadas por mensaje privado se borran automáticamente cada 5 días.
+
 
 									<!-- Codigo navidad-->
 									<script type="text/javascript">

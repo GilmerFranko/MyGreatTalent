@@ -2,9 +2,7 @@
 
 require("core.php");
 
-$uname = $_COOKIE['eluser'];
-$suser = mysqli_query($connect, "SELECT * FROM `players` WHERE username='$uname' LIMIT 1");
-$rowu  = mysqli_fetch_assoc($suser);
+$rowu  = $session;
 
 //SELECCIONAR SECCION
 $WHERE="";
@@ -111,7 +109,7 @@ head();
 <div class="content-wrapper">
 	<div id="content-container">
 		<div class="row" style="margin:0;">
-			<div class="col-sm-12 col-md-6">	
+			<div class="col-sm-12 col-md-6">
 			<!-- OCULTO 	<a class="btn btn-success" style="width:100%;" href="friendsgalerias.php">
 					<i class="fas fa-camera-retro"></i> Fotos de amigas
 				</a>
@@ -122,7 +120,7 @@ head();
 			<div class="row">
 				<div style="width: 100%;">
 					<div class="box">
-					
+
 							<div class='btn-group'>
 									<style>
 									.dropdown-backdrop{
@@ -171,7 +169,21 @@ head();
 							<?php
 							$timeonline = time() - 60;
 
-							$total_pages = $connect->query("SELECT f.`id` AS id,f.`category`,f.`descripcion`, f.`downloadable`,f.`imagen`, f.`linkdedescarga`, f.`player_id`, f.`thumb`, f.`time`, f.`type`, p.`id`,p.`hidden_for_old`, p.`username` FROM `fotosenventa` AS f INNER JOIN `players` AS `p` ON `p`.id = f.`player_id` AND IF(p.`hidden_for_old` != 0 AND p.`id` != '$rowu[id]', p.`hidden_for_old` <= '$rowu[time_joined]', 1=1) LEFT JOIN `friends` AS b ON (b.`player1` = f.`player_id` && b.`player2` = '$rowu[id]') || (b.`player2` = f.`player_id` && b.`player1` ='$rowu[id]') WHERE f.`category`='$prefer' AND IF(f.`player_id` != '$rowu[id]',b.`id` IS NOT NULL,1=1) GROUP BY f.`id` ORDER BY f.`id` DESC")->num_rows;
+							/**
+							 * Optiene las imagenes de los perfiles teniendo en cuenta las siguientes caracteristicas
+
+							 * 1. Que las fotos sean de la preferencia sexual del usuario
+
+							 * 2. Si el perfil de la foto tiene habilitada la opcion p.hidden_for_old:
+							      Deben mostrarse las fotos de ese perfil solo si el usuario es mas antiguo que ese perfil
+
+							 * 3. Si el perfil tiene la opcion mostrar_en_galeria activada
+
+							 * 4. Las fotos optenidas deben ser solo de personas que tenga
+							 		  una amistad con el usuario, no debe mostrar fotos de usuarios
+							 		  que no tenga amistad
+							**/
+							$total_pages = $connect->query("SELECT f.`id` AS id,f.`category`,f.`descripcion`, f.`downloadable`,f.`imagen`, f.`linkdedescarga`, f.`player_id`, f.`thumb`, f.`time`, f.`type`, p.`id`,p.`hidden_for_old`, p.`username` FROM `fotosenventa` AS f INNER JOIN `players` AS `p` ON `p`.id = f.`player_id` AND IF(p.`hidden_for_old` != 0 AND p.`id` != '$rowu[id]', p.`hidden_for_old` <= '$rowu[time_joined]', 1=1) LEFT JOIN `friends` AS b ON ((b.`player1` = f.`player_id` && b.`player2` = '$rowu[id]') || (b.`player2` = f.`player_id` && b.`player1` ='$rowu[id]')) AND p.`mostrar_en_galeria` = 1 WHERE f.`category`='$prefer' AND IF(f.`player_id` != '$rowu[id]',b.`id` IS NOT NULL,1=1) GROUP BY f.`id` ORDER BY f.`id` DESC")->num_rows;
 
 							$page = isset($_GET['page']) && is_numeric($_GET['page']) ? $_GET['page'] : 1;
 
@@ -179,7 +191,7 @@ head();
 							$calc_page = ($page - 1) * $num_results_on_page;
 
 							// SELECCIONAR FOTOS DE AMIGOS
-							$querycp = mysqli_query($connect, "SELECT f.`id` AS id,f.`category`,f.`descripcion`, f.`downloadable`,f.`imagen`, f.`linkdedescarga`, f.`player_id`, f.`thumb`, f.`time`, f.`type`, p.`id` AS pid,p.`hidden_for_old`, p.`username` FROM `fotosenventa` AS f INNER JOIN `players` AS `p` ON `p`.id = f.`player_id` AND IF(p.`hidden_for_old` != 0 AND p.`id` != '$rowu[id]', p.`hidden_for_old` <= '$rowu[time_joined]', 1=1) LEFT JOIN `friends` AS b ON (b.`player1` = f.`player_id` && b.`player2` = '$rowu[id]') || (b.`player2` = f.`player_id` && b.`player1` ='$rowu[id]') WHERE f.`category`='$prefer' AND IF(f.`player_id` != '$rowu[id]',b.`id` IS NOT NULL,1=1) GROUP BY f.`id` ORDER BY f.`id` DESC LIMIT {$calc_page}, {$num_results_on_page}");
+							$querycp = mysqli_query($connect, "SELECT f.`id` AS id,f.`category`,f.`descripcion`, f.`downloadable`,f.`imagen`, f.`linkdedescarga`, f.`player_id`, f.`thumb`, f.`time`, f.`type`, p.`id` AS pid,p.`hidden_for_old`, p.`username` FROM `fotosenventa` AS f INNER JOIN `players` AS `p` ON `p`.id = f.`player_id` AND IF(p.`hidden_for_old` != 0 AND p.`id` != '$rowu[id]', p.`hidden_for_old` <= '$rowu[time_joined]', 1=1) LEFT JOIN `friends` AS b ON ((b.`player1` = f.`player_id` && b.`player2` = '$rowu[id]') || (b.`player2` = f.`player_id` && b.`player1` ='$rowu[id]')) AND p.`mostrar_en_galeria` = 1 WHERE f.`category`='$prefer' AND IF(f.`player_id` != '$rowu[id]',b.`id` IS NOT NULL,1=1) GROUP BY f.`id` ORDER BY f.`id` DESC LIMIT {$calc_page}, {$num_results_on_page}");
 
 							$countcp = mysqli_num_rows($querycp);
 							if ($countcp > 0) {

@@ -1,6 +1,4 @@
 <?php
-
-include "config.php";
-
-echo CountAllThePhotos(10);
-?>
+  include "functions.php";
+  echo detectLink('www.hola.com');
+ ?>

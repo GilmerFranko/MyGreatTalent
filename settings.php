@@ -49,6 +49,7 @@ if (isset($_POST['save'])) {
 
 	if($rowu['gender']=='mujer'){
 		$perfiloculto = empty($_POST['perfiloculto']) ? 'no' : $_POST['perfiloculto'];
+		$mostrar_en_galeria = empty($_POST['mostrar_en_galeria']) ? 0 : $connect->real_escape_string($_POST['mostrar_en_galeria']);
 		$hidetochat = empty($_POST['hidetochat']) ? 'no' : $_POST['hidetochat'];
 	}else{
 		$perfiloculto = 'no';
@@ -99,8 +100,11 @@ if (isset($_POST['save'])) {
 
 	//exit();
 
-	$querysd = mysqli_query($connect, "UPDATE `players` SET avatar='$avatar', description='$description', perfiloculto='$perfiloculto',hidetochat='$hidetochat' WHERE id='$player_id'");
+	$querysd = $connect->query("UPDATE `players` SET `avatar` = '$avatar', `description` = '$description', `perfiloculto` = '$perfiloculto', `hidetochat` = '$hidetochat', `mostrar_en_galeria` = '$mostrar_en_galeria' WHERE `id` = '$player_id'");
 
+	error_log("UPDATE `players` SET `avatar` = '$avatar', `description` = '$description', `perfiloculto` = '$perfiloculto', `hidetochat` = '$hidetochat', `mostrar_en_galeria` = '$mostrar_en_galeria' WHERE `id` = '$player_id'");
+
+	error_log(var_export($connect->error,1));
 	echo '<meta http-equiv="refresh" content="0;url=settings.php">';
 }
 
@@ -136,8 +140,14 @@ $sqlPR = $connect->query("SELECT *,p.`id` AS p_id FROM players_recommendations A
 						</div>
 						<form enctype="multipart/form-data" id="save" name="save" method="POST" action="">
 							<center>
+								<div class="form-group">
+									<label class="content-input">
+										<input id="mostrar_en_galeria" type="checkbox" name="mostrar_en_galeria" value="1" <?php echo $rowu['mostrar_en_galeria'] == '1' ? 'checked=""' :''; ?>>Mostrar mis fotos en la galeria
+										<i></i>
+									</label>
+								</div>
 								<?php
-								if(false){
+								if(true){
 									?>
 									<div class="form-group">
 										<div class="form-group">
@@ -146,13 +156,13 @@ $sqlPR = $connect->query("SELECT *,p.`id` AS p_id FROM players_recommendations A
 												<i></i>
 											</label>
 										</div>
-									</div>
+									</div><!-- OCULTO
 									<div class="form-group">
 										<label class="content-input">
 											<input id="typeProgram" type="checkbox" name="hidetochat" value="si" <?php echo $rowu['hidetochat'] == 'si' ? 'checked=""' :''; ?>>Perfil solo visible a quienes se registraron desde el Chat
-											<i></i>
+											<i></i> 
 										</label>
-									</div>
+									</div>-->
 									<br>
 									<?php
 								}
@@ -254,15 +264,22 @@ $sqlPR = $connect->query("SELECT *,p.`id` AS p_id FROM players_recommendations A
 						</h3>
 					</div>
 					<div id="collapse2" class="panel-collapse in collapse text-center">
+						<!-- Cambiar contraseña -->
+						<div class="box" style="margin: 15px;">
+							<a href="cambiarclave.php" class="btn btn-primary">CAMBIAR CONTRASEÑA</a>
+						</div>
+
 						<!-- Eliminar cuenta -->
 						<div class="box" style="margin: 15px;">
-							<button id="deleteAccount" class="btn btn-danger" onclick="DeleteAccount(0);"><i class="fa fa-ban"></i> ELIMINAR CUENTA</button>
+							<button id="deleteAccount" class="btn btn-danger" onclick="DeleteAccountXD(0);"><i class="fa fa-ban"></i> ELIMINAR CUENTA</button>
 						</div>
 					</div>
 				</section>
 			</div>
 		</div>
 	</div>
+
+
 	<style>
 		#preview {
 			height: 100%;
@@ -418,6 +435,7 @@ $sqlPR = $connect->query("SELECT *,p.`id` AS p_id FROM players_recommendations A
 				}
 			});
 		});
+
 
 	</script>
 	<?php

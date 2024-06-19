@@ -16,7 +16,7 @@ head();
 	<div id="content-container">
 
 		<section class="content-header">
-			<h1><i class="fas fa-layer-group"></i> Mis Compras</h1>
+			<h1><i class="fas fa-layer-group"></i> Mis Suscripciones</h1>
 
 		</section>
 
@@ -61,7 +61,7 @@ head();
 
 							<div class="box">
 								<div class="box-header">
-									<h3 class="box-title">Mis packs comprados</h3>
+									<h3 class="box-title">Mis Suscripciones a packs</h3>
 								</div>
 								<div class="box-body">
 									<table id="dt-basic" class="table table-striped table-bordered table-hover" cellspacing="0" width="100%">

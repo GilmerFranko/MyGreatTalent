@@ -28,33 +28,24 @@ if(!isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['SCRIPT_FILENAME'] != '
       ];
       mysqli_query($connect, "INSERT INTO `fotosenventa` (player_id, imagen, thumb, descripcion, type, time,category) VALUES
        ('". $foto['player_id'] ."',
-         '". $foto['imagen'] ."',
-         '". $thumb ."',
-         '". $foto['descripcion'] ."',
-         '". $foto['type'] ."',
-         '". $dia ."','$foto[category]')");
-       mysqli_query($connect, "DELETE FROM `fotosprogramadas` WHERE id='{$FotoID}'");
+       '". $foto['imagen'] ."',
+       '". $thumb ."',
+       '". $foto['descripcion'] ."',
+       '". $foto['type'] ."',
+       '". $dia ."','$foto[category]')");
+      mysqli_query($connect, "DELETE FROM `fotosprogramadas` WHERE id='{$FotoID}'");
       // BORRA LA <<FOTO DE REGALO>>
-       $connect->query('TRUNCATE `photo_gift_credits`');
-     }
-   }
- }
-// COMPRUEBA QUE EXISTA UNA SESSION INICIADA
- if (isset($_COOKIE['eluser']))
- {
-    // CONSULTA LOS DATOS DEL USUARIO
-  $uname = $_COOKIE['eluser'];
-  $suser = mysqli_query($connect, "SELECT * FROM `players` WHERE username='$uname'");
-    // GUARDALOS EN UNA VARIABLE GLOBAL
-  $rowu = mysqli_fetch_assoc($suser);
-  $player_id = $rowu['id'];
-    // SI NO SE ENCUENTRA EL USUARIO EN LA BBDD
-  if ($suser AND $suser->num_rows <= 0)
-  {
-    echo '<meta http-equiv="refresh" content="0; url='.$sitio['site'].'index.php" />';
-    exit;
+      $connect->query('TRUNCATE `photo_gift_credits`');
+    }
   }
 }
+// COMPRUEBA QUE EXISTA UNA SESSION INICIADA
+if (isset($session) AND !empty($session) AND $session['role'] != 'guest')
+{
+  $rowu       = $session;
+  $player_id  = $rowu['id'];
+}
+
 // SI NO EXISTE NINGUNA SESSION INICIADA
 // COMPRUEBA QUE EL SITIO QUE ESTE VISITANDO EL USUARIO ESTE PERMITIRDO PARA NO LOGUEADOS
 elseif (in_array(basename($_SERVER['SCRIPT_NAME']), $sitesfree))
@@ -154,51 +145,52 @@ function head()
   </script>
   <!--BLOQUEADOR COPIAR PEGAR, AGREGAR LUGARES DONDE QUIERA QUE SI SE PUEDA COPIAR Y PEGAR-->
   <?php
-  if (basename($_SERVER['SCRIPT_NAME']) != 'messages.php' and basename($_SERVER['SCRIPT_NAME']) != 'search.php' and basename($_SERVER['SCRIPT_NAME']) != 'collections.php' and basename($_SERVER['SCRIPT_NAME']) != 'nombres.php' and basename($_SERVER['SCRIPT_NAME']) != 'mass.php' and basename($_SERVER['SCRIPT_NAME']) != 'notas.php' and basename($_SERVER['SCRIPT_NAME']) != 'compraspackadmin.php' and basename($_SERVER['SCRIPT_NAME']) != 'suscriptores.php' and basename($_SERVER['SCRIPT_NAME']) != 'settings.php' and basename($_SERVER['SCRIPT_NAME']) != 'mensajesauto.php' and basename($_SERVER['SCRIPT_NAME']) != 'regalo1.php' and basename($_SERVER['SCRIPT_NAME']) != 'foto2.php' and basename($_SERVER['SCRIPT_NAME']) != 'pack2.php' and basename($_SERVER['SCRIPT_NAME']) != 'edituser.php' and basename($_SERVER['SCRIPT_NAME']) != 'whopaid.php' and basename($_SERVER['SCRIPT_NAME']) != 'fotosprogramadas.php' and basename($_SERVER['SCRIPT_NAME']) != 'comprar.php' and basename($_SERVER['SCRIPT_NAME']) != 'referrers.php' AND $rowu['role']!='Admin') {
+  if (basename($_SERVER['SCRIPT_NAME']) != 'messages.php' and basename($_SERVER['SCRIPT_NAME']) != 'search.php' and basename($_SERVER['SCRIPT_NAME']) != 'chat2.php' and basename($_SERVER['SCRIPT_NAME']) != 'collections.php' and basename
+      ($_SERVER['SCRIPT_NAME']) != 'friends.php' and basename($_SERVER['SCRIPT_NAME']) != 'adminreportes.php' and basename($_SERVER['SCRIPT_NAME']) != 'nombres.php' and basename($_SERVER['SCRIPT_NAME']) != 'mass.php' and basename($_SERVER['SCRIPT_NAME']) != 'notas.php' and basename($_SERVER['SCRIPT_NAME']) != 'compraspackadmin.php' and basename($_SERVER['SCRIPT_NAME']) != 'suscriptores.php' and basename($_SERVER['SCRIPT_NAME']) != 'settings.php' and basename($_SERVER['SCRIPT_NAME']) != 'mensajesauto.php' and basename($_SERVER['SCRIPT_NAME']) != 'regalo1.php' and basename($_SERVER['SCRIPT_NAME']) != 'foto2.php' and basename($_SERVER['SCRIPT_NAME']) != 'pack2.php' and basename($_SERVER['SCRIPT_NAME']) != 'edituser.php' and basename($_SERVER['SCRIPT_NAME']) != 'whopaid.php' and basename($_SERVER['SCRIPT_NAME']) != 'fotosprogramadas.php' and basename($_SERVER['SCRIPT_NAME']) != 'comprar.php' and basename($_SERVER['SCRIPT_NAME']) != 'referrers.php' AND $rowu['role']!='Admin') {
     ?>
     <script type="text/javascript">
       $(document).ready(function () {
               //Disable full page
-        $("body").on("contextmenu",function(e){
-          return false;
-        });
+              $("body").on("contextmenu",function(e){
+                return false;
+              });
 
 
               //Disable part of page
-        $("#id").on("contextmenu",function(e){
-          return false;
-        });
-        onkeydown = e => {
-          let tecla = e.which || e.keyCode;
+              $("#id").on("contextmenu",function(e){
+                return false;
+              });
+              onkeydown = e => {
+                let tecla = e.which || e.keyCode;
 
                   // Evaluar si se ha presionado la tecla Ctrl:
-          if ( e.ctrlKey ) {
+                  if ( e.ctrlKey ) {
                   // Evitar el comportamiento por defecto del nevagador:
                   // Mostrar el resultado de la combinación de las teclas:
                   //BLOQUEA TECLA CTRL + S Y CTRL + U
-            if ( tecla === 85 || tecla === 83 ){
-              e.preventDefault();
-              e.stopPropagation();
-            }
-          }
+                  if ( tecla === 85 || tecla === 83 ){
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }
+                }
                   //BLOQUEA TECLA F12
-          if (e.which === 123) {
-            return false;
-          }
-        }
-      });
-    </script>
-    <!--BLOQUEAR DRAG AND DROP usar asi 'cut copy paste'linea 227-->
-    <BODY ondragstart="return false;" ondrop="return false;">
-      <!--TAMBIEN HAY QUE MANTENER SIEMPRE LA PORTPAPELES LIMIPIA-->
-      <style>
-        @media print {
-          body { visibility: hidden; }
-        }
-      </style>
-      <script type="text/javascript">
-        $(document).ready(function ()
-        {
+                  if (e.which === 123) {
+                    return false;
+                  }
+                }
+              });
+            </script>
+            <!--BLOQUEAR DRAG AND DROP usar asi 'cut copy paste'linea 227-->
+            <BODY ondragstart="return false;" ondrop="return false;">
+              <!--TAMBIEN HAY QUE MANTENER SIEMPRE LA PORTPAPELES LIMIPIA-->
+              <style>
+                @media print {
+                  body { visibility: hidden; }
+                }
+              </style>
+              <script type="text/javascript">
+                $(document).ready(function ()
+                {
           //Disable full page
           <?php if(basename($_SERVER['SCRIPT_NAME']) != 'profile.php'): ?>
             $('body').bind('cut copy', function (e) {
@@ -212,218 +204,218 @@ function head()
 
         });
       //BLOQUEAR TECLA IMPR PANT
-      </script>
-      <?php
-    }
-    ?>
-    <script>
-      function openImage(image,nosub = " "){
-       console.log('img', image)
+    </script>
+    <?php
+  }
+  ?>
+  <script>
+    function openImage(image,nosub = " "){
+     console.log('img', image)
         //SI LA IMAGEN REQUIERE FILTRO; AGREGARLO
-       $('.img-mdl-cnt').remove()
-       const close = $(`<div>`).addClass('btn-close').html($(`<i>`).addClass('fa fa-times'))
-       const expand = $(`<div>`).addClass('btn-expand').html($(`<i>`).addClass('fa fa-expand'))
-       const bg = $(`<div>`).addClass('bg')
-       const img = $(`<img>`).addClass('image-content max-size '+ nosub).attr({'src':image})
-       const c = $(`<div>`).addClass('img-mdl-cnt')
-       .append(bg)
-       .append(close)
-       .append(expand)
-       .append(img)
-       expand.click(function(){
-        console.log("expand ptmadree")
-        img.toggleClass('max-size')
-      })
-       close.click(function(){
-        c.remove()
-      })
-       bg.click(function(){
-        c.remove()
-      })
+        $('.img-mdl-cnt').remove()
+        const close = $(`<div>`).addClass('btn-close').html($(`<i>`).addClass('fa fa-times'))
+        const expand = $(`<div>`).addClass('btn-expand').html($(`<i>`).addClass('fa fa-expand'))
+        const bg = $(`<div>`).addClass('bg')
+        const img = $(`<img>`).addClass('image-content max-size '+ nosub).attr({'src':image})
+        const c = $(`<div>`).addClass('img-mdl-cnt')
+        .append(bg)
+        .append(close)
+        .append(expand)
+        .append(img)
+        expand.click(function(){
+          console.log("expand ptmadree")
+          img.toggleClass('max-size')
+        })
+        close.click(function(){
+          c.remove()
+        })
+        bg.click(function(){
+          c.remove()
+        })
 
-       $(`body`).append(c)
-     }
+        $(`body`).append(c)
+      }
 
-     $(document).ready(function(){
+      $(document).ready(function(){
        $('.item-zoom').click(function(){
         const img = $(this).data('src')
         openImage(img)
       });
         //CON FILTRO
-       $('.item-zoom-2').click(function(){
-        const img = $(this).data('src')
-        openImage(img,"noSub");
-      });
-     })
-   </script>
- </head>
- <body class="hold-transition skin-red sidebar-mini<?php
- if($rowu['theme'] == 1){
-  Echo ' --dark';
-}
-?>">
-<div class="wrapper">
-  <header class="main-header">
-    <!-- BARRA NAVBAR -->
-    <nav class="navbar navbar-static-top">
-      <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
-        <i class="fas fa-bars"></i>
-        <span class="sr-only">Toggle navigation</span>
-      </a>
-      <ul class="sidebar-menu header-menu" style="width: 70%">
-        <!-- SI ESTOY LOGUEADO -->
-        <?php if(isLogged()): ?>
-          <li <?php currentPage('messages.php'); ?> id="msgContent" align="center">
-            <a href="messages.php">
-              <i class="fas fa-envelope"></i>
-              <span>
-                <?php
-
-
-                $noleidos = 0;
-
-                // OPTIENE LOS MENSAJES NO LEIDOS DE "$player_id"
-                $noleidos = $connect->query("SELECT * FROM `nuevochat_mensajes` AS nm INNER JOIN nuevochat_rooms AS nr ON (nr.`player1` = '$player_id' || nr.`player2` = '$player_id') AND nr.`id` = nm.`id_chat` WHERE leido = IF(author = '$player_id','no devolver mensajes','no')")->num_rows;
-
-                if ($noleidos > 0){
-                  echo '<span class="count-notify">'.$noleidos.'</span>';
-                }
-
-
-
-                $sqlfotonovista = mysqli_query($connect, "SELECT * FROM `notificaciones_fotosnuevas` WHERE player_notificado='{$player_id}' AND visto='no'");
-                $Fotos = mysqli_num_rows($sqlfotonovista);
-                ?>
-              </span>
-            </a>
-          </li>
-
-          <li <?php currentPage('galerias.php'); ?> id="fotosContent" align="center">
-            <a href="galerias.php">
-              <i class="fas fa-camera-retro"></i>
-              <span>
-                <?php
-                if ($Fotos > 0){
-                  echo '<span class="count-notify">'.$Fotos.'</span>';
-                }
-                ?>
-              </span>
-            </a>
-          </li>
-
-          <li <?php currentPage('search.php'); ?> align="center">
-            <a href="search.php">
-              <i class="fas fa-search"></i>
-            </a>
-          </li>
-
-          <li <?php currentPage('notifications.php'); ?> id="notifyContent" align="center">
-            <a href="notifications.php">
-              <div>
-                <i class="fas fa-bell"></i>
+        $('.item-zoom-2').click(function(){
+          const img = $(this).data('src')
+          openImage(img,"noSub");
+        });
+      })
+    </script>
+  </head>
+  <body class="hold-transition skin-red sidebar-mini<?php
+  if($rowu['theme'] == 1){
+    Echo ' --dark';
+  }
+  ?>">
+  <div class="wrapper">
+    <header class="main-header">
+      <!-- BARRA NAVBAR -->
+      <nav class="navbar navbar-static-top">
+        <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
+          <i class="fas fa-bars"></i>
+          <span class="sr-only">Toggle navigation</span>
+        </a>
+        <ul class="sidebar-menu header-menu" style="width: 70%">
+          <!-- SI ESTOY LOGUEADO -->
+          <?php if(isLogged()): ?>
+            <li <?php currentPage('messages.php'); ?> id="msgContent" align="center">
+              <a href="messages.php">
+                <i class="fas fa-envelope"></i>
                 <span>
                   <?php
-//ver si hay notificaciones no vistas
 
-                  $sqlnovistos = mysqli_query($connect, "SELECT * FROM `players_notifications` WHERE toid='$player_id' AND read_time='0'");
-                  $novistos   = mysqli_num_rows($sqlnovistos);
 
-                  if ($novistos > 0){
-                    echo '<span class="count-notify">'.$novistos.'</span>';
+                  $noleidos = 0;
+
+                // OPTIENE LOS MENSAJES NO LEIDOS DE "$player_id"
+                  $noleidos = $connect->query("SELECT * FROM `nuevochat_mensajes` AS nm INNER JOIN nuevochat_rooms AS nr ON (nr.`player1` = '$player_id' || nr.`player2` = '$player_id') AND nr.`id` = nm.`id_chat` WHERE leido = IF(author = '$player_id','no devolver mensajes','no')")->num_rows;
+
+                  if ($noleidos > 0){
+                    echo '<span class="count-notify">'.$noleidos.'</span>';
+                  }
+
+
+
+                  $sqlfotonovista = mysqli_query($connect, "SELECT * FROM `notificaciones_fotosnuevas` WHERE player_notificado='{$player_id}' AND visto='no'");
+                  $Fotos = mysqli_num_rows($sqlfotonovista);
+                  ?>
+                </span>
+              </a>
+            </li>
+
+            <li <?php currentPage('galerias.php'); ?> id="fotosContent" align="center">
+              <a href="galerias.php">
+                <i class="fas fa-camera-retro"></i>
+                <span>
+                  <?php
+                  if ($Fotos > 0){
+                    echo '<span class="count-notify">'.$Fotos.'</span>';
                   }
                   ?>
                 </span>
-              </div>
-            </a>
-          </li>
+              </a>
+            </li>
 
-          <li <?php currentPage('packs.php'); ?> align="center">
-            <a href="packs.php">
-              <i class="fas fa-images"></i>
-            </a>
-          </li>
+            <li <?php currentPage('search.php'); ?> align="center">
+              <a href="search.php">
+                <i class="fas fa-search"></i>
+              </a>
+            </li>
 
-          <li align="center">
-            <div>
-              <a class="dark-theme" style="position: relative;
-              left: 20px;">
-              <i class="fa fa-lightbulb"></i>
-            </a>
-          </div>
-        </li>
-      <?php else: ?>
-        <li align="center">
-          <a href="index.php">
-            <i class="fa fa-sign-in-alt"></i>
-          </a>
-        </li>
-        <li align="center">
-          <a href="register.php">
-            <i class="fa fa-user-plus"></i>
-          </a>
-        </li>
-      <?php endif ?>
-    </ul>
-    <!-- /BARRA NAVBAR -->
+            <li <?php currentPage('notifications.php'); ?> id="notifyContent" align="center">
+              <a href="notifications.php">
+                <div>
+                  <i class="fas fa-bell"></i>
+                  <span>
+                    <?php
+//ver si hay notificaciones no vistas
 
-    <!-- MENU PERFIL -->
-    <?php if (isLogged()): ?>
-      <div class="navbar-custom-menu">
-        <ul class="nav navbar-nav">
-          <li class="dropdown user user-menu">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="padding: 0px!important;">
-              <img src="<?php echo $sitio['site'].$rowu['avatar'];?>" class="user-image" style="width: 40px;height: 40px;margin: 5px;">
-              <span class="hidden-xs" style="padding: 15px;display: inline-block;"><?php echo $_COOKIE['eluser']; ?></span>
-            </a>
-            <ul class="dropdown-menu">
-              <li class="user-header">
-                <img src="<?php echo $sitio['site'].$rowu['avatar'];?>" class="img-circle" alt="Admin Image">
-                <p>
-                  <i class="fas fa-user"></i> <?php echo $_COOKIE['eluser'];?>
-                  <small><i class="fas fa-envelope"></i> <?php echo $rowu['email'];?></small>
-                </p>
-              </li>
-              <li class="user-footer">
-                <div class="pull-left">
-                  <a href="settings.php" class="btn btn-default btn-flat"><i class="fas fa-edit fa-fw fa-lg"></i> Editar Perfil</a>
+                    $sqlnovistos = mysqli_query($connect, "SELECT * FROM `players_notifications` WHERE toid='$player_id' AND read_time='0'");
+                    $novistos   = mysqli_num_rows($sqlnovistos);
+
+                    if ($novistos > 0){
+                      echo '<span class="count-notify">'.$novistos.'</span>';
+                    }
+                    ?>
+                  </span>
                 </div>
-                <?php
-                if ($rowu['gender'] == 'mujer'){
-                  ?>
-                  <div class="pull-right">
-                    <a href="<?php echo $sitio['site']; ?>logout.php" class="btn btn-default btn-flat"><i class="fas fa-sign-out-alt fa-fw"></i> Logout</a>
-                  </div>
-                  <?php
-                }
-                ?>
+              </a>
+            </li>
+
+            <li <?php currentPage('packs.php'); ?> align="center">
+              <a href="packs.php">
+                <i class="fas fa-images"></i>
+              </a>
+            </li>
+
+            <li align="center">
+              <div>
+                <a class="dark-theme" style="position: relative;
+                left: 20px;">
+                <i class="fa fa-lightbulb"></i>
+              </a>
+            </div>
+          </li>
+          <?php else: ?>
+            <li align="center">
+              <a href="index.php">
+                <i class="fa fa-sign-in-alt"></i>
+              </a>
+            </li>
+            <li align="center">
+              <a href="register.php">
+                <i class="fa fa-user-plus"></i>
+              </a>
+            </li>
+          <?php endif ?>
+        </ul>
+        <!-- /BARRA NAVBAR -->
+
+        <!-- MENU PERFIL -->
+        <?php if (isLogged()): ?>
+          <div class="navbar-custom-menu">
+            <ul class="nav navbar-nav">
+              <li class="dropdown user user-menu">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="padding: 0px!important;">
+                  <img src="<?php echo $sitio['site'].$rowu['avatar'];?>" class="user-image" style="width: 40px;height: 40px;margin: 5px;">
+                  <span class="hidden-xs" style="padding: 15px;display: inline-block;"><?php echo $_COOKIE['eluser']; ?></span>
+                </a>
+                <ul class="dropdown-menu">
+                  <li class="user-header">
+                    <img src="<?php echo $sitio['site'].$rowu['avatar'];?>" class="img-circle" alt="Admin Image">
+                    <p>
+                      <i class="fas fa-user"></i> <?php echo $_COOKIE['eluser'];?>
+                      <small><i class="fas fa-envelope"></i> <?php echo $rowu['email'];?></small>
+                    </p>
+                  </li>
+                  <li class="user-footer">
+                    <div class="pull-left">
+                      <a href="settings.php" class="btn btn-default btn-flat"><i class="fas fa-edit fa-fw fa-lg"></i> Editar Perfil</a>
+                    </div>
+                    <?php
+                    if ($rowu['gender'] == 'mujer'){
+                      ?>
+                      <div class="pull-right">
+                        <a href="<?php echo $sitio['site']; ?>logout.php" class="btn btn-default btn-flat"><i class="fas fa-sign-out-alt fa-fw"></i> Logout</a>
+                      </div>
+                      <?php
+                    }
+                    ?>
+                  </li>
+                </ul>
               </li>
             </ul>
-          </li>
-        </ul>
-      </div>
-    <?php endif ?>
-  </nav>
-</header>
-<!-- BARRA LATERAL -->
-<aside class="main-sidebar">
-  <?php if (isLogged()):
+          </div>
+        <?php endif ?>
+      </nav>
+    </header>
+    <!-- BARRA LATERAL -->
+    <aside class="main-sidebar">
+      <?php if (isLogged()):
     // SI EL ADMIN ESTA EN OTRO USUARIo
-    if(isset($_COOKIE['returnUser']) AND !empty($_COOKIE['returnUser'])):?>
-      <div class="user-panel" style="padding: 20px 10px;height: auto;">
-        <span class="text-white">Mirando como <strong><?php echo getFirstWord($rowu['username']) ?></strong>&nbsp;&nbsp; </span><a href="javascript:logoutProfileGuest()" class="btn btn-default btn-flat">Salir</a>
-      </div>
-    <?php endif; ?>
-    <section class="sidebar">
-      <div class="user-panel" style="padding: 20px 10px;height: auto;">
-        <div class="pull-left image" style="padding:10px 0;">
-          <img src="<?php echo $sitio['site'].$rowu['avatar']; ?>" class="img-circle" alt="User Image">
-        </div>
-        <div class="pull-left info">
-         <p><?php Echo $_COOKIE['eluser']; ?></p>
-         <a id="coins-user-panel" href="#">
-          <i class="fas fa-coins"></i>
-          <span><?php Echo $rowu['eCreditos'];?> Créditos</span>
-        </a>
+        if(isset($_COOKIE['returnUser']) AND !empty($_COOKIE['returnUser'])):?>
+          <div class="user-panel" style="padding: 20px 10px;height: auto;">
+            <span class="text-white">Mirando como <strong><?php echo getFirstWord($rowu['username']) ?></strong>&nbsp;&nbsp; </span><a href="javascript:logoutProfileGuest()" class="btn btn-default btn-flat">Salir</a>
+          </div>
+        <?php endif; ?>
+        <section class="sidebar">
+          <div class="user-panel" style="padding: 20px 10px;height: auto;">
+            <div class="pull-left image" style="padding:10px 0;">
+              <img src="<?php echo $sitio['site'].$rowu['avatar']; ?>" class="img-circle" alt="User Image">
+            </div>
+            <div class="pull-left info">
+             <p><?php Echo $_COOKIE['eluser']; ?></p>
+             <a id="coins-user-panel" href="#">
+              <i class="fas fa-coins"></i>
+              <span><?php Echo $rowu['eCreditos'];?> Créditos</span>
+            </a>
 		<!--	<br/>
 			<a href="#">
 				<i class="fas fa-coins"></i>
@@ -457,43 +449,43 @@ function head()
     if (basename($_SERVER['SCRIPT_NAME']) == 'profile.php') {
       echo 'class="active"';
     }
-  ?>>
-  <a href="profile.php">
-    <i class="fas fa-address-card"></i>&nbsp; <span>Mi Perfil</span>
+    ?>>
+    <a href="profile.php">
+      <i class="fas fa-address-card"></i>&nbsp; <span>Mi Perfil</span>
+    </a>
+  </li>
+  <li <?php
+  if (basename($_SERVER['SCRIPT_NAME']) == 'messages.php') {
+    echo 'class="active"';
+  }
+  ?> id="msgContent">
+  <a href="messages.php">
+    <i class="fas fa-envelope"></i>&nbsp; <span>Mensajes
+      <?php
+      if ($noleidos > 0){
+        echo '<span class="count-notify">'.$noleidos.'</span>';
+      }
+      ?>
+    </span>
   </a>
 </li>
-<li <?php
-if (basename($_SERVER['SCRIPT_NAME']) == 'messages.php') {
-  echo 'class="active"';
-}
-?> id="msgContent">
-<a href="messages.php">
-  <i class="fas fa-envelope"></i>&nbsp; <span>Mensajes
-    <?php
-    if ($noleidos > 0){
-      echo '<span class="count-notify">'.$noleidos.'</span>';
-    }
-    ?>
-  </span>
-</a>
-</li>
 
-
-    <!-- OCULTO  <li <?php Echo basename($_SERVER['SCRIPT_NAME']) == 'packs.php' ? 'class="active"':'';?> id="NotifyPack">
+<li <?php Echo basename($_SERVER['SCRIPT_NAME']) == 'packs.php' ? 'class="active"':'';?> id="NotifyPack">
 			<a href="packs.php">
 				<i class="fas fa-images"></i>&nbsp; <span>Packs en Venta</span>
 				<?php Echo get_Notification_pack();	?>
 			</a>
-    </li> -->
+        </li>
+
 
     <li <?php
     if (basename($_SERVER['SCRIPT_NAME']) == 'comprar.php') {
      echo 'class="active"';
    }
- ?>>
- <a href="comprar.php">
-  <i class="fab fa-paypal"></i>&nbsp; <span>Comprar Créditos</span>
-</a>
+   ?>>
+   <a href="comprar.php">
+    <i class="fab fa-paypal"></i>&nbsp; <span>Comprar Créditos</span>
+  </a>
 </li>
  <!-- OCULTO     <li <?php echo basename($_SERVER['SCRIPT_NAME']) == 'preguntas.php' ? 'class="active"':'';?> id="NotifyQuestion">
            <a href="preguntas.php">
@@ -834,20 +826,20 @@ if (basename($_SERVER['SCRIPT_NAME']) == 'settings.php') {
     if (basename($_SERVER['SCRIPT_NAME']) == 'adminsettings.php') {
       echo 'class="active"';
     }
-  ?>>
-  <a href="adminsettings.php">
-    <i class="fas fa-wrench"></i>&nbsp; <span>Configuraciones </span>
-  </a>
-</li>
+    ?>>
+    <a href="adminsettings.php">
+      <i class="fas fa-wrench"></i>&nbsp; <span>Configuraciones </span>
+    </a>
+  </li>
 
-<li <?php
-if (basename($_SERVER['SCRIPT_NAME']) == 'create_gifcodes.php') {
-  echo 'class="active"';
-}
-?>>
-<a href="create_gifcodes.php">
-  <i class="fas fa-award"></i>&nbsp; <span>Codigos de Regalo </span>
-</a>
+  <li <?php
+  if (basename($_SERVER['SCRIPT_NAME']) == 'create_gifcodes.php') {
+    echo 'class="active"';
+  }
+  ?>>
+  <a href="create_gifcodes.php">
+    <i class="fas fa-award"></i>&nbsp; <span>Codigos de Regalo </span>
+  </a>
 </li>
 <li <?php if (basename($_SERVER['SCRIPT_NAME']) == 'admin_questions.php')echo 'class="active"';?>>
   <a href="admin_questions.php">
@@ -924,10 +916,10 @@ if (basename($_SERVER['SCRIPT_NAME']) == 'buscaip.php') {
   if (basename($_SERVER['SCRIPT_NAME']) == 'hola.php') {
     echo 'class="active"';
   }
-?>>
-<a href="hola.php">
-  <i class="fas fa-hand-holding-usd"></i>&nbsp; <span>Quien pago</span>
-</a>
+  ?>>
+  <a href="hola.php">
+    <i class="fas fa-hand-holding-usd"></i>&nbsp; <span>Quien pago</span>
+  </a>
 </li>
 <li <?php
 if (basename($_SERVER['SCRIPT_NAME']) == 'subscriberslist.php') {
@@ -1317,168 +1309,168 @@ function footer()
       });
     })
         // HACE UNA PREGUNTA AL USUARIO CON UN FORMULARIO, SI ACEPTA, SE REDIRIGIRA AL LINK
-    $(".actionQuest").click(function(){
-      var dHref = $(this).data('href');
-      var quest = $(this).data('quest');
-      var btnAction = $(this).data('btnaction');
-      swal.fire({
-        title: quest,
-        buttons: ["Cancelar", btnAction],
-        showCancelButton: true,
-      })
-      .then((name) => {
-        if(name.isConfirmed){
+        $(".actionQuest").click(function(){
+          var dHref = $(this).data('href');
+          var quest = $(this).data('quest');
+          var btnAction = $(this).data('btnaction');
+          swal.fire({
+            title: quest,
+            buttons: ["Cancelar", btnAction],
+            showCancelButton: true,
+          })
+          .then((name) => {
+            if(name.isConfirmed){
 
-          window.location.href = dHref;
+              window.location.href = dHref;
 
-        }
-      });
-    })
-    $(".actionInfo").click(function(){
-      let info = $(this).data('info');
-      let secondInfo = $(this).data('secondinfo');
-      swal.fire({title: info,html: secondInfo,icon: 'info'})
-    })
-    notifyRequest();
-    setInterval(function () {
-      notifyRequest();
-    }, 5000);
-
-    position = $(".wrapper").scrollTop();
-
-    $(".wrapper").scroll(function() {
-     if($(".wrapper").width() <= 3600 && !$("body").hasClass("sidebar-open")){
-      var scroll = $(".wrapper").scrollTop();
-      if(scroll > position) {
-       ScrollPos = "DOWN";
-     } else if(ScrollPos) {
-       ScrollPos = "TOP";
-     }
-     if(LastScroll != ScrollPos){
-       LastScroll = ScrollPos;
-
-       if(ScrollPos == "TOP"){
-        $(".main-header").animate( { "top": "0px" } );
-      }
-
-      if(ScrollPos == "DOWN"){
-        $(".main-header").animate( { "top": "-70px" } );
-      }
-    }
-    position = scroll;
-  }else{
-				//console.log('Window is width');
-  }
-});
-    $(".buy_item").click(function(){
-      var dHref = $(this).data('href');
-      var cash = $(this).data('cash');
-      swal.fire({
-        title: 'Desea comprar este item por '+cash+' Creditos Normales o Especiales?',
-        buttons: ["No", "Si"],
-        showCancelButton: true,
-      })
-      .then((name) => {
-        if(name.isConfirmed){
-
-          window.location.href = dHref;
-
-        }
-      });
-    })
-    $(".buy_player_item").click(function(){
-      var dHref = $(this).data('href');
-      var cash = $(this).data('cash');
-      swal.fire({
-        title: 'Desea comprar este item por '+cash+' Puntos',
-        buttons: ["No", "Si"],
-        showCancelButton: true,
-      })
-      .then((name) => {
-        if(name.isConfirmed){
-
-          window.location.href = dHref;
-
-        }
-      });
-    })
-    $(".action_limited").click(function(){
-
-      swal.fire({
-        title: 'Esto solo se puede hacer desde la app de BellasGram',
-        buttons: ["Luego", "Descarga la App de BellasGram"],
-        showCancelButton: true,
-        icon: "https://bellasgram.com/chat/assets/img/app.png",
-      })
-      .then((name) => {
-        if(name.isConfirmed){
-
-          window.location.href = "instrucciones.php";
-
-        }
-      });
-    })
-    <?php if(isLogged()): ?>
-      function notifyRequest(){
-            //$("#actualizarmensajes").load('ajax.php #actualizarmensajes');
-        $.ajax({
-          url:'./ajax.php',
-          type:'POST',
-          data: {
-            'notify': true
-          }
-        }).done(function(response){
-          var response = $.parseJSON(response);
-          console.log( response );
-          resultnotify=response.Msg + response.notify + response.Fotos + response.Packs + response.Encuesta + response.Questions;
-          changeTitle(resultnotify);
-          if(response.Msg > 0){
-            $("[id=msgContent]").find(".count-notify").remove();
-            $("[id=msgContent]").find("span").append( $("<span>").addClass("count-notify").html(response.Msg) );
-          }else{
-            $("[id=msgContent]").find(".count-notify").remove();
-          }
-          if(response.notify > 0){
-            console.log( response.notify );
-            $("[id=notifyContent]").find(".count-notify").remove();
-            $("[id=notifyContent]").find("span").append($("<span>").addClass("count-notify").html(response.notify) );
-          }else{
-            $("[id=notifyContent]").find(".count-notify").remove();
-          }
-          if(response.Fotos > 0){
-                    //console.log( response.Fotos );
-            $("[id=fotosContent]").find(".count-notify").remove();
-            $("[id=fotosContent]").find("span").append( $("<span>").addClass("count-notify").html(response.Fotos) );
-          }else{
-            $("[id=fotosContent]").find(".count-notify").remove();
-          }
-
-          if(response.Packs > 0){
-                    //console.log( response.Fotos );
-            $("[id=NotifyPack]").find(".count-notify").remove();
-            $("[id=NotifyPack]").find("span").append( $("<span>").addClass("count-notify").html(response.Packs) );
-          }else{
-            $("[id=NotifyPack]").find(".count-notify").remove();
-          }
-          if(response.Encuesta > 0){
-                    //console.log( response.Fotos );
-            $("[id=NotifyPoll]").find(".count-notify").remove();
-            $("[id=NotifyPoll]").find("span").append( $("<span>").addClass("count-notify").html(response.Encuesta) );
-          }else{
-            $("[id=NotifyPoll]").find(".count-notify").remove();
-          }
-          if(response.Questions > 0){
-                    //console.log( response.Fotos );
-            $("[id=NotifyQuestion]").find(".count-notify").remove();
-            $("[id=NotifyQuestion]").find("span").append($("<span>").addClass("count-notify").html(response.Questions) );
-          }else{
-            $("[id=NotifyPoll]").find(".count-notify").remove();
-          }
+            }
+          });
         })
-      }
-    <?php endif ?>
+        $(".actionInfo").click(function(){
+          let info = $(this).data('info');
+          let secondInfo = $(this).data('secondinfo');
+          swal.fire({title: info,html: secondInfo,icon: 'info'})
+        })
+        notifyRequest();
+        setInterval(function () {
+          notifyRequest();
+        }, 5000);
 
-  })
+        position = $(".wrapper").scrollTop();
+
+        $(".wrapper").scroll(function() {
+         if($(".wrapper").width() <= 3600 && !$("body").hasClass("sidebar-open")){
+          var scroll = $(".wrapper").scrollTop();
+          if(scroll > position) {
+           ScrollPos = "DOWN";
+         } else if(ScrollPos) {
+           ScrollPos = "TOP";
+         }
+         if(LastScroll != ScrollPos){
+           LastScroll = ScrollPos;
+
+           if(ScrollPos == "TOP"){
+            $(".main-header").animate( { "top": "0px" } );
+          }
+
+          if(ScrollPos == "DOWN"){
+            $(".main-header").animate( { "top": "-70px" } );
+          }
+        }
+        position = scroll;
+      }else{
+				//console.log('Window is width');
+      }
+    });
+        $(".buy_item").click(function(){
+          var dHref = $(this).data('href');
+          var cash = $(this).data('cash');
+          swal.fire({
+            title: 'Desea comprar este item por '+cash+' Creditos Normales o Especiales?',
+            buttons: ["No", "Si"],
+            showCancelButton: true,
+          })
+          .then((name) => {
+            if(name.isConfirmed){
+
+              window.location.href = dHref;
+
+            }
+          });
+        })
+        $(".buy_player_item").click(function(){
+          var dHref = $(this).data('href');
+          var cash = $(this).data('cash');
+          swal.fire({
+            title: 'Desea comprar este item por '+cash+' Puntos',
+            buttons: ["No", "Si"],
+            showCancelButton: true,
+          })
+          .then((name) => {
+            if(name.isConfirmed){
+
+              window.location.href = dHref;
+
+            }
+          });
+        })
+        $(".action_limited").click(function(){
+
+          swal.fire({
+            title: 'Esto solo se puede hacer desde la app de BellasGram',
+            buttons: ["Luego", "Descarga la App de BellasGram"],
+            showCancelButton: true,
+            icon: "https://bellasgram.com/chat/assets/img/app.png",
+          })
+          .then((name) => {
+            if(name.isConfirmed){
+
+              window.location.href = "instrucciones.php";
+
+            }
+          });
+        })
+        <?php if(isLogged()): ?>
+          function notifyRequest(){
+            //$("#actualizarmensajes").load('ajax.php #actualizarmensajes');
+            $.ajax({
+              url:'./ajax.php',
+              type:'POST',
+              data: {
+                'notify': true
+              }
+            }).done(function(response){
+              var response = $.parseJSON(response);
+              console.log( response );
+              resultnotify=response.Msg + response.notify + response.Fotos + response.Packs + response.Encuesta + response.Questions;
+              changeTitle(resultnotify);
+              if(response.Msg > 0){
+                $("[id=msgContent]").find(".count-notify").remove();
+                $("[id=msgContent]").find("span").append( $("<span>").addClass("count-notify").html(response.Msg) );
+              }else{
+                $("[id=msgContent]").find(".count-notify").remove();
+              }
+              if(response.notify > 0){
+                console.log( response.notify );
+                $("[id=notifyContent]").find(".count-notify").remove();
+                $("[id=notifyContent]").find("span").append($("<span>").addClass("count-notify").html(response.notify) );
+              }else{
+                $("[id=notifyContent]").find(".count-notify").remove();
+              }
+              if(response.Fotos > 0){
+                    //console.log( response.Fotos );
+                    $("[id=fotosContent]").find(".count-notify").remove();
+                    $("[id=fotosContent]").find("span").append( $("<span>").addClass("count-notify").html(response.Fotos) );
+                  }else{
+                    $("[id=fotosContent]").find(".count-notify").remove();
+                  }
+
+                  if(response.Packs > 0){
+                    //console.log( response.Fotos );
+                    $("[id=NotifyPack]").find(".count-notify").remove();
+                    $("[id=NotifyPack]").find("span").append( $("<span>").addClass("count-notify").html(response.Packs) );
+                  }else{
+                    $("[id=NotifyPack]").find(".count-notify").remove();
+                  }
+                  if(response.Encuesta > 0){
+                    //console.log( response.Fotos );
+                    $("[id=NotifyPoll]").find(".count-notify").remove();
+                    $("[id=NotifyPoll]").find("span").append( $("<span>").addClass("count-notify").html(response.Encuesta) );
+                  }else{
+                    $("[id=NotifyPoll]").find(".count-notify").remove();
+                  }
+                  if(response.Questions > 0){
+                    //console.log( response.Fotos );
+                    $("[id=NotifyQuestion]").find(".count-notify").remove();
+                    $("[id=NotifyQuestion]").find("span").append($("<span>").addClass("count-notify").html(response.Questions) );
+                  }else{
+                    $("[id=NotifyPoll]").find(".count-notify").remove();
+                  }
+                })
+          }
+        <?php endif ?>
+
+      })
 
 function loadgalery(imageRandom = null){
   location.href= '<?php echo $sitio['site']; ?>foto.php?fotoID='+imageRandom;
@@ -1497,8 +1489,8 @@ function videoPreview(id){
     $(video).get(0).play()
   }
       //setTimeout(() =>{ getThumb(id)},1500)
-}
-</script>
+    }
+  </script>
 
 </body>
 </html>

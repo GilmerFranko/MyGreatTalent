@@ -1,57 +1,65 @@
 <?php
-
 require "config.php";
 
-$eltoken = rand(11111,99999);
-$urid = $_GET['urid'];
-$chatid = $_GET['chatid'];
-$toid= $_GET['toid'];
-$fileName = $_FILES["file1"]["name"]; // The file name
-$fileTmpLoc = $_FILES["file1"]["tmp_name"]; // File in the PHP tmp folder
-$fileType = $_FILES["file1"]["type"]; // The type of file it is
-$fileSize = $_FILES["file1"]["size"]; // File size in bytes
-$fileErrorMsg = $_FILES["file1"]["error"]; // 0 for false... and 1 for true
+function handleFileUpload($file, $chatId, $userId, $toId) {
+  global $connect, $session;
+  $fileName = $file["name"];
+  $fileTmpLoc = $file["tmp_name"];
+  $fileType = $file["type"];
+  $fileSize = $file["size"];
 
-if (!$fileTmpLoc) { // if file not chosen
-  echo "ERROR: por favor primero haga click en seleccionar archivo antes de hacer click en enviar foto.";
-  exit();
-}
-$info = pathinfo($_FILES['file1']['name']);
+  if (!$fileTmpLoc) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Por favor, selecciona un archivo antes de enviarlo.']);
+    exit();
+  }
 
-$elfilenm = md5(rand().time()).".".$info['extension'];
+  $info = pathinfo($fileName);
+  $elfilenm = md5(rand() . time()) . "." . $info['extension'];
+  $uploadDir = "uploads/src_messages/";
+  $uploadPath = $uploadDir . $elfilenm;
 
-// COMPRUEBA SI EL ARCHIVO ES UNA IMAGEN
-if($fileType == 'image/jpeg' OR $fileType == 'image/png' OR $fileType == 'image/jpg')
-{
-  // SI EL ARCHIVO SE MOVIO CORRECTAMENTE
-  if(move_uploaded_file($fileTmpLoc, "uploads/src_messages/$elfilenm"))
-  {
-    $mensaje = '';
-    $time    = time();
-    $foto = 'Yes';
-    $rutadefoto = 'uploads/src_messages/'.$elfilenm;
-    $timeroom = time();
+  if ((($fileType == 'image/jpeg' || $fileType == 'image/png' || $fileType == 'image/jpg') && $fileSize <= 20000000) || ($fileType == 'video/mp4' && $fileSize <= 20000000 AND $session['permission_send_gift'] == 1)) {
+    if (move_uploaded_file($fileTmpLoc, $uploadPath)) {
+      $timeroom = time();
+      $updateTimeRoom = mysqli_query($connect, "UPDATE `nuevochat_rooms` SET time='{$timeroom}' WHERE id='{$chatId}'");
 
-    $update_time_room = mysqli_query($connect, "UPDATE `nuevochat_rooms` SET time='{$timeroom}' WHERE id='{$chatid}'");
+      $mensaje = '';
+      $time = time();
+      $foto = 'Yes';
+      $rutaDefoto = $uploadPath;
 
-    $post_gcmessage = mysqli_query($connect, "INSERT INTO `nuevochat_mensajes` (id_chat, author, toid, mensaje, time, foto, rutadefoto) VALUES ('$chatid', '$urid', '$toid', '$mensaje', '$time', '$foto', '$rutadefoto')");
+      $postGcMessage = mysqli_query($connect, "INSERT INTO `nuevochat_mensajes` (id_chat, author, toid, mensaje, time, foto, rutadefoto) VALUES ('$chatId', '$userId', '$toId', '$mensaje', '$time', '$foto', '$rutaDefoto')");
 
-    $lasidinsert = mysqli_insert_id($connect);
-    $query = $connect->query("SELECT *, nm.`id` AS id FROM `nuevochat_mensajes` AS nm INNER JOIN players AS p ON p.`id` = nm.`author` WHERE nm.`id` = '$lasidinsert'");
+      $lastInsertId = mysqli_insert_id($connect);
+      $query = $connect->query("SELECT *, nm.`id` AS id FROM `nuevochat_mensajes` AS nm INNER JOIN players AS p ON p.`id` = nm.`author` WHERE nm.`id` = '$lastInsertId'");
 
-    if ($query AND $query->num_rows > 0)
-    {
-        // GUARDA EL MESAJE EN UN ARRAY
-      while ($messages = $query->fetch_assoc())
-      {
-        $msg[] = $messages;
+      if ($query && $query->num_rows > 0) {
+        while ($messages = $query->fetch_assoc()) {
+          $msg[] = $messages;
+        }
+        echo json_encode(['status' => true, 'msg' => $msg]);
       }
-      echo json_encode($msg);
+    } else {
+      //http_response_code(500); // Internal Server Error
+      echo json_encode(['status' => false, 'msg' => 'Error al mover el archivo.']);
     }
   } else {
-    echo "error 980";
+    //http_response_code(400); // Bad Request
+    echo json_encode(['status' => false, 'msg' => 'Tipo de archivo no compatible o tamaño excedido.']);
   }
-}else{
-  echo "nadabien";
+}
+
+// Manejo de la solicitud AJAX
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  $file = $_FILES["file1"];
+  $urid = $_GET['urid'];
+  $chatid = $_GET['chatid'];
+  $toid = $_GET['toid'];
+
+  handleFileUpload($file, $chatid, $urid, $toid);
+} else {
+  http_response_code(405); // Method Not Allowed
+  echo json_encode(['error' => 'Método no permitido.']);
 }
 ?>

@@ -357,594 +357,600 @@ if (isset($_POST['mensaje'])){
 
 						mysqli_query($connect, "INSERT INTO `respuesta_sala` (chat_room, pregunta_id, publicado, time) VALUES
 							('{$id_chat}', '{$RSPDa["id"]}', 'no', '{$DelayTime}')");
-							break;
-						}
+						break;
 					}
 				}
 			}
 		}
+	}
 
 	// revisando si el mensaje va hacia un bot
-		$sqlrevisiondebot = mysqli_query($connect, "SELECT * FROM `players` WHERE id='$toid'");
-		$rowubot = mysqli_fetch_assoc($sqlrevisiondebot);
+	$sqlrevisiondebot = mysqli_query($connect, "SELECT * FROM `players` WHERE id='$toid'");
+	$rowubot = mysqli_fetch_assoc($sqlrevisiondebot);
 
-		if ($rowubot['role'] == 'BOT'){
+	if ($rowubot['role'] == 'BOT'){
 		//vemos que el bot no ha respondido y que no se ha insertado una solicitud de respuesta
 
-			$sqlrevisiondemensjbot = mysqli_query($connect, "SELECT * FROM `nuevochat_rooms` WHERE id='$id_chat'");
+		$sqlrevisiondemensjbot = mysqli_query($connect, "SELECT * FROM `nuevochat_rooms` WHERE id='$id_chat'");
 
-			$revisiondemensjbot = mysqli_fetch_assoc($sqlrevisiondemensjbot);
+		$revisiondemensjbot = mysqli_fetch_assoc($sqlrevisiondemensjbot);
 
-			if ($revisiondemensjbot['mensaje_chatbot'] == 0){
+		if ($revisiondemensjbot['mensaje_chatbot'] == 0){
 
 
-				$sqlrevisiondesolic = mysqli_query($connect, "SELECT * FROM `respuestasbot_enespera` WHERE chat_id='$id_chat'");
+			$sqlrevisiondesolic = mysqli_query($connect, "SELECT * FROM `respuestasbot_enespera` WHERE chat_id='$id_chat'");
 
-				$countrevisiondesoclic = mysqli_num_rows($sqlrevisiondesolic);
+			$countrevisiondesoclic = mysqli_num_rows($sqlrevisiondesolic);
 
-				if ($countrevisiondesoclic < 1){
+			if ($countrevisiondesoclic < 1){
 
-					$mensajedebot = $rowubot['respuesta_automatica'];
-					$respuestatime = time() + ($rowubot['tiempoderespuesta'] * 60);
+				$mensajedebot = $rowubot['respuesta_automatica'];
+				$respuestatime = time() + ($rowubot['tiempoderespuesta'] * 60);
 
-					$sqlfotodebot = mysqli_query($connect, "SELECT * FROM `fotosbot` WHERE lista_id='$rowubot[id_listadefotos]' ORDER BY RAND() LIMIT 1");
-					$rowufotodebot = mysqli_fetch_assoc($sqlfotodebot);
+				$sqlfotodebot = mysqli_query($connect, "SELECT * FROM `fotosbot` WHERE lista_id='$rowubot[id_listadefotos]' ORDER BY RAND() LIMIT 1");
+				$rowufotodebot = mysqli_fetch_assoc($sqlfotodebot);
 
-					$fotodebot = $rowufotodebot['rutadefoto'];
+				$fotodebot = $rowufotodebot['rutadefoto'];
 				// insertar la solicitud de respuesta del bot
-					$post_solicitudbot = mysqli_query($connect, "INSERT INTO `respuestasbot_enespera` (bot_id, chat_id, toid, mensaje, foto, respuesta_time) VALUES ('$toid', '$id_chat', '$author', '$mensajedebot', '$fotodebot', '$respuestatime')");
-
-				}
+				$post_solicitudbot = mysqli_query($connect, "INSERT INTO `respuestasbot_enespera` (bot_id, chat_id, toid, mensaje, foto, respuesta_time) VALUES ('$toid', '$id_chat', '$author', '$mensajedebot', '$fotodebot', '$respuestatime')");
 
 			}
 
 		}
 
-		$sqlrevisiondecantidaddemensajes = mysqli_query($connect, "SELECT * FROM `nuevochat_mensajes` WHERE chat_id='$id_chat'");
-
-		if($sqlrevisiondecantidaddemensajes){
-
-			$countmensajes = mysqli_num_rows($sqlrevisiondecantidaddemensajes);
-
-			if($countmensajes > 20){
-
-				$mensajeaborrar = mysqli_query($connect, "SELECT * FROM `nuevochat_mensajes` WHERE chat_id='$id_chat' ORDER BY id ASC LIMIT 1");
-				$msjdelete  = mysqli_fetch_assoc($mensajeaborrar);
-
-				$borrarmensaje = mysqli_query($connect, "DELETE FROM `nuevochat_mensajes` WHERE id='$msjdelete[id]'");
-
-			}
-
-		}
-
-		exit();
 	}
+
+	$sqlrevisiondecantidaddemensajes = mysqli_query($connect, "SELECT * FROM `nuevochat_mensajes` WHERE chat_id='$id_chat'");
+
+	if($sqlrevisiondecantidaddemensajes){
+
+		$countmensajes = mysqli_num_rows($sqlrevisiondecantidaddemensajes);
+
+		if($countmensajes > 20){
+
+			$mensajeaborrar = mysqli_query($connect, "SELECT * FROM `nuevochat_mensajes` WHERE chat_id='$id_chat' ORDER BY id ASC LIMIT 1");
+			$msjdelete  = mysqli_fetch_assoc($mensajeaborrar);
+
+			$borrarmensaje = mysqli_query($connect, "DELETE FROM `nuevochat_mensajes` WHERE id='$msjdelete[id]'");
+
+		}
+
+	}
+
+	exit();
+}
 
 //comentarios
 
-	if (isset($_GET['postComment'])) {
-		$comment = $_POST['comment'];
-		$galeria_id = $_POST['galeria_id'];
-		$author = $player_id;
-		$date = date('d F Y');
-		$time = date('H:i');
+if (isset($_GET['postComment'])) {
+	$comment = $_POST['comment'];
+	$galeria_id = $_POST['galeria_id'];
+	$author = $player_id;
+	$date = date('d F Y');
+	$time = date('H:i');
 
-		$querycpc = mysqli_query($connect, "SELECT * FROM `player_comments` WHERE author_id='$player_id' AND galeria_id='$galeria_id' AND comment='$comment' AND date='$date' LIMIT 1");
-		$countcpc = mysqli_num_rows($querycpc);
-		if ($countcpc == 0) {
+	$querycpc = mysqli_query($connect, "SELECT * FROM `player_comments` WHERE author_id='$player_id' AND galeria_id='$galeria_id' AND comment='$comment' AND date='$date' LIMIT 1");
+	$countcpc = mysqli_num_rows($querycpc);
+	if ($countcpc == 0) {
 
-			if(mysqli_query($connect, "INSERT INTO `player_comments` (galeria_id, author_id, comment, date, time) VALUES ('$galeria_id', '$player_id', '$comment', '$date', '$time')")){
+		if(mysqli_query($connect, "INSERT INTO `player_comments` (galeria_id, author_id, comment, date, time) VALUES ('$galeria_id', '$player_id', '$comment', '$date', '$time')")){
 
-				Echo json_encode([
-					'status' => true,
-					'message' => get_comment("WHERE comment='{$comment}' AND date='{$date}' AND time='{$time}'")
-				]);
-			}
-
-			$querycpbrr1 = mysqli_query($connect, "SELECT * FROM `player_comments` WHERE galeria_id='$galeria_id'");
-			if($querycpbrr1){
-				$countcpbrr = mysqli_num_rows($querycpbrr1);
-				if ($countcpbrr > 500) {
-					$querycpbrr2 = mysqli_query($connect, "SELECT * FROM `player_comments` WHERE galeria_id='$galeria_id' ORDER BY id ASC LIMIT 1");
-					$rowbrr = mysqli_fetch_assoc($querycpbrr2);
-					$brrcmnt = $rowbrr['id'];
-					$brr = mysqli_query($connect, "DELETE FROM `player_comments` WHERE id='$brrcmnt'");
-				}
-			}
-			exit();
+			Echo json_encode([
+				'status' => true,
+				'message' => get_comment("WHERE comment='{$comment}' AND date='{$date}' AND time='{$time}'")
+			]);
 		}
 
-		Echo json_encode([
-			'status' => false,
-			'message' => "Error enviando comentario."
-		]);
-
-		Exit();
-	}
-
-	function admCreditos($gid, $value="+"){
-		global $connect, $player_id;
-		$post = mysqli_query($connect, "SELECT * FROM `fotosenventa` WHERE id='{$gid}'");
-		if($post && mysqli_num_rows($post)){
-			$post = mysqli_fetch_assoc($post);
-			$connect->query("UPDATE `players` SET Likesdados=Likesdados{$value}1 WHERE id='{$player_id}'");
-			$connect->query("UPDATE `players` SET LikesRecibidos=LikesRecibidos{$value}1 WHERE id='{$post['player_id']}'");
+		$querycpbrr1 = mysqli_query($connect, "SELECT * FROM `player_comments` WHERE galeria_id='$galeria_id'");
+		if($querycpbrr1){
+			$countcpbrr = mysqli_num_rows($querycpbrr1);
+			if ($countcpbrr > 500) {
+				$querycpbrr2 = mysqli_query($connect, "SELECT * FROM `player_comments` WHERE galeria_id='$galeria_id' ORDER BY id ASC LIMIT 1");
+				$rowbrr = mysqli_fetch_assoc($querycpbrr2);
+				$brrcmnt = $rowbrr['id'];
+				$brr = mysqli_query($connect, "DELETE FROM `player_comments` WHERE id='$brrcmnt'");
+			}
 		}
+		exit();
 	}
+
+	Echo json_encode([
+		'status' => false,
+		'message' => "Error enviando comentario."
+	]);
+
+	Exit();
+}
+
+function admCreditos($gid, $value="+"){
+	global $connect, $player_id;
+	$post = mysqli_query($connect, "SELECT * FROM `fotosenventa` WHERE id='{$gid}'");
+	if($post && mysqli_num_rows($post)){
+		$post = mysqli_fetch_assoc($post);
+		$connect->query("UPDATE `players` SET Likesdados=Likesdados{$value}1 WHERE id='{$player_id}'");
+		$connect->query("UPDATE `players` SET LikesRecibidos=LikesRecibidos{$value}1 WHERE id='{$post['player_id']}'");
+	}
+}
 
 //me gusta
 
-	if (isset($_GET['like'])) {
-		$gid = $_POST['gid'];
+if (isset($_GET['like'])) {
+	$gid = $_POST['gid'];
 
-		$querycpc = mysqli_query($connect, "SELECT * FROM `player_megusta` WHERE player_id='$player_id' AND galeria_id='$gid' LIMIT 1");
-		if ($querycpc && !mysqli_num_rows($querycpc)) {
-			if(mysqli_query($connect, "INSERT INTO `player_megusta` (player_id, galeria_id) VALUES ('$player_id', '$gid')")){
-				Echo json_encode([
-					'status' => true,
-					'message' => "Megusta Añadido!!"
-				]);
+	$querycpc = mysqli_query($connect, "SELECT * FROM `player_megusta` WHERE player_id='$player_id' AND galeria_id='$gid' LIMIT 1");
+	if ($querycpc && !mysqli_num_rows($querycpc)) {
+		if(mysqli_query($connect, "INSERT INTO `player_megusta` (player_id, galeria_id) VALUES ('$player_id', '$gid')")){
+			Echo json_encode([
+				'status' => true,
+				'message' => "Megusta Añadido!!"
+			]);
 
-				admCreditos($gid, '+');
-			}
-			Exit();
-		}else{
-			if(mysqli_query($connect, "DELETE FROM player_megusta WHERE player_id='$player_id' AND galeria_id='$gid'")){
-				Echo json_encode([
-					'status' => false,
-					'message' => "Megusta Removido!!"
-				]);
-
-				admCreditos($gid, '-');
-			}
-			Exit();
+			admCreditos($gid, '+');
 		}
-		Echo json_encode([
-			'status' => false,
-			'message' => "Error"
-		]);
+		Exit();
+	}else{
+		if(mysqli_query($connect, "DELETE FROM player_megusta WHERE player_id='$player_id' AND galeria_id='$gid'")){
+			Echo json_encode([
+				'status' => false,
+				'message' => "Megusta Removido!!"
+			]);
+
+			admCreditos($gid, '-');
+		}
 		Exit();
 	}
+	Echo json_encode([
+		'status' => false,
+		'message' => "Error"
+	]);
+	Exit();
+}
 
 ///
 
 
-	if(isset($_GET['addProgramMessagesMass'])) {
+if(isset($_GET['addProgramMessagesMass'])) {
 
 	// RECORRE TODOS LOS MENSAJES
-		foreach ($_POST['image'] as $index => $File) {
-			$FileDirName = null;
-			if($File && $File!='none') {
-				$image = str_replace("data:image/png;base64,", '', $File);
-				$image = str_replace("data:image/jpg;base64,", '', $image);
-				$image = str_replace("data:image/jpeg;base64,", '', $image);
-				$image = str_replace("data:image/gif;base64,", '', $image);
-				$image = base64_decode($image);
+	foreach ($_POST['image'] as $index => $File) {
+		$FileDirName = null;
+		if($File && $File!='none') {
+			// $image = str_replace("data:image/png;base64,", '', $File);
+			// $image = str_replace("data:image/jpg;base64,", '', $image);
+			// $image = str_replace("data:image/jpeg;base64,", '', $image);
+			// $image = str_replace("data:image/gif;base64,", '', $image);
+			$data = $File;
+			list($type, $data) = explode(';', $data);
+			list(, $data)      = explode(',', $data);
+			$image = base64_decode($data);
 
-				$FileName = $player_id .'-'. time() .'-'. rand(100, 999) .'.jpg';
-				$target_dir = "uploads/";
-				$FileDirName = $target_dir . $FileName;
+			$FileName = $player_id .'-'. time() .'-'. rand(100, 999) .'.jpg';
+			$target_dir = "uploads/";
+			$FileDirName = $target_dir . $FileName;
 
-				file_put_contents($FileDirName, $image);
-			}
+			file_put_contents($FileDirName, $image);
+		}
 		// ALMACENA EL DIA DEL ULTIMO MENSAJE PROGRAMADO
-			$lastDay = getLastDayMessageScheduled();
+		$lastDay = getLastDayMessageScheduled();
 
 		//CAMBIAR DIA A UNIX//
-			if($lastDay != NULL) $lastDay = ($lastDay * (60*60*24)); else $lastDay = 0;
+		if($lastDay != NULL) $lastDay = ($lastDay * (60*60*24)); else $lastDay = 0;
 
 		// PROGRAMA EL MENSAJE
-			ProgramarMenssage($FileDirName, $index, $lastDay);
-		}
-
-		Echo json_encode(['status' => true]);
-		exit();
+		ProgramarMenssage($FileDirName, $index, $lastDay);
 	}
 
-	function ProgramarFoto($ImageDir, $index){
-		global $player_id, $connect,$rowu;
+	Echo json_encode(['status' => true]);
+	exit();
+}
 
-		$descripcion = $_POST['descripcion'][ $index ];
-		$postType = $_POST['postType'];
-		$date = time();
-		$numsave=0;
-		if($_POST['dias'][ $index ]==0 && $_POST['horas'][ $index ]==0 && $_POST['minutos'][ $index ]==0){
-			/*---EVITAR DIAS REPETIDOS---*/
-			$sql = mysqli_query($connect, "SELECT * FROM fotosprogramadas WHERE player_id=$player_id");
-			if(mysqli_num_rows($sql)>0){
-				$b=0;
-				$a=0;
+function ProgramarFoto($ImageDir, $index){
+	global $player_id, $connect,$rowu;
+
+	$descripcion = $_POST['descripcion'][ $index ];
+	$postType = $_POST['postType'];
+	$date = time();
+	$numsave=0;
+	if($_POST['dias'][ $index ]==0 && $_POST['horas'][ $index ]==0 && $_POST['minutos'][ $index ]==0){
+		/*---EVITAR DIAS REPETIDOS---*/
+		$sql = mysqli_query($connect, "SELECT * FROM fotosprogramadas WHERE player_id=$player_id");
+		if(mysqli_num_rows($sql)>0){
+			$b=0;
+			$a=0;
 			//ALMACENA FILAS Y COLUMNAS DE LA CONSULTA EN UN ARRAY
-				while($arrow = mysqli_fetch_row($sql)) {
-					for ($i=0; $i < 6; $i++) {
-						$row[$a][$i]=$arrow[$i];
-					}
-					$a++;
+			while($arrow = mysqli_fetch_row($sql)) {
+				for ($i=0; $i < 6; $i++) {
+					$row[$a][$i]=$arrow[$i];
 				}
-				$numsave=0;
+				$a++;
+			}
+			$numsave=0;
 			//BUSCAR CUALES PROGRAMACIONES ESTAN Y CUALES FALTAN
-				for($a=0; $a<mysqli_num_rows($sql); $a++){
-					if (isset($row[$a]) and !empty($row[$a])) {
-						for($b=0; $b<mysqli_num_rows($sql); $b++){
-							if (isset($row[$b]) and !empty($row[$b]))
-							{
-								if (TimeNextHours($row[$b][5])==TimeNextHours($row[$a][5])){
+			for($a=0; $a<mysqli_num_rows($sql); $a++){
+				if (isset($row[$a]) and !empty($row[$a])) {
+					for($b=0; $b<mysqli_num_rows($sql); $b++){
+						if (isset($row[$b]) and !empty($row[$b]))
+						{
+							if (TimeNextHours($row[$b][5])==TimeNextHours($row[$a][5])){
 								//echo TimeNextHours($row[$b][5])." AND ".TimeNextHours($row[$a][5])."<br>";
-									$save[$numsave]=$row[$b][5];
-									$saveday[$numsave]=TimeNextHours($row[$b][5]);
-									$numsave++;
-								}
+								$save[$numsave]=$row[$b][5];
+								$saveday[$numsave]=TimeNextHours($row[$b][5]);
+								$numsave++;
 							}
 						}
 					}
 				}
-				$a=0;
+			}
+			$a=0;
 			//SELECCIONAR LOS NUMEROS(DIAS) QUE NO ESTAN EN UN RANGO DE X A X NUMEROS
-				$range=range(0,max($saveday));
-				$missingValues = array_diff($range,$saveday);
-				foreach ($missingValues as $key => $value) {
+			$range=range(0,max($saveday));
+			$missingValues = array_diff($range,$saveday);
+			foreach ($missingValues as $key => $value) {
 				//SACAR AL 0 PARA EVITAR COLOCAR "0 DIAS"
-					if($key!=0){
-						$missing[$a]=$key;
-						$a++;
-					}
+				if($key!=0){
+					$missing[$a]=$key;
+					$a++;
 				}
+			}
 		//SI NO HAY DIAS REPETIDOS EN LAS FOTOS PROGRAMADAS
-				if(!isset($missing) or empty($missing)){
-					$sql = mysqli_query($connect, "SELECT * FROM fotosprogramadas WHERE player_id=$player_id ORDER BY time DESC");
+			if(!isset($missing) or empty($missing)){
+				$sql = mysqli_query($connect, "SELECT * FROM fotosprogramadas WHERE player_id=$player_id ORDER BY time DESC");
 					//SELECCIONA EL ULTIMO DIA PROGRAMADO
-					$arrow1=mysqli_fetch_assoc($sql);
-					$missing[0]=TimeNextHours($arrow1['time'])+1;
-				}
+				$arrow1=mysqli_fetch_assoc($sql);
+				$missing[0]=TimeNextHours($arrow1['time'])+1;
+			}
 		//SI NO EN FOTOS PRAGAMADAS
-			}else{
-			//QUE LA PRIMERA PROGRAMACION SEA DE UN DIA
-				$missing[0]=1;
-			}
-			$d = $missing[0] * (60*60*24);
-			$date = $date + $d;
-
-			$d = rand(0, 24) * (60*24);
-			$date = $date + $d;
-
-			$d = rand(0, 60) * (60);
-			$date = $date + $d;
 		}else{
-			if($_POST['dias'][ $index ]>0){
-				$d = $_POST['dias'][ $index ] * (60*60*24);
-				$date = $date + $d;
-			}
-			if($_POST['horas'][ $index ]>0){
-				$d = $_POST['horas'][ $index ] * (60*60);
-				$date = $date + $d;
-			}
-			if($_POST['minutos'][ $index ]>0){
-				$d = $_POST['minutos'][ $index ] * (60);
-				$date = $date + $d;
-			}
+			//QUE LA PRIMERA PROGRAMACION SEA DE UN DIA
+			$missing[0]=1;
 		}
+		$d = $missing[0] * (60*60*24);
+		$date = $date + $d;
+
+		$d = rand(0, 24) * (60*24);
+		$date = $date + $d;
+
+		$d = rand(0, 60) * (60);
+		$date = $date + $d;
+	}else{
+		if($_POST['dias'][ $index ]>0){
+			$d = $_POST['dias'][ $index ] * (60*60*24);
+			$date = $date + $d;
+		}
+		if($_POST['horas'][ $index ]>0){
+			$d = $_POST['horas'][ $index ] * (60*60);
+			$date = $date + $d;
+		}
+		if($_POST['minutos'][ $index ]>0){
+			$d = $_POST['minutos'][ $index ] * (60);
+			$date = $date + $d;
+		}
+	}
 	//CONVERTIR EN JSON
-		$ImageDir = '["' . $ImageDir . '"]';
+	$ImageDir = '["' . $ImageDir . '"]';
 
-		mysqli_query($connect, "INSERT INTO `fotosprogramadas` (player_id, imagen, descripcion, type, time,category) VALUES
-			('{$player_id}', '{$ImageDir}', '{$descripcion}', '{$postType}', '". $date ."','$rowu[category]')");
-		}
+	mysqli_query($connect, "INSERT INTO `fotosprogramadas` (player_id, imagen, descripcion, type, time,category) VALUES
+		('{$player_id}', '{$ImageDir}', '{$descripcion}', '{$postType}', '". $date ."','$rowu[category]')");
+}
 
-		if(isset($_GET['addprograma'])) {
+if(isset($_GET['addprograma'])) {
 
-			foreach ($_POST['file'] as $index => $File) {
-				$image = str_replace("data:image/png;base64,", '', $File);
-				$image = str_replace("data:image/jpg;base64,", '', $image);
-				$image = str_replace("data:image/jpeg;base64,", '', $image);
-				$image = str_replace("data:image/gif;base64,", '', $image);
-				$image = base64_decode($image);
+	foreach ($_POST['file'] as $index => $File) {
+		// $image = str_replace("data:image/png;base64,", '', $File);
+		// $image = str_replace("data:image/jpg;base64,", '', $image);
+		// $image = str_replace("data:image/jpeg;base64,", '', $image);
+		// $image = str_replace("data:image/gif;base64,", '', $image);
+		$data = $File;
+		list($type, $data) = explode(';', $data);
+		list(, $data)      = explode(',', $data);
+		$image = base64_decode($data);
 
-				$FileName = $player_id .'-'. time() .'-'. rand(100, 999) .'.jpg';
-				$target_dir    = "shout/galeria/";
+		$FileName = $player_id .'-'. time() .'-'. rand(100, 999) .'.jpg';
+		$target_dir    = "shout/galeria/";
 
-				file_put_contents($target_dir . $FileName, $image);
+		file_put_contents($target_dir . $FileName, $image);
 
-				ProgramarFoto($target_dir . $FileName, $index);
-			}
+		ProgramarFoto($target_dir . $FileName, $index);
+	}
 
-			Echo json_encode(['status' => true]);
-			exit();
-		}
+	Echo json_encode(['status' => true]);
+	exit();
+}
 
-		if(isset($_GET['addGalery'])) {
+if(isset($_GET['addGalery'])) {
 
-			$time = time();
-			$dia = date('d', time());
-			$SelectPhonoDay = mysqli_query($connect, "SELECT *, DATE_FORMAT(FROM_UNIXTIME( time),'%d') AS day FROM fotosenventa WHERE player_id = '$player_id' AND DATE_FORMAT(FROM_UNIXTIME( time),'%d') = '$dia'");
-			if($SelectPhonoDay->num_rows >= 15){
-				Echo json_encode([
-					'status' => false,
-					'message' => "Llegaste al limite de imagenes por dia."
-				]);
-				exit();
-			}
-			$gender = $_POST['gender'];
-			$descripcion = $_POST['descripcion'];
-			$downloadable = $_POST['downloadable'];
-			$postType = $_POST['postType'];
-			$error=0;
+	$time = time();
+	$dia = date('d', time());
+	$SelectPhonoDay = mysqli_query($connect, "SELECT *, DATE_FORMAT(FROM_UNIXTIME( time),'%d') AS day FROM fotosenventa WHERE player_id = '$player_id' AND DATE_FORMAT(FROM_UNIXTIME( time),'%d') = '$dia'");
+	if($SelectPhonoDay->num_rows >= 15){
+		Echo json_encode([
+			'status' => false,
+			'message' => "Llegaste al limite de imagenes por dia."
+		]);
+		exit();
+	}
+	$gender = $_POST['gender'];
+	$descripcion = $_POST['descripcion'];
+	$downloadable = $_POST['downloadable'];
+	$postType = $_POST['postType'];
+	$error=0;
 	//SI EL USUARIO INGRESO UN LINK EXTERNO
-			if(isset($_POST['linkext']) and !empty($_POST['linkext'])) {
+	if(isset($_POST['linkext']) and !empty($_POST['linkext'])) {
 		//VERIFICA QUE SEA UN LINK
-				if(filtrourl($_POST['linkext'])=="error"){
+		if(filtrourl($_POST['linkext'])=="error"){
 			//SI NO ES, NOTIFICAR AL USUARIO
-					Echo json_encode([
-						'status' => false,
-						'message' => "link-incorrect"
-					]);
-					exit;
-				}else{
-					$linkext = $_POST['linkext'];
-				}
+			Echo json_encode([
+				'status' => false,
+				'message' => "link-incorrect"
+			]);
+			exit;
+		}else{
+			$linkext = $_POST['linkext'];
+		}
 		//SI NO EXITE ALGUNA IMAGEN, SUBIR A LA BBDD SIN IMAGENES
-				if(!isset($_FILES["fotoFile"]) or empty($FILE_["fotoFile"])) {
-					if(!$insertarcompra = mysqli_query($connect, "INSERT INTO `fotosenventa` (player_id, descripcion,linkdedescarga, type,downloadable, time,category) VALUES
-						('$player_id', '$descripcion', '$linkext' , '{$postType}','$downloadable', '". $time ."','$gender')")){
-						$error=2;
-						Echo json_encode([
-							'status' => false,
-							'message' => "error guardando la publicacion"
-						]);
-						exit;
-					}else{
-						Echo json_encode([
-							'status' => true,
-							'message' => "Imagen subida con exito."
-						]);
-						exit;
-					}
-				}
-	//SI NO HAY URL, COLOCARLA EN BLANCO
-			}else{
-				$linkext=" ";
-			}
-			if(!isset($player_id)){
+		if(!isset($_FILES["fotoFile"]) or empty($FILE_["fotoFile"])) {
+			if(!$insertarcompra = mysqli_query($connect, "INSERT INTO `fotosenventa` (player_id, descripcion,linkdedescarga, type,downloadable, time,category) VALUES
+				('$player_id', '$descripcion', '$linkext' , '{$postType}','$downloadable', '". $time ."','$gender')")){
+				$error=2;
 				Echo json_encode([
 					'status' => false,
-					'message' => "debes iniciar session para continuar."
+					'message' => "error guardando la publicacion"
 				]);
+				exit;
+			}else{
+				Echo json_encode([
+					'status' => true,
+					'message' => "Imagen subida con exito."
+				]);
+				exit;
 			}
+		}
+	//SI NO HAY URL, COLOCARLA EN BLANCO
+	}else{
+		$linkext=" ";
+	}
+	if(!isset($player_id)){
+		Echo json_encode([
+			'status' => false,
+			'message' => "debes iniciar session para continuar."
+		]);
+	}
 
 	/// imagen
-			$uname = $_COOKIE['eluser'];
-			$Images = [];
-			$thumbjson = [];
-			$countvideos=0;
-			$countimages=0;
-			$countfiles=count($_FILES["fotoFile"]["name"]);
-			foreach($_FILES["fotoFile"]["name"] as $key => $FILE)
-			{
-				$token = rand(111,999);
-				$target_dir    = "shout/galeria/";
-				$target_file   = $target_dir . basename($_FILES["fotoFile"]["name"][$key]);
-				$imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+	$uname = $_COOKIE['eluser'];
+	$Images = [];
+	$thumbjson = [];
+	$countvideos=0;
+	$countimages=0;
+	$countfiles=count($_FILES["fotoFile"]["name"]);
+	foreach($_FILES["fotoFile"]["name"] as $key => $FILE)
+	{
+		$token = rand(111,999);
+		$target_dir    = "shout/galeria/";
+		$target_file   = $target_dir . basename($_FILES["fotoFile"]["name"][$key]);
+		$imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
 			//No permitir subir + de 1 videos ni videos con imagenes
 
-				if (getSourceType($target_file)=="film")
-				{
-					$countvideos++;
-				}else{
-					$countimages++;
-				}
+		if (getSourceType($target_file)=="film")
+		{
+			$countvideos++;
+		}else{
+			$countimages++;
+		}
 
-				if (getSourceType($target_file)=="film" and $countimages>0) {
-					continue;
-				}
+		if (getSourceType($target_file)=="film" and $countimages>0) {
+			continue;
+		}
 
-				$filename      = $token . ( $token*time() ) . $uname . '.' . $imageFileType;
-				$imagen        = "shout/galeria/" . $filename;
-				if(move_uploaded_file($_FILES["fotoFile"]["tmp_name"][$key], "shout/galeria/" . $filename))
-				{
+		$filename      = $token . ( $token*time() ) . $uname . '.' . $imageFileType;
+		$imagen        = "shout/galeria/" . $filename;
+		if(move_uploaded_file($_FILES["fotoFile"]["tmp_name"][$key], "shout/galeria/" . $filename))
+		{
 
-					$thumb = 'thumb/'. $token. ( $token*time() ) . $uname .'.jpg';
+			$thumb = 'thumb/'. $token. ( $token*time() ) . $uname .'.jpg';
 
 			//ALMACENAR EN ARRAY
-					$Images[] = $imagen;
-					$thumb1[]= $thumb;
+			$Images[] = $imagen;
+			$thumb1[]= $thumb;
 
 
 			//CREAR MINIATURA
-					if (getSourceType($target_file)!="film")
-					{
-						createThumbnail($imagen, $thumb, 300);
-					}
-
-				}
-				else
-				{
-					$error=1;
-				}
-				if($countvideos>0){
-					break;
-				}
-			}
-			$jsonImages = json_encode($Images);
-			$thumbjson  = json_encode($thumb1);
-			if(!$error){
-				if(!$insertarcompra = mysqli_query($connect, "INSERT INTO `fotosenventa` (player_id, imagen, thumb, descripcion,linkdedescarga, type,downloadable, time,category) VALUES
-					('$player_id', '$jsonImages', '$thumbjson', '$descripcion', '$linkext' , '{$postType}','$downloadable', '". $time ."','$gender')")){
-					$error=2;
-				}else{
-					if ($countfiles>1 and $countvideos>0)
-					{
-						$message="Video subido con exito! Recuerda que solo puedes subir un video por publicacion.";
-					}
-					elseif ($countfiles=1 and $countvideos>0)
-					{
-						$message="Video subido con exito! Recuerda que solo puedes subir un video por publicacion.";
-					}
-					elseif ($countimages>0 and $countvideos>0)
-					{
-						$message="Publicacion relizada con exito! Recuerda que solo puedes subir videos sin imagenes.";
-					}
-					elseif ($countimages>0 and $countvideos<=0)
-					{
-						$message="Imagen subida con exito!";
-					}
-
-					Echo json_encode([
-						'status' => true,
-						'message' => $message
-					]);
-
-				}
-			}else{
-				unlinkJSON($Images);
-				unlinkJSON($thumb1);
-				Echo json_encode([
-					'status' => false,
-					'message' => "error guardando la foto."
-				]);
-				exit();
+			if (getSourceType($target_file)!="film")
+			{
+				createThumbnail($imagen, $thumb, 300);
 			}
 
-			if($error == 2){
-				unlinkJSON($Images);
-				unlinkJSON($thumb1);
-				Echo json_encode([
-					'status' => false,
-					'message' => "error guardando la publicacion."
-				]);
-				exit();
+		}
+		else
+		{
+			$error=1;
+		}
+		if($countvideos>0){
+			break;
+		}
+	}
+	$jsonImages = json_encode($Images);
+	$thumbjson  = json_encode($thumb1);
+	if(!$error){
+		if(!$insertarcompra = mysqli_query($connect, "INSERT INTO `fotosenventa` (player_id, imagen, thumb, descripcion,linkdedescarga, type,downloadable, time,category) VALUES
+			('$player_id', '$jsonImages', '$thumbjson', '$descripcion', '$linkext' , '{$postType}','$downloadable', '". $time ."','$gender')")){
+			$error=2;
+		}else{
+			if ($countfiles>1 and $countvideos>0)
+			{
+				$message="Video subido con exito! Recuerda que solo puedes subir un video por publicacion.";
 			}
+			elseif ($countfiles=1 and $countvideos>0)
+			{
+				$message="Video subido con exito! Recuerda que solo puedes subir un video por publicacion.";
+			}
+			elseif ($countimages>0 and $countvideos>0)
+			{
+				$message="Publicacion relizada con exito! Recuerda que solo puedes subir videos sin imagenes.";
+			}
+			elseif ($countimages>0 and $countvideos<=0)
+			{
+				$message="Imagen subida con exito!";
+			}
+
+			Echo json_encode([
+				'status' => true,
+				'message' => $message
+			]);
+
+		}
+	}else{
+		unlinkJSON($Images);
+		unlinkJSON($thumb1);
+		Echo json_encode([
+			'status' => false,
+			'message' => "error guardando la foto."
+		]);
+		exit();
+	}
+
+	if($error == 2){
+		unlinkJSON($Images);
+		unlinkJSON($thumb1);
+		Echo json_encode([
+			'status' => false,
+			'message' => "error guardando la publicacion."
+		]);
+		exit();
+	}
 
 	//enviando notificacion a amigos
 
-			$sqlnotificandoamigos = mysqli_query($connect, "SELECT * FROM `friends` WHERE player1 = '$player_id' OR player2 = '$player_id'");
-			while ($rowamigo = mysqli_fetch_assoc($sqlnotificandoamigos)) {
+	$sqlnotificandoamigos = mysqli_query($connect, "SELECT * FROM `friends` WHERE player1 = '$player_id' OR player2 = '$player_id'");
+	while ($rowamigo = mysqli_fetch_assoc($sqlnotificandoamigos)) {
 
-				if ($rowamigo['player2'] == $player_id){
-					$amigo = $rowamigo['player1'];
-				}elseif ($rowamigo['player1'] == $player_id){
-					$amigo = $rowamigo['player2'];
-				}
-				$insertarcompra = mysqli_query($connect, "INSERT INTO `notificaciones_fotosnuevas` (player_notificador, player_notificado) VALUES ('$player_id', '$amigo')");
-			}
+		if ($rowamigo['player2'] == $player_id){
+			$amigo = $rowamigo['player1'];
+		}elseif ($rowamigo['player1'] == $player_id){
+			$amigo = $rowamigo['player2'];
+		}
+		$insertarcompra = mysqli_query($connect, "INSERT INTO `notificaciones_fotosnuevas` (player_notificador, player_notificado) VALUES ('$player_id', '$amigo')");
+	}
 	// BORRA LA <<FOTO DE REGALO>>
-			$connect->query('TRUNCATE `photo_gift_credits`');
+	$connect->query('TRUNCATE `photo_gift_credits`');
 
-			exit();
-		}
+	exit();
+}
 //get user
-		if (isset($_POST['get_user'])){
-			$username=$_POST['get_user'];
-			$suser = mysqli_query($connect, "SELECT * FROM `players` WHERE username='$username'");
+if (isset($_POST['get_user'])){
+	$username=$_POST['get_user'];
+	$suser = mysqli_query($connect, "SELECT * FROM `players` WHERE username='$username'");
 	//Guardamos los datos en un array
-			if(mysqli_num_rows($suser)>0){
-				$user=mysqli_fetch_assoc($suser);
-				$datos = array(
-					'state' => 'ok',
-					'id' => $user['id'],
-					'username' => $user['username'],
-					'email' => $user['email'],
-					'avatar' => $user['avatar']
-				);
+	if(mysqli_num_rows($suser)>0){
+		$user=mysqli_fetch_assoc($suser);
+		$datos = array(
+			'state' => 'ok',
+			'id' => $user['id'],
+			'username' => $user['username'],
+			'email' => $user['email'],
+			'avatar' => $user['avatar']
+		);
 	//Devolvemos el array pasado a JSON como objeto
-				echo json_encode($datos, JSON_FORCE_OBJECT);
-			}else{
-				$datos = array(
-					'state' => 'error'
-				);
-				echo json_encode($datos, JSON_FORCE_OBJECT);
-			}
-		}
+		echo json_encode($datos, JSON_FORCE_OBJECT);
+	}else{
+		$datos = array(
+			'state' => 'error'
+		);
+		echo json_encode($datos, JSON_FORCE_OBJECT);
+	}
+}
 
 //Notificaciones
-		if (isset($_POST['notify']) or isset($_GET['notify'])){
+if (isset($_POST['notify']) or isset($_GET['notify'])){
 
-			$uname = $_COOKIE['eluser'];
-			$suser = mysqli_query($connect, "SELECT * FROM `players` WHERE username='$uname'");
-			if(mysqli_num_rows($suser)>0){
-				$rowu = mysqli_fetch_assoc($suser);
-				$player_id = $rowu['id'];
+	$uname = $_COOKIE['eluser'];
+	$suser = mysqli_query($connect, "SELECT * FROM `players` WHERE username='$uname'");
+	if(mysqli_num_rows($suser)>0){
+		$rowu = mysqli_fetch_assoc($suser);
+		$player_id = $rowu['id'];
 
-				$query = mysqli_query($connect, "SELECT * FROM `nuevochat_rooms` WHERE player1 = '$player_id' OR player2 = '$player_id'");
-				$rooms = [];
-				if($query){
-					while ($room = mysqli_fetch_assoc($query)) {
-						$rooms[] = $room['id'];
-					}
-				}
+		$query = mysqli_query($connect, "SELECT * FROM `nuevochat_rooms` WHERE player1 = '$player_id' OR player2 = '$player_id'");
+		$rooms = [];
+		if($query){
+			while ($room = mysqli_fetch_assoc($query)) {
+				$rooms[] = $room['id'];
+			}
+		}
 
-				$Mensajes = 0;
+		$Mensajes = 0;
 
 		// OPTIENE LOS MENSAJES NO LEIDOS DE "$player_id"
-				$Mensajes = $connect->query("SELECT * FROM `nuevochat_mensajes` AS nm INNER JOIN nuevochat_rooms AS nr ON (nr.`player1` = '$player_id' || nr.`player2` = '$player_id') AND nr.`id` = nm.`id_chat` WHERE leido = IF(author = '$player_id','no devolver mensajes','no')")->num_rows;
+		$Mensajes = $connect->query("SELECT * FROM `nuevochat_mensajes` AS nm INNER JOIN nuevochat_rooms AS nr ON (nr.`player1` = '$player_id' || nr.`player2` = '$player_id') AND nr.`id` = nm.`id_chat` WHERE leido = IF(author = '$player_id','no devolver mensajes','no')")->num_rows;
 
-				$sqlnovistos = mysqli_query($connect, "SELECT * FROM `players_notifications` WHERE toid='{$player_id}' AND read_time='0'");
-				$Notificaciones   = mysqli_num_rows($sqlnovistos);
+		$sqlnovistos = mysqli_query($connect, "SELECT * FROM `players_notifications` WHERE toid='{$player_id}' AND read_time='0'");
+		$Notificaciones   = mysqli_num_rows($sqlnovistos);
 
-				$sqlfotonovista = mysqli_query($connect, "SELECT * FROM `notificaciones_fotosnuevas` WHERE player_notificado='{$player_id}' AND visto='no'");
-				$Fotos = mysqli_num_rows($sqlfotonovista);
+		$sqlfotonovista = mysqli_query($connect, "SELECT * FROM `notificaciones_fotosnuevas` WHERE player_notificado='{$player_id}' AND visto='no'");
+		$Fotos = mysqli_num_rows($sqlfotonovista);
 
-				$Uquestion = $connect->query("SELECT id FROM `players_questions` WHERE `toid` = '$rowu[id]' AND `read_time` = 0")->num_rows;
-				Echo json_encode([
-					"Msg" => $Mensajes,
-					"notify" => $Notificaciones,
-					"Fotos" => $Fotos,
-					"Packs" => get_Notification_pack(true),
-					"Encuesta" => get_Notification_encuesta(true),
-					"Questions" => $Uquestion
-				]);
-			}
-			exit();
-		}
+		$Uquestion = $connect->query("SELECT id FROM `players_questions` WHERE `toid` = '$rowu[id]' AND `read_time` = 0")->num_rows;
+		Echo json_encode([
+			"Msg" => $Mensajes,
+			"notify" => $Notificaciones,
+			"Fotos" => $Fotos,
+			"Packs" => get_Notification_pack(true),
+			"Encuesta" => get_Notification_encuesta(true),
+			"Questions" => $Uquestion
+		]);
+	}
+	exit();
+}
 //CAMBIA FOTO DE PORTADA
-		if (isset($_GET['add_cover-page'])) {
+if (isset($_GET['add_cover-page'])) {
 
 	//SOLO SI ES EL DUEÑO DEL PERFIL
-			if ($_POST['id']==$rowu['id']) {
+	if ($_POST['id']==$rowu['id']) {
 
 		//SI LA IMAGEN SUPERA EL LIMITE.
 		# DEFAULT 300KB
-				if ($_FILES["fotoFile"]["size"]>300100)
-				{
-					Echo json_encode([
-						'status' => false,
-						'message' => 'El tamaño de la imagen excede el límite permitido!'
-					]);
-					exit;
-				}
+		if ($_FILES["fotoFile"]["size"]>300100)
+		{
+			Echo json_encode([
+				'status' => false,
+				'message' => 'El tamaño de la imagen excede el límite permitido!'
+			]);
+			exit;
+		}
 
 		//DECLARACION DE DIRECTORIOS
-				$id=$_POST['id'];
-				$token = rand(111,999);
-				$target_dir    = "shout/cover-pages/";
-				$target_file   = $target_dir . basename($_FILES["fotoFile"]["name"]);
-				$imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
-				$error=0;
-				$filename      = "cover-page-" . $token . ( $token*time() ) . $uname . '.' . $imageFileType;
-				$imagen        = "shout/cover-pages/" . $filename;
+		$id=$_POST['id'];
+		$token = rand(111,999);
+		$target_dir    = "shout/cover-pages/";
+		$target_file   = $target_dir . basename($_FILES["fotoFile"]["name"]);
+		$imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+		$error=0;
+		$filename      = "cover-page-" . $token . ( $token*time() ) . $uname . '.' . $imageFileType;
+		$imagen        = "shout/cover-pages/" . $filename;
 
 		//DE NO SER UNA IMAGEN
-				if (getSourceType($target_file)!="camera")
-				{
-					Echo json_encode([
-						'status' => false,
-						'message' => 'Selecciona solo Imagenes!'
-					]);
-					exit;
-				}
+		if (getSourceType($target_file)!="camera")
+		{
+			Echo json_encode([
+				'status' => false,
+				'message' => 'Selecciona solo Imagenes!'
+			]);
+			exit;
+		}
 
 		//SI LA IMAGEN SE ALMACENA CORRECTAMENTE
-				if(move_uploaded_file($_FILES["fotoFile"]["tmp_name"], "shout/cover-pages/" . $filename))
-				{
+		if(move_uploaded_file($_FILES["fotoFile"]["tmp_name"], "shout/cover-pages/" . $filename))
+		{
 
-					$thumb = 'thumb/cover-page-'. $token. ( $token*time() ) . $uname .'.jpg';
-				}
-				else
-				{
-					$error=1;
-				}
+			$thumb = 'thumb/cover-page-'. $token. ( $token*time() ) . $uname .'.jpg';
+		}
+		else
+		{
+			$error=1;
+		}
 
 		//SUBE LA DIRECCION DE LA IMAGEN A LA BBDD
-				if(!$error){
+		if(!$error){
 
 			/*/CREAR MINIATURA
 			createThumbnail($imagen, $thumb, 1500);	*/
@@ -1450,84 +1456,84 @@ if(isset($_GET['getUsersWhoBoughtPack']))
 		$consult = $connect->query("INSERT INTO `site_questions` (player_id, question, description, time) VALUES (\"". $connect->real_escape_string($rowu['id']) ."\",\"". $connect->real_escape_string($Quest) ."\",\"". $connect->real_escape_string('') ."\", UNIX_TIMESTAMP())");
 
 	// COMPRUEBA QUE EL USUARIO TENGA CRÉDITOS DE REGALO POR ACEPTAR
-			if ($consult)
-			{
-				$message = array('state' => true, 'questID' => $connect->insert_id);
-			}
-			else
-			{
-				$message = array('state' => false);
-			}
-			echo json_encode($message);
-		}
-// BORRA UNA PREGUNTA DE USUARIO DE LA DB
-		if(isset($_GET['deleteQuestUser']))
+		if ($consult)
 		{
-			$Quest = (isset($_POST['idQuest']) AND !empty($_POST['idQuest'])) ? $_POST['idQuest'] : '';
+			$message = array('state' => true, 'questID' => $connect->insert_id);
+		}
+		else
+		{
+			$message = array('state' => false);
+		}
+		echo json_encode($message);
+	}
+// BORRA UNA PREGUNTA DE USUARIO DE LA DB
+	if(isset($_GET['deleteQuestUser']))
+	{
+		$Quest = (isset($_POST['idQuest']) AND !empty($_POST['idQuest'])) ? $_POST['idQuest'] : '';
 
 
 	// BORRAR PREGUNTA ENVIADAS
-			$consult2 = $connect->query("DELETE FROM `players_questions` WHERE `question` = \"". $connect->real_escape_string($Quest) ."\"");
+		$consult2 = $connect->query("DELETE FROM `players_questions` WHERE `question` = \"". $connect->real_escape_string($Quest) ."\"");
 	// BORRAR PREGUNTA PRINCIPAL DE LA LISTA
-			$consult = $connect->query("DELETE FROM `site_questions` WHERE `id` = \"". $connect->real_escape_string($Quest) ."\"");
+		$consult = $connect->query("DELETE FROM `site_questions` WHERE `id` = \"". $connect->real_escape_string($Quest) ."\"");
 
 	// COMPRUEBA QUE EL USUARIO TENGA CRÉDITOS DE REGALO POR ACEPTAR
-			if ($consult AND $connect->affected_rows > 0)
-			{
-				$message = array('state' => true);
-			}
-			else
-			{
-				$message = array('state' => false);
-			}
-			echo json_encode($message);
+		if ($consult AND $connect->affected_rows > 0)
+		{
+			$message = array('state' => true);
 		}
+		else
+		{
+			$message = array('state' => false);
+		}
+		echo json_encode($message);
+	}
 
 // RESPONDE UNA PREGUNTA DE USUARIO EN LA DB
-		if(isset($_GET['sentAnswer']) AND (isset($_POST['idQuest']) AND !empty($_POST['idQuest']) AND (isset($_POST['answer']) AND !empty($_POST['answer']))))
-		{
+	if(isset($_GET['sentAnswer']) AND (isset($_POST['idQuest']) AND !empty($_POST['idQuest']) AND (isset($_POST['answer']) AND !empty($_POST['answer']))))
+	{
 
-			$Quest =  $_POST['idQuest'];
-			$answer =  $_POST['answer'];
+		$Quest =  $_POST['idQuest'];
+		$answer =  $_POST['answer'];
 
-			$consult = $connect->query("UPDATE `players_questions` SET `answer` = \"". $connect->real_escape_string($answer) ."\", `read_time` = \"". time() ."\" WHERE `id` = \"". $connect->real_escape_string($Quest) ."\"");
+		$consult = $connect->query("UPDATE `players_questions` SET `answer` = \"". $connect->real_escape_string($answer) ."\", `read_time` = \"". time() ."\" WHERE `id` = \"". $connect->real_escape_string($Quest) ."\"");
 
 	// COMPRUEBA QUE EL USUARIO TENGA CRÉDITOS DE REGALO POR ACEPTAR
-			if ($consult AND $connect->affected_rows > 0)
-			{
-				$message = array('state' => true);
-			}
-			else
-			{
-				$message = array('state' => false);
-			}
-			echo json_encode($message);
-		}
-
-		if(isset($_GET['controllerTouchInFoto']) AND isset($_GET['controllerTouchInFoto']))
+		if ($consult AND $connect->affected_rows > 0)
 		{
-			$m = [];
-			$Photos = [];
-			if(isset($_POST['idPhoto']) AND !empty($_POST['idPhoto']))
-			{
-				$SQLPhoto = $connect->query("SELECT * FROM `fotosenventa` WHERE `id` = \"". $connect->real_escape_string($_POST['idPhoto']) ."\"");
+			$message = array('state' => true);
+		}
+		else
+		{
+			$message = array('state' => false);
+		}
+		echo json_encode($message);
+	}
+
+	if(isset($_GET['controllerTouchInFoto']) AND isset($_GET['controllerTouchInFoto']))
+	{
+		$m = [];
+		$Photos = [];
+		if(isset($_POST['idPhoto']) AND !empty($_POST['idPhoto']))
+		{
+			$SQLPhoto = $connect->query("SELECT * FROM `fotosenventa` WHERE `id` = \"". $connect->real_escape_string($_POST['idPhoto']) ."\"");
 		// SI EXISTE LA FOTO
-				if($SQLPhoto AND $SQLPhoto->num_rows > 0)
-				{
-					$Photo = $SQLPhoto->fetch_assoc();
+			if($SQLPhoto AND $SQLPhoto->num_rows > 0)
+			{
+				$Photo = $SQLPhoto->fetch_assoc();
 
 			// COMPROBAR SI EXISTEN MAS DE UNA FOTO DEL MISMO USUARIO
-					if($_POST['selfBuG'] == 1){
-						$SQLPhotos = $connect->query("SELECT * FROM `fotosenventa` WHERE `id` = \"". $connect->real_escape_string($_POST['idPhoto']) ."\"");
-					}
-					else
-					{
-						$noID = $connect->real_escape_string(implode($_POST['noID'], ','));
-						$SQLPhotos = $connect->query("SELECT * FROM `fotosenventa` WHERE `player_id` = \"". $connect->real_escape_string($Photo['player_id']) ."\"  AND `id` != \"". $connect->real_escape_string($_POST['idPhoto']) ."\"");
-					}
-					if($SQLPhotos AND $SQLPhotos->num_rows > 0)
-					{
-						while ($rPhotos = mysqli_fetch_assoc($SQLPhotos)) {
+				if($_POST['selfBuG'] == 1){
+					$SQLPhotos = $connect->query("SELECT * FROM `fotosenventa` WHERE `id` = \"". $connect->real_escape_string($_POST['idPhoto']) ."\"");
+				}
+				else
+				{
+					$noID = $connect->real_escape_string(implode($_POST['noID'], ','));
+					$SQLPhotos = $connect->query("SELECT * FROM `fotosenventa` WHERE `player_id` = \"". $connect->real_escape_string($Photo['player_id']) ."\"  AND `id` != \"". $connect->real_escape_string($_POST['idPhoto']) ."\"");
+				}
+				if($SQLPhotos AND $SQLPhotos->num_rows > 0)
+				{
+					while ($rPhotos = mysqli_fetch_assoc($SQLPhotos)) {
 					// Si es un video
 					if((isset(json_decode($rPhotos['imagen'])[0]) ? getSourceType(json_decode($rPhotos['imagen'])[0]) : 'film')=='film')					// Cantidad de imagenes
 					$rPhotos['isVideo'] = true;
@@ -1627,12 +1633,7 @@ if( isset($_GET['DeleteAccount']) AND isset($_POST['token']) AND !empty($_POST['
 	// VERIFICA QUE EL USUARIO HAYA INTRODUCIDO CORRECTAMENTE LA CONTRASEÑA DE CONFIRMACION
 	if($currentPassword === $confirmPassword)
 	{
-		// COMPRUEBA SI EL USUARIO ES UN USUARIO REGISTRADO EN BELLASGRAM (que este en la bbdd de BG)
-		if(isMemberFromBG($rowu['id']))
-		{
-			$UserBG = getUserFromBG($rowu['id']);
-			$passwordUser = $UserBG->password;
-		}
+
 		// VERIFICA QUE SEA EL USUARIO QUIEN ESTE EJECUTANDO ESTA ACCION (EVITA FRAUDES)
 		if(md5('token' . $rowu['username']) == $token)
 		{
@@ -1702,32 +1703,11 @@ if(isset($_GET['loginAsThisUser']) AND isset($_POST['userTo']) AND !empty($_POST
 	echo json_encode($msg);
 }
 
-// SALIR DE UN PERFIL (SALE DE UN PERFIL DEL QUE ESTÁ MIRANDO EL ADMIN)
+/* SALIR DE UN PERFIL (SALE DE UN PERFIL DEL QUE ESTÁ MIRANDO EL ADMIN) */
 if(isset($_GET['logoutProfileGuest']))
 {
-	// COMPRUEBA QUE SE PUEDA RETORNAR USUARIO
-	if(isset($_COOKIE['returnUser']) AND !empty($_COOKIE['returnUser']))
-	{
-		//
-		$returnUser = getColumns('players', array('id'), array('username', base64_decode($_COOKIE['returnUser'])), 1, true);
-		if($returnUser AND $returnUser->num_rows > 0)
-		{
+	$msg = returnUser();
 
-			setcookie('returnUser', '', time() - 1);
-			// CAMBIAR DE USUARIO
-			setcookie('eluser', base64_decode($_COOKIE['returnUser']), time() + (60*60*24*90));
-
-			$msg = array('status' => true);
-		}
-		else
-		{
-			$msg = array('status' => false);
-		}
-	}
-	else
-	{
-		$msg = array('status' => false);
-	}
 	echo json_encode($msg);
 }
 
@@ -1735,6 +1715,102 @@ if(isset($_GET['logoutProfileGuest']))
 if(isset($_GET['getGiftCredits']) and isset($_POST['idGift']) and is_numeric($_POST['idGift']))
 {
 	echo getGiftCredits($_POST['idGift']);
+
+	/** Elimina la notificación **/
+	$query = $connect->query('DELETE FROM `players_notifications` WHERE `toid` = \''. $rowu['id'] .'\' AND `not_key` = "newGiftMoneyAll"');
+}
+
+/**
+ * Programa un pack
+ */
+if(isset($_GET['programaPack'])) {
+	// Variable necesaria si el tipo de programacion es byRange
+	$story[0] = 0;
+	$countForeah = 0;
+
+	/* Matriz de imagenes */
+	$images = [];
+
+	//if(isset($_POST['file']))
+	foreach ($_POST['file'] as $index => $File) {
+
+		$image = str_replace("data:image/png;base64,", '', $File);
+		$image = str_replace("data:image/jpg;base64,", '', $image);
+		$image = str_replace("data:image/jpeg;base64,", '', $image);
+		$image = str_replace("data:image/gif;base64,", '', $image);
+		$image = base64_decode($image);
+
+		$images[] = $image;
+		//file_put_contents($target_dir . $FileName, $image);
+
+	}
+
+	$data['images'] = $images;
+	$data['packVideo'] = (isset($_FILES['packVideo']) AND !empty($_FILES['packVideo'])) ? $_FILES['packVideo'] : '';
+	$data['descripcion'] = $_POST['descripcion'];
+	$data['precio'] = $_POST['precio'];
+	$data['minutos'] = $_POST['minutos'];
+	$data['horas'] = $_POST['horas'];
+	$data['dias'] = $_POST['dias'];
+
+	if(programarPack($data))
+	{
+		Echo json_encode(['status' => true]);
+	}
+	else
+	{
+		echo "hola";
+	}
+
+	//error_log(var_export($_POST,1));
+
+	exit();
+}
+
+/**
+* Cambia de contraseña a un usuario
+*/
+if(isset($_GET['changePassword']) AND isset($_POST['password']) AND isset($_POST['password2']))
+{
+	$password = $_POST['password'];
+	$password2 = $_POST['password2'];
+
+  // Validate password length
+	if(strlen($password) < 8)
+	{
+		$m = [
+			'status' => false,
+			'message' => "La contraseña debe tener al menos 8 caracteres"
+		];
+	}
+  // Validate if passwords match
+	elseif ($password != $password2)
+	{
+		$m = [
+			'status' => false,
+			'message' => "Las contraseñas no coinciden"
+		];
+	}
+	else
+	{
+
+		if(changePassword($password, $rowu['id'], $rowu['email']))
+		{
+			$m = [
+				'status' => true,
+				'message' => "Contraseña cambiada exitosamente"
+			];
+		}
+		else
+		{
+			$m = [
+				'status' => false,
+				'message' => "Error al cambiar la contraseña"
+			];
+		}
+	}
+
+	echo json_encode($m);
 }
 ?>
 

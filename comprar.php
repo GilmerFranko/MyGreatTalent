@@ -32,14 +32,14 @@ $Items = [
 
 if(isset($_GET["acreditar"])){
 	require("core.php");
-
+	
 	$AddCash = $Items[ $_GET["acreditar"] ]['Creditos'];
-
+	
 	$uname = $_COOKIE['eluser'];
 
 	//ACTUALIZAR CREDITOS
 	updateCredits($rowu['id'],'+',$AddCash,3);
-
+	
 	exit();
 }
 
@@ -52,10 +52,10 @@ head();
 	<div id="content-container">
 		<section class="content-header">
 			<h4> Comprar Créditos </h4>
-
+			
 			<h4>(comunícate <a href="https://my-great-talent.com/newchat.php?id=46339">AQUÍ</a> con nosotros si tienes algún inconveniente)</h4>
 		</section>
-		<?php
+		<?php				
 		foreach($Items as $key => $item){
 			$item = (object) $item;
 			?>
@@ -91,7 +91,7 @@ head();
 							createOrder: function(data, actions) {
 								return actions.order.create({
 									purchase_units: [{
-										"description":"<?php echo $item->Creditos ?> Créditos",
+										"description":"<?php echo $item->Creditos ?> Creditos",
 										"reference_id": <?php echo $key ?>,
 										"amount":{
 											"currency_code":"USD",

@@ -2,7 +2,9 @@
 require("core.php");
 head();
 //$giftSendByMe = getAllGiftSendBy($rowu['id']);
-$giftSendToMe = getAllGiftSendTo($rowu['id']);
+
+$page = (isset($_GET['page']) AND !empty($_GET['page'])) ? $_GET['page'] : 1;
+$giftSendToMe = getAllGiftSendTo($rowu['id'], $page, 20);
 ?>
 
 <div class="content-wrapper" height="10%">
@@ -79,20 +81,21 @@ $giftSendToMe = getAllGiftSendTo($rowu['id']);
 												<a class="btn btn-primary" href="#">Ver</a>
 											</div>
 										</div>
-									</center>
-								<?php endif ?>
-								<br>
-							<?php endforeach; ?>
-						<?php endif ?>
+									<?php endif ?>
+									<br>
+								<?php endforeach; ?>
+							<?php endif ?>
+						</div>
 					</div>
 				</div>
+				<center>
+					<?php paginationIndex('regalos',$giftSendToMe['total'], 10) ?>
+				</center>
 			</div>
-			<?php paginationIndex('regalos',$giftSendToMe['total'], 40) ?>
 		</div>
 	</div>
-</div>
 
 
-<?php
-footer();
-?>
+	<?php
+	footer();
+	?>

@@ -42,15 +42,15 @@ if (isset($_COOKIE['eluser'])) {
   // COMPROBAR SI SE PERMITEN VISITAR PAGINAS SIN ESTAR LOGUEADO
   if ($sitio['limit_unlogged_users'])
   {
-      // AGG SITIOS EN LOS QUE SE PUEDE ENTRAR SIN ESTAR LOGUEADO
-    $sitesfree = array('profile.php');
+    // AGG SITIOS EN LOS QUE SE PUEDE ENTRAR SIN ESTAR LOGUEADO
+    $sitesfree = array('profile.php', 'index.php');
   }
   else
   {
     $sitesfree = array('');
   }
   // DATOS PARA USUARIO INVITADO
-  $guestUser = array('id' => 9999999999,'username' => 'invitado', 'email' => '', 'baneado' => '0','role' => 'Player', 'theme' => 0,'follower' => '[]');
+  $guestUser = array('id' => '0987654321','username' => 'invitado', 'email' => '', 'baneado' => '0','role' => 'Player', 'theme' => 0,'follower' => '[]', 'registerfrom' => 'chat');
 
   /*===== // ======*/
 
@@ -60,3 +60,18 @@ if (isset($_COOKIE['eluser'])) {
 //error_reporting(E_ALL);
 
   require_once("functions.php");
+
+
+
+  if(isset($_COOKIE['session']) and !empty($_COOKIE['session']) ){
+
+    if($session = getSession($_COOKIE['session']))
+    {
+      $rowu = $session;
+      $timenow = time();
+      $update  = mysqli_query($connect, "UPDATE `players` SET timeonline='$timenow' WHERE username='$_COOKIE[session]'");
+    }
+
+
+  }
+

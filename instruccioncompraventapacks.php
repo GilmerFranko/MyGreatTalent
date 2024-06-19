@@ -35,7 +35,7 @@ head();
 
 <br/>
 
-Opción para que las mujeres vendan sus pack de fotos
+Opción para que las mujeres den suscripciones de 7 dias a sus packs de fotos
 <hr />
 Te saldrá un botón verde "Agregar Pack" al tocarlo te sale lo siguiente:
 <br/><br/>
@@ -52,7 +52,7 @@ Precio.<br/>
 
 Prohibido poner fotos que no sean tuyas en el pack
 <hr />
-Al comprar un pack de fotos o vídeos tendrán siempre el acceso a el con la opción de verlo o de descargarlo a tu celular. el acceso al pack comprado es para siempre.
+Al suscribirte a un pack de fotos o vídeos tendrán acceso a el con la opción de verlo o de descargarlo a tu celular. el acceso al pack comprado es por 7 días.
 <hr />
 Cuanto compren tu pack los créditos se acreditan a tu cuenta que podrás canjear por dinero (Para retirar el dinero tiene que verificar tu cuenta).
 

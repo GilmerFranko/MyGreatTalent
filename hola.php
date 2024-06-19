@@ -6,7 +6,7 @@ if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH']
     echo '<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
-<center> <H4> <font color="green">Las fotos son solo visibles desde nuestra nueva app de BellasGram, para ingresar sigue los pasos descritos abajo. 
+<center> <H4> <font color="green">Las fotos son solo visibles desde nuestra nueva app de BellasGram, para ingresar sigue los pasos descritos abajo.
 <br/>(Al instalar la nueva app no perderas nada de lo que tenias ya en BellasGram).
 
     <hr />
@@ -21,10 +21,10 @@ if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH']
     <br/><br/>
         <hr />
    <a href="https://play.google.com/store/apps/details?id=com.bellas.gram.app.android">Descarga la APP AQUI</a> ya luego borra la app actual e ingresa solo desde la nueva.
-     
+
     <hr />
-    Nuestra aplicaci&oacute;n en la PlayStore o Google Play se llama 
-<br/><a href="https://play.google.com/store/apps/details?id=com.bellas.gram.app.android">BellasGram </a><br/>(Puedes buscarla en la PlayStore o toca las letras azules para ir a Google Play) 
+    Nuestra aplicaci&oacute;n en la PlayStore o Google Play se llama
+<br/><a href="https://play.google.com/store/apps/details?id=com.bellas.gram.app.android">BellasGram </a><br/>(Puedes buscarla en la PlayStore o toca las letras azules para ir a Google Play)
 <hr />
 
 Instala la APP y la abres e ignora el contenido (a simple vista se ve como si fuera un app de un v&iacute;deojuego, pero lo rico esta oculto)<br/> <br/>
@@ -51,9 +51,7 @@ Y escribe bellasgram y espera que salga la manzana (al escribir bellasgram saldr
 
 require("core.php");
 
-$uname = $_COOKIE['eluser'];
-$suser = mysqli_query($connect, "SELECT * FROM `players` WHERE username='$uname'");
-$rowu  = mysqli_fetch_assoc($suser);
+
 if ($rowu['role']!='Admin') {
     echo '<meta http-equiv="refresh" content="0;url='.$sitio['site'].'messages.php">';
     exit;
@@ -63,7 +61,7 @@ if(isset($_POST['deleteH'])){
   echo "bien";
   exit;
 }
-if (isset($_GET['delete'])){ 
+if (isset($_GET['delete'])){
   mysqli_query($connect, "DELETE FROM `payment_list` WHERE id=". $_GET['delete']);
   echo '<meta http-equiv="refresh" content="0; url=hola.php" />';
     exit;
@@ -78,15 +76,15 @@ head();
     <div id="content-container">
 
         <div class="row" style="margin:0;">
-            
+
             <div class="col-sm-12 col-md-6">
             <!-- OCULTO     <a class="btn btn-success" style="width:100%;" href="friendsgalerias.php">
                     <i class="fas fa-camera-retro"></i> Fotos de amigas
                 </a>
             </div>OCULTO -->
-    
+
         </div>
-        
+
         <section class="content">
 
             <div class="row">
@@ -94,9 +92,9 @@ head();
                 <div style="width: 100%;">
 
                     <div class="box">
-                       
+
                        <!-- Poner aqui aviso y textos-->
-                       
+
                        <!-- Poner aqui aviso y textos-->
                        <?php $total_pages = $connect->query("SELECT * FROM `payment_list` ORDER BY id DESC")->num_rows;
                        if ($total_pages>0) {
@@ -105,7 +103,7 @@ head();
                        <form onsubmit="return false" id="miformulario" name="miformulario" action="" method="get">
                        <center>
                            <button class="btn btn-success" name="btndelete" value="ok">
-                              Borrar Historial                                     
+                              Borrar Historial
                            </button>
                        </center>
                        </form>
@@ -158,7 +156,7 @@ if ($countcp > 0) {
       <th style="text-align:center;"><a href="hola.php?delete=<?php echo $rowcp['idpay']; ?> "><i class="fa fa-trash"></i></a></th>
     </tr>
     <?php
-    
+
 }
 ?>
 </table>
@@ -240,7 +238,7 @@ $(document).on('submit', 'form', function(e){
     }
     });
     },
-    function(){ 
+    function(){
     alertify.error('Cancel')
 
     });

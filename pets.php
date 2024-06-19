@@ -1,9 +1,7 @@
 <?php
 require "core.php";
 
-$uname = $_COOKIE['eluser'];
-$suser = mysqli_query($connect, "SELECT * FROM `players` WHERE username='{$uname}' LIMIT 1");
-$rowu = mysqli_fetch_assoc($suser);
+
 $player_id = $rowu['id'];
 
 $adoptepPet = false;
@@ -12,7 +10,7 @@ if(isset($_GET['aceptarRegalo'])){
 	$pet = $connect->query("SELECT * FROM `player_pets` WHERE id='{$_GET['aceptarRegalo']}' AND bonus>0 AND live=1");
 	if($pet && mysqli_num_rows($pet)){
 		$pet = mysqli_fetch_assoc($pet);
-		
+
 		$connect->query("UPDATE `player_pets` SET bonus=0 WHERE id='{$_GET['aceptarRegalo']}' AND live=1");
 		updateCredits($pet['player_id'],'+',$pet['bonus'],9);
 	}
@@ -25,21 +23,21 @@ if(isset($_POST['BuyFeedItem'])){
 	$item_id = $_POST['item_id'];
 	$item = $connect->query("SELECT * FROM `items` WHERE id='{$item_id}'");
 	$item = mysqli_fetch_assoc($item);
-	
+
 	$Proc = false;
 	if($item['price'] <= $rowu['creditos']){
 		$Proc = 'creditos';
 	}elseif($item['price'] <= $rowu['eCreditos']){
 		$Proc = 'eCreditos';
 	}
-	
+
 	if($Proc!=false){
 		$pet = $connect->query("SELECT * FROM `player_pets` WHERE id='{$pet_id}' AND live=1");
 		$pet = mysqli_fetch_assoc($pet);
-		
+
 		$petS = $connect->query("SELECT * FROM `pets` WHERE id='{$pet["pet_id"]}'");
 		$petS = mysqli_fetch_assoc($petS);
-		
+
 		if($pet[ $item['type'] ] >= $petS[ $item['type'] ]){
 			$name = str_replace('energy', 'estado de ánimo', $item['type']);
 			$name = str_replace('hp', 'amor', $name);
@@ -49,12 +47,12 @@ if(isset($_POST['BuyFeedItem'])){
 			]);
 			exit();
 		}
-		
+
 		$newValue = $pet[ $item['type'] ] + $item['value'];
 		if($newValue > $petS[ $item['type'] ]){
 			$newValue = $petS[ $item['type'] ];
 		}
-		
+
 		$Updated = $item['type'] .'='. $newValue;
 		$connect->query("UPDATE `player_pets` SET {$Updated} WHERE id='{$pet_id}' AND live=1");
 		$money = $rowu[ $Proc ] - $item['price'];
@@ -93,64 +91,64 @@ if(isset($_GET['AdoptarMascora'])) {
 		if($name==''){
 			$name = $rowps['name'];
 		}
-		
-		$hp = $rowps['hp'];  
-		$energy = $rowps['energy']; 
+
+		$hp = $rowps['hp'];
+		$energy = $rowps['energy'];
 
 		if($rowps['creditos'] <= $rowu['creditos']){
 			$Proc = 'creditos';
 		}elseif($rowps['creditos'] <= $rowu['eCreditos']){
 			$Proc = 'eCreditos';
-		}		
-		
+		}
+
         $money = $rowu[ $Proc ] - $rowps['creditos'];
-		
+
 		$adoptepPet = [
 			'status' => false
 		];
-  
+
         if ($Proc!=false) {
-			
+
             $pet_pay = $connect->query("UPDATE `players` SET {$Proc}='{$money}' WHERE id='{$player_id}'");
 
-            $pet_adopt = $connect->query("INSERT INTO `player_pets` (player_id, pet_id, name, hp, energy, updated) 
+            $pet_adopt = $connect->query("INSERT INTO `player_pets` (player_id, pet_id, name, hp, energy, updated)
 				VALUES ('{$player_id}', '{$PetID}', '{$name}', '{$hp}', '{$energy}', '". time() ."')");
-			
+
 			$adoptepPet = [
 				'status' => true,
 				'name' => $name,
-				'price' => $rowps['creditos'],		
-				'image' => petImg($rowps['image'])->imgNormal,		
-				'total_money' => $money		
+				'price' => $rowps['creditos'],
+				'image' => petImg($rowps['image'])->imgNormal,
+				'total_money' => $money
 			];
-            
+
         }
-        
+
 		Echo json_encode($adoptepPet);
-		
+
     }
 	exit();
 }
 
 if (isset($_GET['returnId'])) {
     $petfr_id = (int) $_GET["returnId"];
-    
+
     $queryspp = mysqli_query($connect, "SELECT * FROM `player_pets` WHERE pet_id='$petfr_id' and player_id='$player_id' LIMIT 1");
     $countspp = mysqli_num_rows($queryspp);
-    
+
     if ($countspp > 0) {
-        
+
         $querypfrc = mysqli_query($connect, "SELECT * FROM `pets` WHERE id='$petfr_id' LIMIT 1");
         $rowpfrc   = mysqli_fetch_assoc($querypfrc);
-        
+
         $money_back   = $rowpfrc['money'] / 2;
         $gold_back    = $rowpfrc['gold'] / 2;
         $respect_back = $rowpfrc['respect'];
         $bonustypeg   = $rowpfrc['bonustype'];
         $bonusvalueg  = $rowpfrc['bonusvalue'];
-        
+
         $return_pet = mysqli_query($connect, "DELETE FROM `player_pets` WHERE pet_id='$petfr_id' AND player_id='$player_id'");
-        
+
         if ($bonustypeg == 'power') {
             $values_back = mysqli_query($connect, "UPDATE `players` SET money=money+'$money_back', gold=gold+'$gold_back', respect=respect-'$respect_back', power=power-'$bonusvalueg' WHERE id='$player_id'");
         }
@@ -163,7 +161,7 @@ if (isset($_GET['returnId'])) {
         if ($bonustypeg == 'intelligence') {
             $values_back = mysqli_query($connect, "UPDATE `players` SET money=money+'$money_back', gold=gold+'$gold_back', respect=respect-'$respect_back', intelligence=intelligence-'$bonusvalueg' WHERE id='$player_id'");
         }
-        
+
     }
 }
 
@@ -187,7 +185,7 @@ if($Action == ""){
 	<div class="col-sm-12 col-md-6">
 		<a class="btn btn-primary" style="width:100%;" href="pets.php?Action=MyPets">
 			<i class="fa fa-paw"></i> Tus mascotas
-		</a> 
+		</a>
 	</div>
 	<div class="col-sm-12 col-md-6">
 		<a class="btn btn-primary" style="width:100%;" href="pets.php?Action=Shop">
@@ -230,7 +228,7 @@ if($Action == "MyPets"):
 .animation02 {
   width: 100px;
   height: 100px;
-  position: relative; 
+  position: relative;
   -webkit-animation: ansecond 10s linear 2s infinite alternate; /* Safari 4.0 - 8.0 */
   animation: ansecond 10s linear 2s infinite alternate;
 }
@@ -286,9 +284,9 @@ while ($rowpp = mysqli_fetch_assoc($pet_adopt)):
 						</form>
 					</li>
 				<?php endif; ?>
-			</ul>			
+			</ul>
 		</center>
-		
+
 		<div class="row">
 			<div class="col-md-7">
 				<center><img src="<?php echo porcentaje($pet['hp'], $rowpp['hp'])<50 ? petImg($pet['image'])->lifelow : petImg($pet['image'])->imgNormal;?>" style="max-height: 370px;"></center>
@@ -312,7 +310,7 @@ while ($rowpp = mysqli_fetch_assoc($pet_adopt)):
 								</div>
 							</div>
 						</div>
-					</div>             
+					</div>
 				</div>
 				<span data-toggle="modal" data-target="#ModalFeed-<?php echo $rowpp['id']; ?>" class="btn btn-success btn-md btn-block"><i class="fa fa-paw"></i> Darle Amor</span>
 				<span data-toggle="modal" data-target="#ModayGame-<?php echo $rowpp['id']; ?>" class="btn btn-success btn-md btn-block"><i class="fa fa-paw"></i> Jugar con ella</span>
@@ -328,16 +326,16 @@ while ($rowpp = mysqli_fetch_assoc($pet_adopt)):
 				</div>
 				<div class="modal-body">
 					<div class="row">
-					
+
 						<div class="col-md-7">
-						
+
 							<div id="juguete" class="animation02"></div>
-						
+
 							<center><img src="<?php echo petImg($pet['image'])->imgGame;?>" style="max-height: 350px;"></center>
-							
+
 						</div>
 						<div class="col-md-5">
-						
+
 							<div id="stats2">
 								<div class="row">
 									<div class="col-lg-12">
@@ -356,13 +354,13 @@ while ($rowpp = mysqli_fetch_assoc($pet_adopt)):
 											</div>
 										</div>
 									</div>
-								</div>             
+								</div>
 							</div>
 						</div>
-						
-						
+
+
 					</div>
-					
+
 					<br>
 						<center><h2>Juega con tu mascota</h2></center>
 					<br>
@@ -376,19 +374,19 @@ while ($rowpp = mysqli_fetch_assoc($pet_adopt)):
 							<div class="item-shop">
 								<img src="<?php Echo $item['image']; ?>" width="100%" style="max-width:60px;margin:auto;display:block;margin-bottom:10px;">
 								<div class="item-footer text-center">
-								
+
 									<strong><?php Echo $item['name']; ?></strong>
-									
+
 									<div style="border:1px solid #ddd;padding:10px 0;border-radius:3px;margin:5px 0;">
 										<i class="far fa-money-bill-alt"></i>
 										<span class="badge badge-success">
-											<?php Echo $item['price']; ?>						
+											<?php Echo $item['price']; ?>
 										</span>
 									</div>
 									<div style="border:1px solid #ddd;padding:10px 0;border-radius:3px;margin:5px 0;">
 										<i class="fa fa-plus"></i>
 										<span class="badge badge-success">
-											<?php Echo $item['value']; ?>						
+											<?php Echo $item['value']; ?>
 										</span>
 									</div>
 								<?php
@@ -407,7 +405,7 @@ while ($rowpp = mysqli_fetch_assoc($pet_adopt)):
 								<?php
 								}
 								?>
-									
+
 								</div>
 							</div>
 						</div>
@@ -430,14 +428,14 @@ while ($rowpp = mysqli_fetch_assoc($pet_adopt)):
 				</div>
 				<div class="modal-body">
 					<div class="row">
-					
+
 						<div class="col-md-7">
-						
+
 							<center><img src="<?php echo petImg($pet['image'])->imgFeed;?>" style="max-height: 350px;"></center>
-							
+
 						</div>
 						<div class="col-md-5">
-						
+
 							<div id="stats2">
 								<div class="row">
 									<div class="col-lg-12">
@@ -456,13 +454,13 @@ while ($rowpp = mysqli_fetch_assoc($pet_adopt)):
 											</div>
 										</div>
 									</div>
-								</div>             
+								</div>
 							</div>
 						</div>
-						
-						
+
+
 					</div>
-					
+
 					<br>
 						<center><h2>Dale Amor a tu Mascota</h2></center>
 					<br>
@@ -476,19 +474,19 @@ while ($rowpp = mysqli_fetch_assoc($pet_adopt)):
 							<div class="item-shop">
 								<img src="<?php Echo $item['image']; ?>" width="100%" style="max-width:60px;margin:auto;display:block;margin-bottom:10px;">
 								<div class="item-footer text-center">
-								
+
 									<strong><?php Echo $item['name']; ?></strong>
-									
+
 									<div style="border:1px solid #ddd;padding:10px 0;border-radius:3px;margin:5px 0;">
 										<i class="far fa-money-bill-alt"></i>
 										<span class="badge badge-success">
-											<?php Echo $item['price']; ?>						
+											<?php Echo $item['price']; ?>
 										</span>
 									</div>
 									<div style="border:1px solid #ddd;padding:10px 0;border-radius:3px;margin:5px 0;">
 										<i class="fa fa-plus"></i>
 										<span class="badge badge-success">
-											<?php Echo $item['value']; ?>						
+											<?php Echo $item['value']; ?>
 										</span>
 									</div>
 								<?php
@@ -507,7 +505,7 @@ while ($rowpp = mysqli_fetch_assoc($pet_adopt)):
 								<?php
 								}
 								?>
-									
+
 								</div>
 							</div>
 						</div>
@@ -534,7 +532,7 @@ $(document).ready(function(){
 		e.preventDefault();
 		var data = $(this).serialize();
 		isActive = true;
-		
+
 		$.ajax({
 			url:'pets.php',
 			type:'POST',
@@ -550,7 +548,7 @@ $(document).ready(function(){
 					'background-image':'url('+response.icon+')'
 				}).show();
 				setTimeout(function(){
-					$("[id=juguete]").hide();				
+					$("[id=juguete]").hide();
 					$(".Valenergia").html( response.Valenergy );
 					$(".Porenergia").css( {"width": response.Porenergy + "%"} );
 					swal.fire({
@@ -568,12 +566,12 @@ $(document).ready(function(){
 			}
 		})
 	})
-		
+
 	$("[data-action=alimentar]").submit(function(e){
 		e.preventDefault();
 		var data = $(this).serialize();
 		isActive = true;
-		
+
 		$.ajax({
 			url:'pets.php',
 			type:'POST',
@@ -597,7 +595,7 @@ $(document).ready(function(){
 					button: true
 				})
 			}
-		})		
+		})
 	})
 })
 </script>
@@ -645,9 +643,9 @@ while ($rowpp = mysqli_fetch_assoc($PetsDeath)):
 								</div>
 							</div>
 						</div>
-					</div>             
+					</div>
 				</div>
-				
+
 			</div>
 		</div>
 		<hr />
@@ -671,12 +669,12 @@ if($Action == "Shop"):
 $querypp = mysqli_query($connect, "SELECT * FROM `pets` ORDER BY creditos ASC");
 $countpp = mysqli_num_rows($querypp);
 while ($rowpp = mysqli_fetch_assoc($querypp)) {
-    
+
     $pet_id   = $rowpp['id'];
     $queryppc = mysqli_query($connect, "SELECT * FROM `player_pets` WHERE pet_id='$pet_id' AND player_id='$player_id' AND live=1 LIMIT 1");
     $rowppc   = mysqli_fetch_assoc($queryppc);
     $countppc = mysqli_num_rows($queryppc);
-    
+
 ?>
 	<div class="col-sm-12 col-md-6">
 		<center>
@@ -699,7 +697,7 @@ while ($rowpp = mysqli_fetch_assoc($querypp)) {
 							?>
 						</span>
 					</li>
-					
+
 				</ul><br />
 <?php
 if ($countppc > 0) {
@@ -718,7 +716,7 @@ if ($countppc > 0) {
 }
 ?>
 	</div>
-	
+
 <script>
 $(document).ready(function(){
 	$("[data-action=adoptar]").click(function(){
@@ -732,7 +730,7 @@ $(document).ready(function(){
 		})
 		.then((name) => {
 			if(name.isConfirmed){
-				
+
 				$.ajax({
 					url:'pets.php?AdoptarMascora',
 					type:'POST',
@@ -751,10 +749,10 @@ $(document).ready(function(){
 						})
 					}
 				})
-				
+
 			}
 		});
-		
+
 	})
 })
 </script>
