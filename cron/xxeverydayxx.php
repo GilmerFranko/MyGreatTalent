@@ -6,7 +6,7 @@ include "../config.php";
  */
 
 // Obtener IDs de rooms con más de 20 mensajes
-$roomsQuery = $connect->query("SELECT r.id AS room_id FROM `nuevochat_rooms` r WHERE (SELECT COUNT(*) FROM `nuevochat_mensajes` WHERE id_chat = r.id) > 20");
+$roomsQuery = $connect->query("SELECT r.id AS room_id FROM `nuevochat_rooms` r WHERE (SELECT COUNT(*) FROM `nuevochat_mensajes` WHERE id_chat = r.id) > 5");
 
 if($roomsQuery AND $roomsQuery->num_rows > 0)
 {
@@ -14,7 +14,7 @@ if($roomsQuery AND $roomsQuery->num_rows > 0)
     $chatId = $rowRoom['room_id'];
 
     // Obtener IDs de mensajes que no están entre los 20 más recientes
-    $messagesQuery = $connect->query("SELECT id, foto, rutadefoto, foto_unica FROM `nuevochat_mensajes` WHERE id_chat='$chatId' ORDER BY id DESC LIMIT 20,99999999");
+    $messagesQuery = $connect->query("SELECT id, foto, rutadefoto, foto_unica FROM `nuevochat_mensajes` WHERE id_chat='$chatId' ORDER BY id DESC LIMIT 5,99999999");
 
     // Obtener todos los IDs de mensajes a eliminar
     $messagesToDelete = array();
@@ -43,7 +43,7 @@ if($roomsQuery AND $roomsQuery->num_rows > 0)
         }
 
       }
-
+      // Añade el mensaje a la cola de eliminacion
       $messagesToDelete[] = $rowMessage['id'];
     }
 

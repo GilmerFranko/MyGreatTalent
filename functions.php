@@ -2237,9 +2237,10 @@ function canSlidesBeIntroduced($countImages = null, $IDUser = null)
  * @param  boolean 		$seen        		Definir mensaje como "leido"
  * @param  boolean 		$seen_to       	Definir mensaje como "leido"
  * @param  int  			$time          	Hora de enviado
+ * @param  string		$type			tipo de mensaje (foto unica "u", foto multiple "m")		
  * @return boolean
  */
-function sendMessage($idRoom = null, $from = null, $message = null, $file = null, $scheduledTime = false, $seen = false, $seen_to = false, $time = null)
+function sendMessage($idRoom = null, $from = null, $message = null, $file = null, $scheduledTime = false, $seen = false, $seen_to = false, $time = null, $type = 'u')
 {
 	global $connect, $rowu;
 
@@ -2255,14 +2256,22 @@ function sendMessage($idRoom = null, $from = null, $message = null, $file = null
 				$to = ($room['player1'] == $from) ? $room['player2'] : $room['player1'];
 				$message =  checkFilterMessage($message);
 				$existPhoto = 'No';
+				$foto_unica = 0;
 				if(!empty($file))
 				{
 					$existPhoto = "Yes";
 					$message = "";
+					/**
+					 * Si el tipo de mensajes es mensajes masivos
+					 * Y si es una foto, se le debe indicar
+					 * Al sistema que esta misma foto
+					 * Se usará para muchos mensajes
+					 */
+					$foto_unica = ($type == 'm') ? 1 : 0;
 				}
 
 				// Envia el mensaje
-				$send = $connect->query("INSERT INTO `nuevochat_mensajes` (id_chat, author, toid, mensaje, time, foto, rutadefoto) VALUES (\"". $connect->real_escape_string($idRoom) ."\"  , \"". $connect->real_escape_string($from) ."\", \"". $connect->real_escape_string($to) ."\", \"". $connect->real_escape_string($message) ."\", \"". $time ."\" , \"". $existPhoto ."\" , \"". $file ."\")");
+				$send = $connect->query("INSERT INTO `nuevochat_mensajes` (id_chat, author, toid, mensaje, time, foto, foto_unica, rutadefoto) VALUES (\"". $connect->real_escape_string($idRoom) ."\"  , \"". $connect->real_escape_string($from) ."\", \"". $connect->real_escape_string($to) ."\", \"". $connect->real_escape_string($message) ."\", \"". $time ."\" , \"". $existPhoto ."\" , \"". $foto_unica ."\", \"". $file ."\")");
 				// Actualiza hora de ultimo mensaje enviado a la room
 				$connect->query("UPDATE `nuevochat_rooms` SET time = \"". time() ."\"  WHERE `id` = \"". $connect->real_escape_string($idRoom) ."\"");
 				if($send)

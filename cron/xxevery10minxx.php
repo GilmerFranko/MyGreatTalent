@@ -110,7 +110,7 @@ function sendMassMessage($data) {
 					/* Transforma '-user-' al nombre del usuario al que se le envía el mensaje */
 					$mensaje1 = detectUserString($mensaje, $recipient['username']);
 
-					$sqlInsert .= $separator . "('{$id_chat}', '{$uid}', '{$toid}', '{$mensaje1}', '{$time}', '{$foto}', '{$rutadefoto}')";
+					$sqlInsert .= $separator . "('{$id_chat}', '{$uid}', '{$toid}', '{$mensaje1}', '{$time}', '{$foto}', '{$foto_unica}', '{$rutadefoto}')";
 
 					$idsChatRoom[] = $id_chat;
 
@@ -148,7 +148,7 @@ while($a < 100)
 		// ENVIA EL MENSAJE PROGRAMADO (Enviaba, ahora sencillamente genera las consultas sql para enviar los mensajes y las devuelve)
     $data = sendMassMessage($Mensaje);
 
-    $connect->query("INSERT INTO `nuevochat_mensajes` (id_chat, author, toid, mensaje, time, foto, rutadefoto) VALUES $data[0]");
+    $connect->query("INSERT INTO `nuevochat_mensajes` (id_chat, author, toid, mensaje, time, foto, foto_unica, rutadefoto) VALUES $data[0]");
 
     actualizarRegistros($data[1]);
 

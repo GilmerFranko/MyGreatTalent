@@ -1,0 +1,11 @@
+/CAMBIOS
+/Archivos que pudieron ser pero no fueron
+error.log
+filestore
+.phpintel
+*.png
+*.jpg
+*.mp4
+*.zip
+*.jpeg
+includes/library/rachet
