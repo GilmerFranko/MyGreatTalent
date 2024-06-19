@@ -97,10 +97,16 @@ if (isset($_GET['deleteMsg']) and !empty($_GET['deleteMsg']) )
 			//BORRAR
 			$connect->query("DELETE FROM `nuevochat_mensajes` WHERE id = '$idtrash'");
 
-			// SI ES UNA IMAGEN
-			if ($row_delete['foto']=='Yes')
+			/* Comprueba si es una unica foto enviada para mas de un mensaje */
+			if($rowMessage['foto_unica'] == 1)
 			{
-				unlink($row_delete['rutadefotoXXX']);
+			  /* Comprueba si esta foto se sigue utilizando en otros mensajes, de ser asi, no la elimina */
+			  $foto_unica = $connect->query('SELECT id FROM `nuevochat_mensajes` WHERE `rutadefoto` = \''. $connect->real_escape_string($rowMessage['rutadefoto']) .'\'');
+	
+			  if($foto_unica AND $foto_unica->num_rows <= 1)
+			  {
+				@unlink('../' . $rowMessage['rutadefoto']);
+			  }
 			}
 		}
 	}
