@@ -1,9 +1,9 @@
 <!-- JAVASCRIPT GLOBAL -->
 <script type="text/javascript">
 	/* VARIABLES GLOBALES */
-	var global={
+	var global = {
 
-		url:  "<?php echo url_origin() ?>",
+		url: "<?php echo url_origin() ?>",
 
 	};
 	let selectSID;
@@ -13,34 +13,37 @@
 	$(document).ready(function() {
 		//AGREGAR TAGS
 		//DETECTAR SI DEJA DE ESCRIBIR
-		if (selectSID==null) {
-			selectSID=0;
+		if (selectSID == null) {
+			selectSID = 0;
 		}
-		document.getElementById("searchUserTAGS").addEventListener('keypress', function (e) {
-			if(e.keyCode == 188 || e.code=="Comma") {
+		document.getElementById("searchUserTAGS").addEventListener('keypress', function(e) {
+			if (e.keyCode == 188 || e.code == "Comma") {
 				//NO PERMITIR HACER TAG SI NO SE HA ESCRITO NADA
 				SearchUser();
 				e.preventDefault();
 			}
 		});
 	});
-	function deletetag(selectSID,username){
-		$("#tag"+selectSID).remove();
+
+	function deletetag(selectSID, username) {
+		$("#tag" + selectSID).remove();
 		eliminarPorName(username);
-		selectSArrs=[];
-		for( var i in selectSData){
+		selectSArrs = [];
+		for (var i in selectSData) {
 			selectSArrs.push(selectSData[i].username);
 		}
 		$("#json").val(JSON.stringify(selectSArrs));
 	}
-	function finduser(array,user){
+
+	function finduser(array, user) {
 		var arr = [];
-		for( var i in array){
+		for (var i in array) {
 			arr.push(array[i].username);
 		}
 		return arr.indexOf(user) > -1;
 	}
-	function eliminarPorName(username){
+
+	function eliminarPorName(username) {
 		for (var i = 0; i < selectSData.length; i++) {
 			if (selectSData[i].username == username) {
 				selectSData.splice(i, 1);
@@ -48,164 +51,182 @@
 			}
 		}
 	}
-	function SearchUser(userName){
-		if( userName.length>0 ){
+
+	function SearchUser(userName) {
+		if (userName.length > 0) {
 
 			//ENVIAR AJAX
-			datos = {"get_user":userName};
-			selectSFile = {username: "mnb"};
+			datos = {
+				"get_user": userName
+			};
+			selectSFile = {
+				username: "mnb"
+			};
 			$.ajax({
 				url: "ajax.php",
 				type: "POST",
 				data: datos
-			}).done(function(response){
+			}).done(function(response) {
 				var response = $.parseJSON(response);
 				console.log(response.state);
-				if (response.state=="ok") {
-			//COMPROBAR QUE NO EXISTA EL USUARIO
-			if (finduser(selectSData,response.username)==false) {
-			//AGREGAR TAG
-			username='"'+response.username+'"';
-			$(".container-tags").append("<div id='tag"+selectSID+"' class='s-tag col-lg-12 input-group' style='box-shadow: 1px 1px 3px -1px;margin: 1px;color: var(--text); height: 32px;display: flex;align-items: center;'><div style='background: url("+response.avatar+")no-repeat center center;width: 32px;height: 32px;background-size: cover;display: inline-block;'><img></div> <span class='' title='ID : "+response.id+"'>&nbsp;"+ userName + "&nbsp;&nbsp;</span> <i class='fa fa-window-close' onclick='deletetag("+ selectSID +", "+ username + ");' style='color: var(--colorPrimary);'></i>&nbsp;&nbsp;</div>");
-			//VACIAR INPUT
-			$("#searchUserTAGS").val("");
-			selectSFile = {username: response.username};
-			selectSData.push(selectSFile);
+				if (response.state == "ok") {
+					//COMPROBAR QUE NO EXISTA EL USUARIO
+					if (finduser(selectSData, response.username) == false) {
+						//AGREGAR TAG
+						username = '"' + response.username + '"';
+						$(".container-tags").append("<div id='tag" + selectSID + "' class='s-tag col-lg-12 input-group' style='box-shadow: 1px 1px 3px -1px;margin: 1px;color: var(--text); height: 32px;display: flex;align-items: center;'><div style='background: url(" + response.avatar + ")no-repeat center center;width: 32px;height: 32px;background-size: cover;display: inline-block;'><img></div> <span class='' title='ID : " + response.id + "'>&nbsp;" + userName + "&nbsp;&nbsp;</span> <i class='fa fa-window-close' onclick='deletetag(" + selectSID + ", " + username + ");' style='color: var(--colorPrimary);'></i>&nbsp;&nbsp;</div>");
+						//VACIAR INPUT
+						$("#searchUserTAGS").val("");
+						selectSFile = {
+							username: response.username
+						};
+						selectSData.push(selectSFile);
 
-			//MANTENER ACTUALIZADO EL INPUT JSON
-			selectSArrs=[];
-			for( var i in selectSData){
-				selectSArrs.push(selectSData[i].username);
-			}
-			$("#json").val(JSON.stringify(selectSArrs));
+						//MANTENER ACTUALIZADO EL INPUT JSON
+						selectSArrs = [];
+						for (var i in selectSData) {
+							selectSArrs.push(selectSData[i].username);
+						}
+						$("#json").val(JSON.stringify(selectSArrs));
 
-			//CAMBIAR ID
-			selectSID=selectSID+192;
+						//CAMBIAR ID
+						selectSID = selectSID + 192;
 
-			response=null;
-		}
+						response = null;
+					}
 
-			//SI EL USUARIO YA EXISTE
-			else{
-				$("#searchUserTAGS").val("");
-			}
-		}else{
-			$("#searchUserTAGS").val("");
-		}
-	});
+					//SI EL USUARIO YA EXISTE
+					else {
+						$("#searchUserTAGS").val("");
+					}
+				} else {
+					$("#searchUserTAGS").val("");
+				}
+			});
 		}
 	}
 	// Abre una notificacion simple al usuario
-	function openNewGiftMoneyAll(idGift = null)
-	{
+	function openNewGiftMoneyAll(idGift = null) {
 		$.ajax({
 			url: "ajax.php?getGiftCredits",
 			type: "POST",
-			data: {'idGift': idGift},
+			data: {
+				'idGift': idGift
+			},
 
-		}).done(function(response){
+		}).done(function(response) {
 
 			data = $.parseJSON(response)
 
-			swal.fire({html: 'Te han regalado <b>' + data.amount + ' Créditos Especiales</b>', imageUrl: global.url + 'assets/img/GiftCredits.png', imageWidth: 200, heightAuto: false})
+			swal.fire({
+				html: 'Te han regalado <b>' + data.amount + ' Créditos Especiales</b>',
+				imageUrl: global.url + 'assets/img/GiftCredits.png',
+				imageWidth: 200,
+				heightAuto: false
+			})
 
 		})
 
 	}
-// SUBIR UNA FOTO Y PREVISUALIZARLA EN UN DIV
-function readImage (input, div) {
-	if (input.files && input.files[0]) {
-		var reader = new FileReader();
-		reader.onload = function (e) {
+	// SUBIR UNA FOTO Y PREVISUALIZARLA EN UN DIV
+	function readImage(input, div) {
+		if (input.files && input.files[0]) {
+			var reader = new FileReader();
+			reader.onload = function(e) {
 				$(div).attr('src', e.target.result); // Renderizamos la imagen
 			}
 			reader.readAsDataURL(input.files[0]);
 		}
 	}
-	<?php // SALIR DE UN PERFIL (SALE DE UN PERFIL QUE ESTÁ MIRANDO EL ADMIN) ?>
-	function logoutProfileGuest(){
+	<?php // SALIR DE UN PERFIL (SALE DE UN PERFIL QUE ESTÁ MIRANDO EL ADMIN) 
+	?>
+
+	function logoutProfileGuest() {
 		$.ajax({
 			url: "ajax.php?logoutProfileGuest",
 			type: "POST",
-		}).done(function(response){
+		}).done(function(response) {
 			r = $.parseJSON(response)
-			if(r.status)
-			{
+			if (r.status) {
 				location.reload()
-			}
-			else
-			{
-				swal.fire('Ha ocurrido un error', '','error')
+			} else {
+				swal.fire('Ha ocurrido un error', '', 'error')
 			}
 		})
 	}
 </script>
-<?php // FUNCIONES ADMINISTRATIVAS ?>
-<?php if ($rowu['role'] == 'Admin'): ?>
+<?php // FUNCIONES ADMINISTRATIVAS 
+?>
+<?php if ($rowu['role'] == 'Admin') : ?>
 	<script type="text/javascript">
-		<?php // LOGUEARSE COMO X USUARIO DE MANERA INSTANTANEA ?>
-		function loginAsThisUser(userTo){
+		<?php // LOGUEARSE COMO X USUARIO DE MANERA INSTANTANEA 
+		?>
+
+		function loginAsThisUser(userTo) {
 			$.ajax({
 				url: "ajax.php?loginAsThisUser",
 				type: "POST",
-				data: {'userTo': userTo},
+				data: {
+					'userTo': userTo
+				},
 
-			}).done(function(response){
+			}).done(function(response) {
 				r = $.parseJSON(response)
 
-				if(r.status)
-				{
+				if (r.status) {
 					location.reload()
-				}
-				else
-				{
-					swal.fire('Ha ocurrido un error', '','error')
+				} else {
+					swal.fire('Ha ocurrido un error', '', 'error')
 				}
 			})
 		}
 	</script>
 <?php endif ?>
 <script>
-		// DONAR CREDITOS
-		var idDonate = null;
-		var submitDonarCreditos = (idDonate) => {
-			var formData = new FormData();
-			formData.append("id", idDonate);
-			formData.append("Creditos", $("#Creditos").val());
+	// DONAR CREDITOS
+	var idDonate = null;
+	var submitDonarCreditos = (idDonate) => {
+		var formData = new FormData();
+		formData.append("id", idDonate);
+		formData.append("Creditos", $("#Creditos").val());
 
-			$.ajax({
-				url: "ajax.php?DonarCreditos",
-				type: "POST",
-				data: formData,
-				processData: false,
-				contentType: false
-			}).done(function(response){
-				var data = $.parseJSON(response);
-				console.log(response);
-				if(data.status){
-					swal.fire(data.message, "Podras ver su contenido durante 7 días", "success").then((result) => {
-						location.reload()
-					})
+		$.ajax({
+			url: "ajax.php?DonarCreditos",
+			type: "POST",
+			data: formData,
+			processData: false,
+			contentType: false
+		}).done(function(response) {
+			var data = $.parseJSON(response);
+			console.log(response);
+			if (data.status) {
+				swal.fire(data.message, "Podras ver su contenido durante 7 días", "success").then((result) => {
+					location.reload()
+				})
 
-				}else{
-					swal.fire({title: data.message, html: '<a class="btn btn-success" href="comprar.php">Comprar Créditos</a> ', icon: "warning"});
-				}
-				cancelDonarCreditos();
-			})
-		}
-		var openDonarCreditos = (idD,userName) => {
-			idDonate = idD;
-			$("#textUsernameDonate").html(userName)
-			$("#DonarCreditos").css('display','flex');
-		}
-		var cancelDonarCreditos = () => {
-			$("#DonarCreditos").hide();
-		}
+			} else {
+				swal.fire({
+					title: data.message,
+					html: '<a class="btn btn-success" href="comprar.php">Comprar Créditos</a> ',
+					icon: "warning"
+				});
+			}
+			cancelDonarCreditos();
+		})
+	}
+	var openDonarCreditos = (idD, userName) => {
+		idDonate = idD;
+		$("#textUsernameDonate").html(userName)
+		$("#DonarCreditos").css('display', 'flex');
+	}
+	var cancelDonarCreditos = () => {
+		$("#DonarCreditos").hide();
+	}
 
-		$(document).ready(function(){
+	$(document).ready(function() {
 		// COPIAR TEXTOS (en referrers.php)
 		//agregado ID copyClip
-		$("#copyClipLink").click(function(){
+		$("#copyClipLink").click(function() {
 			var clipboard = new Clipboard('#copyClipLink');
 			clipboard.on('success', function(event) {
 				$("#copyClipLink").html('¡COPIADO!');
@@ -223,7 +244,7 @@ function readImage (input, div) {
 			});
 		})
 		//agregado ID copyClip
-		$("#copyUrlProfile").click(function(){
+		$("#copyUrlProfile").click(function() {
 			var clipboard = new Clipboard('#copyUrlProfile');
 			clipboard.on('success', function(event) {
 				$("#copyUrlProfile").html('¡COPIADO!');
@@ -236,7 +257,7 @@ function readImage (input, div) {
 		//RECORDAR POSISION DEL SCROLL //EN REVICION
 		if (localStorage.getItem("my_app_name_here-quote-scroll") != null) {
 			$(window).scrollTop(localStorage.getItem("my_app_name_here-quote-scroll"));
-			console.log('HOLA'+localStorage.getItem("my_app_name_here-quote-scroll"))
+			console.log('HOLA' + localStorage.getItem("my_app_name_here-quote-scroll"))
 		}
 		$(window).scroll(function() {
 			console.log("hOL")
@@ -275,23 +296,27 @@ function readImage (input, div) {
 
 							<!--<a class="btn btn-info" href="comprar.php" style="background-color:#606060;border-color: #606060;border-radius: 30px;"">Comprar Creditos</a>-->
 						</center>
-					</center>
-				</div>
+				</center>
 			</div>
 		</div>
 	</div>
-</object></center></div></div></div></div>
+</div>
+</object></center>
+</div>
+</div>
+</div>
+</div>
 <!-- MODAL Y FUNCIONES - CREDITOS DE REGALOS SEMANALES -->
-<?php if($connect->query("SELECT * FROM giftcredits_weekly WHERE `player_id` = '$rowu[id]' ")->num_rows > 0): ?>
+<?php if ($connect->query("SELECT * FROM giftcredits_weekly WHERE `player_id` = '$rowu[id]' ")->num_rows > 0) : ?>
 
 
 	<?php
-			/**
-		 * TEMPORALMENTE DESACTIVADO
-		 * Muestra el modal de regalo al usuario en cualquier parte solo una vez
-		 */
+	/**
+	 * TEMPORALMENTE DESACTIVADO
+	 * Muestra el modal de regalo al usuario en cualquier parte solo una vez
+	 */
 
-		/*/ DECIDE SI SE DEBE MOSTRAR EL MODAL AUTOMATICAMENTE
+	/*/ DECIDE SI SE DEBE MOSTRAR EL MODAL AUTOMATICAMENTE
 		$consult = $connect->query("SELECT `toid`,`not_key`,`read_time` FROM `players_notifications` WHERE `toid` = '$rowu[id]' AND `not_key` = 'giftWeekly' AND `read_time` = '0'");
 		//
 		if ($consult AND $consult->num_rows > 0)
@@ -309,15 +334,15 @@ function readImage (input, div) {
 		}
 
 	*/
-		$showModal = '';
-		?>
+	$showModal = '';
+	?>
 
 	<!--
 		----------
 	 SI EL USUARIO NO ESTA EN notifications.php (que es donde se abre el modal manualmente)
 	 NO CARGAR EL MODAL (ahorra al no cargar )
 	-->
-	<?php if (basename($_SERVER['SCRIPT_NAME']) == 'notifications.php'): ?>
+	<?php if (basename($_SERVER['SCRIPT_NAME']) == 'notifications.php') : ?>
 
 
 
@@ -332,20 +357,24 @@ function readImage (input, div) {
 					data: formData,
 					processData: false,
 					contentType: false
-				}).done(function(response){
+				}).done(function(response) {
 					var data = $.parseJSON(response);
 					console.log(response);
-					if(data.state){
+					if (data.state) {
 						swal.fire(data.message, "Recuerda que estamos regalando Créditos Especiales semanalmente.", "success");
-					}else{
-						swal.fire({title: data.message, html: '', icon: "warning"});
+					} else {
+						swal.fire({
+							title: data.message,
+							html: '',
+							icon: "warning"
+						});
 					}
 					$('#giftCreditsW').hide();
 				})
 			}
 
 			var openModalGiftCredits = () => {
-				$("#giftCreditsW").css('display','flex');
+				$("#giftCreditsW").css('display', 'flex');
 			}
 		</script>
 
@@ -381,53 +410,51 @@ function readImage (input, div) {
 	 SI EL USUARIO NO ESTA EN notifications.php (que es donde se abre el modal manualmente)
 	 NO CARGAR EL MODAL (ahorra al no cargar )
 	-->
-	<?php if (in_array(basename($_SERVER['SCRIPT_NAME']),array('notifications.php','regalos.php'))): ?>
+<?php if (in_array(basename($_SERVER['SCRIPT_NAME']), array('notifications.php', 'regalos.php'))) : ?>
 
 
 	<script type="text/javascript">
-
 		var openModalViewGiftFromUser = (id) => {
 			$.ajax({
 				url: "ajax.php?getGiftFromUser",
 				type: "POST",
-				data: {'idGift': id},
+				data: {
+					'idGift': id
+				},
 
-			}).done(function(response)
-			{
+			}).done(function(response) {
 				console.log(response)
 				r = $.parseJSON(response)
 
-					// SI ES UN REGALO CON CREDITOS
-					if(r.state && r.giftCredits > 0){
-						// ESTABLECER PARAMETROS AL MODAL
-						$("#MGiftName").text(r.gift.username)
-						$("#descriptionModalGift").text("Te envió " + r.giftCredits + " Créditos Especiales")
-						$("#MGiftDescription").text(r.gift.comment)
-						$("#MGiftDate").text(r.gift.time)
-						$("#MGiftImage").hide()
-						$("#MViewGiftFromUser").css('display','flex');
-					}
-					// SI ES UN REGALO CON IMAGEN
-					else if(r.state){
-						// ESTABLECER PARAMETROS AL MODAL
-						$("#MGiftName").text(r.gift.username)
-						$("#descriptionModalGift").text("Te ha enviado un regalo")
-						$("#MGiftDescription").text(r.gift.comment)
-						$("#MGiftDate").text(r.gift.time)
-						$("#MGiftImage").show();
-						$("#MGiftImage").css('background', 'url("'+r.gift.files+'")no-repeat center center');
-						$("#MGiftImage").css('background-size', 'cover');
-						//$("#MGiftImage").attr('data-src',r.gift.files)
-						$("#MGiftImage").click(function(){
-							openImage(r.gift.files)
-						})
-						$("#MViewGiftFromUser").css('display','flex');
-					}
-					else
-					{
-						swal.fire(r.msg,'','info');
-					}
-				});
+				// SI ES UN REGALO CON CREDITOS
+				if (r.state && r.giftCredits > 0) {
+					// ESTABLECER PARAMETROS AL MODAL
+					$("#MGiftName").text(r.gift.username)
+					$("#descriptionModalGift").text("Te envió " + r.giftCredits + " Créditos Especiales")
+					$("#MGiftDescription").text(r.gift.comment)
+					$("#MGiftDate").text(r.gift.time)
+					$("#MGiftImage").hide()
+					$("#MViewGiftFromUser").css('display', 'flex');
+				}
+				// SI ES UN REGALO CON IMAGEN
+				else if (r.state) {
+					// ESTABLECER PARAMETROS AL MODAL
+					$("#MGiftName").text(r.gift.username)
+					$("#descriptionModalGift").text("Te ha enviado un regalo")
+					$("#MGiftDescription").text(r.gift.comment)
+					$("#MGiftDate").text(r.gift.time)
+					$("#MGiftImage").show();
+					$("#MGiftImage").css('background', 'url("' + r.gift.files + '")no-repeat center center');
+					$("#MGiftImage").css('background-size', 'cover');
+					//$("#MGiftImage").attr('data-src',r.gift.files)
+					$("#MGiftImage").click(function() {
+						openImage(r.gift.files)
+					})
+					$("#MViewGiftFromUser").css('display', 'flex');
+				} else {
+					swal.fire(r.msg, '', 'info');
+				}
+			});
 
 		}
 	</script>
@@ -445,7 +472,7 @@ function readImage (input, div) {
 						</div>
 						<!-- /Foto -->
 						<blockquote id="MGiftDescription" class=" blockquote-footer" style="border-left: 5px solid var(--colorPrimary);width: 80%;color: var(--colorPrimary);font-size: 11pt;background-color: aliceblue;margin: 10px;"></blockquote>
-						<?php if (basename($_SERVER['SCRIPT_NAME']) == 'notifications.php'): ?>
+						<?php if (basename($_SERVER['SCRIPT_NAME']) == 'notifications.php') : ?>
 							<span class="font-small" style="font-size: 10pt;display: block; color: unset;padding: 4px;">Puedes ver cuando quieras este y todos los <strong>regalos</strong> que te hayan enviado en <a href="regalos.php">Regalos</a>.</span>
 						<?php endif ?>
 					</div>
@@ -463,40 +490,58 @@ function readImage (input, div) {
 
 <!-- MODAL ENVIAR REGALO A USUARIO -->
 <script>
-	$(document).ready(function(){
-		$("#selectSentGift").change(function(){
-			console.log($("#selectSentGift").val())
+	$(document).ready(function() {
+		$("#selectSentGift").change(function() {
 			if ($("#selectSentGift").val() == '0') {
+				selectSData = []
+				selectSArrs = []
+				$('.container-tags').html('')
+
 				$("#sentGiftSelect").hide()
 				$(".container-tags").hide()
 			}
 			if ($("#selectSentGift").val() == '1') {
+				selectSData = []
+				selectSArrs = []
+				$('.container-tags').html('')
+
 				$("#sentGiftSelect").show()
 				$(".container-tags").show()
 			}
+			if ($("#selectSentGift").val() == '2') {
+				selectSData = []
+				selectSArrs = []
+				$('.container-tags').html('')
+
+				$("#sentGiftSelect").show()
+				$(".container-tags").show()
+
+				$.each(jsonLastUserList, function(index, value) {
+					SearchUser(value)
+				});
+			}
 		})
 		$('#searchUserTAGS').typeahead({
-			source: function (search, result) {
+			source: function(search, result) {
 				var formData = new FormData();
 				formData.append("search", search);
 				$.ajax({
 					url: "ajax.php",
 					type: "POST",
 					data: formData,
-					contentType:false,
+					contentType: false,
 					cache: false,
-					processData:false,
+					processData: false,
 
-				}).done(function(response)
-				{
+				}).done(function(response) {
 					console.log(response);
 					var response = $.parseJSON(response);
-					result($.map(response, function (item) {
+					result($.map(response, function(item) {
 						return item;
 					}));
 				});
 			},
-			updater : function(item) {
+			updater: function(item) {
 				SearchUser(item)
 				return item;
 			}
@@ -504,11 +549,11 @@ function readImage (input, div) {
 	})
 	var openModalGiveGift = (name) => {
 		// SI SE PRECIONO EL BOTON ENVIAR REGALO
-		if(name == null){
-			$("#MGiveGift").css('display','flex');
+		if (name == null) {
+			$("#MGiveGift").css('display', 'flex');
 		}
 		// SI HAY UN NOMBRE ESPECIFICO
-		else{
+		else {
 			// CAMBIAR SELECT
 			$("#selectSentGift").val('1');
 			$("#selectSentGift").trigger('change');
@@ -517,9 +562,10 @@ function readImage (input, div) {
 			// BUCAR Y AGREGAR
 			SearchUser(name);
 			// MOSTRAL MODAL
-			$("#MGiveGift").css('display','flex');
+			$("#MGiveGift").css('display', 'flex');
 		}
 	}
+
 	function closeModalGiveGift() {
 		let selectSID = null
 		let selectSData = []
@@ -528,235 +574,236 @@ function readImage (input, div) {
 		$('#MGiveGift').hide();
 	}
 	// ENVIAR REGALOS
-	function sentGiftSelect(){
+	function sentGiftSelect() {
 
 		// COMPRUEBA SI HA SELECCIONADO UN ARCHIVO
 		if ($("#selectSentGift").val() != null && $('#inputUploadFileGift').get(0).files.length !== 0) {
 
 			// COMPRUEBA QUE ESTE AL MENOS UN USUARIO SELECCIONADO
-			if($("#selectSentGift").val() == '0' || $('.container-tags').html() != ''){
+			if ($("#selectSentGift").val() == '0' || $('.container-tags').html() != '') {
 
 				let file = document.getElementById("inputUploadFileGift").files[0];
 				let comment = $("#descriptionGift").val()
 
-					// DATOS A ENVIAR
-					let formData = new FormData();
-					if ($("#selectSentGift").val() == '0')
-						formData.append("usernames", '');
-					else
-						formData.append("usernames", selectSArrs);
-
-					formData.append("gift", file);
-					formData.append("comment", comment);
-					formData.append("optionSelect", $("#selectSentGift").val())
-
-
-					selectSArrs = [];
-					file = null;
-					comment = null;
-					$('#inputUploadFileGift').get(0).files = null;
-					$('#fileGift').attr('src','')
-					$('#descriptionGift').val('')
-					$("#selectSentGift").val('0')
-					$('.container-tags').html('')
-					// Cerrar Modal
-					closeModalGiveGift()
-
-					$.ajax({
-						url: "ajax.php?sentGift",
-						type: "POST",
-						data: formData,
-						contentType:false,
-						cache: false,
-						processData:false
-					}).done(function(response){
-						console.log(response)
-						a = $.parseJSON(response)
-
-						swal.fire(a[0],a[1],a[2])
-
-					})
-				}
+				// DATOS A ENVIAR
+				let formData = new FormData();
+				if ($("#selectSentGift").val() == '0')
+					formData.append("usernames", '');
 				else
-				{
-					swal.fire('Aun no has seleccionado ningún usuario','Selecciona al menos un usuario para enviarle(s) el regalo.','info')
-				}
+					formData.append("usernames", selectSArrs);
+
+				formData.append("gift", file);
+				formData.append("comment", comment);
+				formData.append("optionSelect", $("#selectSentGift").val())
+
+
+				selectSArrs = [];
+				file = null;
+				comment = null;
+				$('#inputUploadFileGift').get(0).files = null;
+				$('#fileGift').attr('src', '')
+				$('#descriptionGift').val('')
+				$("#selectSentGift").val('0')
+				$('.container-tags').html('')
+				// Cerrar Modal
+				closeModalGiveGift()
+
+				$.ajax({
+					url: "ajax.php?sentGift",
+					type: "POST",
+					data: formData,
+					contentType: false,
+					cache: false,
+					processData: false
+				}).done(function(response) {
+					console.log(response)
+					a = $.parseJSON(response)
+
+					swal.fire(a[0], a[1], a[2])
+
+				})
+			} else {
+				swal.fire('Aun no has seleccionado ningún usuario', 'Selecciona al menos un usuario para enviarle(s) el regalo.', 'info')
 			}
-			else
-				swal.fire('No hay imagen que enviar','Debes subir al menos una imagen','info')
-		}
-		var openModalGiveGift2 = () => {
-			// SI SE DEBE ENVIAR A TODOS LOS USUARIOS
-			$("#MGiveGift2").css('display','flex');
-		}
-		function closeModalGiveGift2() {
-			$('#MGiveGift2').hide();
-		}
-		// ENVIAR REGALOS
-		function sentGiftSelect2(){
+		} else
+			swal.fire('No hay imagen que enviar', 'Debes subir al menos una imagen', 'info')
+	}
+	var openModalGiveGift2 = () => {
+		// SI SE DEBE ENVIAR A TODOS LOS USUARIOS
+		$("#MGiveGift2").css('display', 'flex');
+	}
 
-			let comment = $("#descriptionGift2").val()
+	function closeModalGiveGift2() {
+		$('#MGiveGift2').hide();
+	}
+	// ENVIAR REGALOS
+	function sentGiftSelect2() {
 
-			// DATOS A ENVIAR
-			let formData = new FormData();
-			formData.append("comment", comment);
-			formData.append("amount", $("#totalDonate").val())
+		let comment = $("#descriptionGift2").val()
 
-			// Cerrar Modal
-			closeModalGiveGift2()
+		// DATOS A ENVIAR
+		let formData = new FormData();
+		formData.append("comment", comment);
+		formData.append("amount", $("#totalDonate").val())
 
-			$.ajax({
-				url: "ajax.php?sentGiftMoney",
-				type: "POST",
-				data: formData,
-				contentType:false,
-				cache: false,
-				processData:false
-			}).done(function(response){
-				console.log(response)
-				a = $.parseJSON(response)
+		// Cerrar Modal
+		closeModalGiveGift2()
 
-				swal.fire(a[0],a[1],a[2])
+		$.ajax({
+			url: "ajax.php?sentGiftMoney",
+			type: "POST",
+			data: formData,
+			contentType: false,
+			cache: false,
+			processData: false
+		}).done(function(response) {
+			console.log(response)
+			a = $.parseJSON(response)
 
-			})
-		}
-		function InputStepChange(input){
-			if(input == '+') $("#totalDonate").val(parseInt($("#totalDonate").val()) + 1)
-				else $("#totalDonate").val($("#totalDonate").val() - 1)
-					$("#totalDonateInfo").text(parseInt($("#totalDonate").val()).toLocaleString('eu', 0))
-			}
-		</script>
-		<style type="text/css">
-			input[type="number"] {
-				-webkit-appearance: textfield;
-				-moz-appearance: textfield;
-				appearance: textfield;
-			}
+			swal.fire(a[0], a[1], a[2])
 
-			input[type=number]::-webkit-inner-spin-button,
-			input[type=number]::-webkit-outer-spin-button {
-				-webkit-appearance: none;
-			}
+		})
+	}
 
-			.number-input {
-				border: 1px solid darkorange;
-				border-radius: 8px;
-				display: inline-flex;
-			}
+	function InputStepChange(input) {
+		if (input == '+') $("#totalDonate").val(parseInt($("#totalDonate").val()) + 1)
+		else $("#totalDonate").val($("#totalDonate").val() - 1)
+		$("#totalDonateInfo").text(parseInt($("#totalDonate").val()).toLocaleString('eu', 0))
+	}
+</script>
+<style type="text/css">
+	input[type="number"] {
+		-webkit-appearance: textfield;
+		-moz-appearance: textfield;
+		appearance: textfield;
+	}
 
-			.number-input,
-			.number-input * {
-				box-sizing: border-box;
-			}
+	input[type=number]::-webkit-inner-spin-button,
+	input[type=number]::-webkit-outer-spin-button {
+		-webkit-appearance: none;
+	}
 
-			.number-input button {
-				outline:none;
-				-webkit-appearance: none;
-				background-color: transparent;
-				border: none;
-				align-items: center;
-				justify-content: center;
-				width: 3rem;
-				height: 3rem;
-				cursor: pointer;
-				margin: 0;
-				position: relative;
-			}
+	.number-input {
+		border: 1px solid darkorange;
+		border-radius: 8px;
+		display: inline-flex;
+	}
 
-			.number-input button:before,
-			.number-input button:after {
-				display: inline-block;
-				position: absolute;
-				content: '';
-				width: 1rem;
-				height: 2px;
-				background-color: darkorange;
-				transform: translate(-50%, -50%);
-			}
-			.number-input button.plus:after {
-				transform: translate(-50%, -50%) rotate(90deg);
-			}
+	.number-input,
+	.number-input * {
+		box-sizing: border-box;
+	}
 
-			.number-input input[type=number] {
-				font-family: sans-serif;
-				max-width: 10rem;
-				padding: .5rem;
-				border: solid #ddd;
-				border-width: 0 2px;
-				font-size: 18px;
-				height: 3rem;
-				font-weight: bold;
-				text-align: center;
-			}
-		</style>
-		<div id="MGiveGift" class="modal fade in" style="flex-flow: column wrap; place-content: center space-around; align-items: center; backdrop-filter: blur(16px);">
-			<div class="modal-dialog modal-md" style="width: 90vw;min-width: 300px; overflow-y: auto;">
-				<div class="box" style="animation: animateTop .5s;-webkit-transition: all .5s;-moz-transition: all .5s;transition: all .5s;border-radius: 12px;border:none;">
-					<div class="modal-header" align="center" style="padding: 0px;border: none; padding: 0;">
-						<h5 class="modal-header" style="color: var(--text);">Env&iacute;ales<strong style="color: var(--colorPrimary);"> regalos</strong> a tus amigos!</h5>
-						<div class="modal-body" style="color: var(--text);">
-							Subir imagen:
-							<div>
-								<img id="fileGift" src="" style="width: 40%;">
-								<input id="inputUploadFileGift" onchange="readImage(this,'#fileGift');" type="file" class="custom-file-input" name="avafile" accept="image/*" id="imgInp" style="display: none !important;"><br><br>
-								<a class="btn btn-primary" href="#" onclick="$('#inputUploadFileGift').trigger('click');">Subir</a>
-							</div>
-						</div>
-						<div class="modal-title" style="font-size: 38px;padding: 0;color: var(--colorPrimary);top: -5px;left: 0px;display: inline;"></div>
-						<span style="color: var(--colorPrimary);">Enviar a:</span><br>
-						<select class="" id="selectSentGift" style="padding: 10px 15px;outline: none;width: 70%;min-width: 100px;border-radius: 16px;border: solid 1px;border-color: gray;background-color: unset;color: var(--text);">
-							<option value="0">Todos</option>
-							<option value="1">Seleccionar a quien enviar</option>
-						</select>
-						<br><br>
-						<div id="sentGiftSelect" class="input-group" style="display: none;">
-							<span class="input-group-addon"></span>
-							<input id="searchUserTAGS" type="text" class="form-control" placeholder="Busca por nombre. Ejmp: Juan, Maria, Ana" name="searchUserTAGS" autocomplete="off">
-							<input type="text" name="json" id="json" hidden="">
-						</div>
-					</div>
-					<div class="modal-body">
-						<div class="container-tags" style="display: flex;flex-direction: row;flex-wrap: wrap;justify-content: flex-start;overflow: scroll;max-height: 80px; overflow-x: auto;"></div><br><br>
-						<span style="color: var(--text);">Puedes enviar una peque&ntilde;a descripci&oacute;n</span>
-						<textarea id="descriptionGift" placeholder="Escribir" class="form-control" name="" id="" rows="3" spellcheck="false" maxlength="255"></textarea>
-						<center>
-							<br>
-							<button type="submit" name="comprar" class="btn btn-success" onclick="sentGiftSelect()" style="border-radius: 30px;width: 25vw;min-width: 100px;margin-top: 2px;"><b><i>Enviar</i></b></button>
+	.number-input button {
+		outline: none;
+		-webkit-appearance: none;
+		background-color: transparent;
+		border: none;
+		align-items: center;
+		justify-content: center;
+		width: 3rem;
+		height: 3rem;
+		cursor: pointer;
+		margin: 0;
+		position: relative;
+	}
 
-							<button type="button" class="btn btn-primary " onclick="closeModalGiveGift()" style="border-radius: 30px;margin-top: 2px;background-color: unset;border-color: var(--text);color: var(--text);"><b><i>Cancelar</i></b></button>
-						</center>
-					</div>
-				</div>
-			</div>
-		</div>
+	.number-input button:before,
+	.number-input button:after {
+		display: inline-block;
+		position: absolute;
+		content: '';
+		width: 1rem;
+		height: 2px;
+		background-color: darkorange;
+		transform: translate(-50%, -50%);
+	}
 
-		<div id="MGiveGift2" class="modal fade in" style="flex-flow: column wrap; place-content: center space-around; align-items: center; backdrop-filter: blur(16px);">
-			<div class="modal-dialog modal-md" style="width: 90vw;min-width: 300px; overflow-y: auto;">
-				<div class="box" style="animation: animateTop .5s;-webkit-transition: all .5s;-moz-transition: all .5s;transition: all .5s;border-radius: 12px;border:none;">
-					<div class="modal-header" align="center" style="padding: 0px;border: none; padding: 0;">
-						<h5 class="modal-header" style="color: var(--text);">Envia <strong style="color: orange;"> regalos</strong> a todos los usuarios</h5>
-						<div class="modal-title" style="font-size: 38px;padding: 0;color: darkorange;top: -5px;left: 0px;display: inline;"></div>
-					</div>
-					<div class="modal-body">
-						<div style="display: flex;flex-direction: column;align-items: center;">
-							<span style="color: var(--text);">Puedes enviar una peque&ntilde;a descripci&oacute;n</span>
-							<textarea id="descriptionGift2" placeholder="Escribir" class="form-control" name="" id="" rows="3" spellcheck="false" maxlength="255" style="width: 80%;"></textarea>
-						</div>
-						<div id="amountToSend" class="tab-pane" role="tabpanel" style="text-align: center;">
-							<h5 style="color: var(--text);"><strong style="color: orange;">Monto</strong> a enviar</h5>
-							<div class="number-input">
-								<button onclick="InputStepChange('-')"></button>
-								<input id="totalDonate" class="quantity" min="0" name="quantity" value="0" type="number" style="color: darkorange">
-								<button onclick="InputStepChange('+')" class="plus"></button>
-							</div>
-						</div>
-						<center>
-							<br>
-							<button type="submit" name="comprar" class="btn btn-success" onclick="sentGiftSelect2()" style="border-radius: 30px;width: 25vw;min-width: 100px;margin-top: 2px; background-color: orange; border-color: orange;"><b><i>Enviar</i></b></button>
+	.number-input button.plus:after {
+		transform: translate(-50%, -50%) rotate(90deg);
+	}
 
-							<button type="button" class="btn btn-primary " onclick="closeModalGiveGift2()" style="border-radius: 30px;margin-top: 2px;background-color: unset;border-color: var(--text);color: var(--text);"><b><i>Cancelar</i></b></button>
-						</center>
+	.number-input input[type=number] {
+		font-family: sans-serif;
+		max-width: 10rem;
+		padding: .5rem;
+		border: solid #ddd;
+		border-width: 0 2px;
+		font-size: 18px;
+		height: 3rem;
+		font-weight: bold;
+		text-align: center;
+	}
+</style>
+<div id="MGiveGift" class="modal fade in" style="flex-flow: column wrap; place-content: center space-around; align-items: center; backdrop-filter: blur(16px);">
+	<div class="modal-dialog modal-md" style="width: 90vw;min-width: 300px; overflow-y: auto;">
+		<div class="box" style="animation: animateTop .5s;-webkit-transition: all .5s;-moz-transition: all .5s;transition: all .5s;border-radius: 12px;border:none;">
+			<div class="modal-header" align="center" style="padding: 0px;border: none; padding: 0;">
+				<h5 class="modal-header" style="color: var(--text);">Env&iacute;ales<strong style="color: var(--colorPrimary);"> regalos</strong> a tus amigos!</h5>
+				<div class="modal-body" style="color: var(--text);">
+					Subir imagen:
+					<div>
+						<img id="fileGift" src="" style="width: 40%;">
+						<input id="inputUploadFileGift" onchange="readImage(this,'#fileGift');" type="file" class="custom-file-input" name="avafile" accept="image/*" id="imgInp" style="display: none !important;"><br><br>
+						<a class="btn btn-primary" href="#" onclick="$('#inputUploadFileGift').trigger('click');">Subir</a>
 					</div>
 				</div>
+				<div class="modal-title" style="font-size: 38px;padding: 0;color: var(--colorPrimary);top: -5px;left: 0px;display: inline;"></div>
+				<span style="color: var(--colorPrimary);">Enviar a:</span><br>
+				<select class="" id="selectSentGift" style="padding: 10px 15px;outline: none;width: 70%;min-width: 100px;border-radius: 16px;border: solid 1px;border-color: gray;background-color: unset;color: var(--text);">
+					<option value="0">Todos</option>
+					<option value="1">Seleccionar a quien enviar</option>
+					<option value="2">Ultima selección</option>
+				</select>
+				<br><br>
+				<div id="sentGiftSelect" class="input-group" style="display: none;">
+					<span class="input-group-addon"></span>
+					<input id="searchUserTAGS" type="text" class="form-control" placeholder="Busca por nombre. Ejmp: Juan, Maria, Ana" name="searchUserTAGS" autocomplete="off">
+					<input type="text" name="json" id="json" hidden="">
+				</div>
+			</div>
+			<div class="modal-body">
+				<div class="container-tags" style="display: flex;flex-direction: row;flex-wrap: wrap;justify-content: flex-start;overflow: scroll;max-height: 80px; overflow-x: auto;"></div><br><br>
+				<span style="color: var(--text);">Puedes enviar una peque&ntilde;a descripci&oacute;n</span>
+				<textarea id="descriptionGift" placeholder="Escribir" class="form-control" name="" id="" rows="3" spellcheck="false" maxlength="255"></textarea>
+				<center>
+					<br>
+					<button type="submit" name="comprar" class="btn btn-success" onclick="sentGiftSelect()" style="border-radius: 30px;width: 25vw;min-width: 100px;margin-top: 2px;"><b><i>Enviar</i></b></button>
+
+					<button type="button" class="btn btn-primary " onclick="closeModalGiveGift()" style="border-radius: 30px;margin-top: 2px;background-color: unset;border-color: var(--text);color: var(--text);"><b><i>Cancelar</i></b></button>
+				</center>
 			</div>
 		</div>
+	</div>
+</div>
+
+<div id="MGiveGift2" class="modal fade in" style="flex-flow: column wrap; place-content: center space-around; align-items: center; backdrop-filter: blur(16px);">
+	<div class="modal-dialog modal-md" style="width: 90vw;min-width: 300px; overflow-y: auto;">
+		<div class="box" style="animation: animateTop .5s;-webkit-transition: all .5s;-moz-transition: all .5s;transition: all .5s;border-radius: 12px;border:none;">
+			<div class="modal-header" align="center" style="padding: 0px;border: none; padding: 0;">
+				<h5 class="modal-header" style="color: var(--text);">Envia <strong style="color: orange;"> regalos</strong> a todos los usuarios</h5>
+				<div class="modal-title" style="font-size: 38px;padding: 0;color: darkorange;top: -5px;left: 0px;display: inline;"></div>
+			</div>
+			<div class="modal-body">
+				<div style="display: flex;flex-direction: column;align-items: center;">
+					<span style="color: var(--text);">Puedes enviar una peque&ntilde;a descripci&oacute;n</span>
+					<textarea id="descriptionGift2" placeholder="Escribir" class="form-control" name="" id="" rows="3" spellcheck="false" maxlength="255" style="width: 80%;"></textarea>
+				</div>
+				<div id="amountToSend" class="tab-pane" role="tabpanel" style="text-align: center;">
+					<h5 style="color: var(--text);"><strong style="color: orange;">Monto</strong> a enviar</h5>
+					<div class="number-input">
+						<button onclick="InputStepChange('-')"></button>
+						<input id="totalDonate" class="quantity" min="0" name="quantity" value="0" type="number" style="color: darkorange">
+						<button onclick="InputStepChange('+')" class="plus"></button>
+					</div>
+				</div>
+				<center>
+					<br>
+					<button type="submit" name="comprar" class="btn btn-success" onclick="sentGiftSelect2()" style="border-radius: 30px;width: 25vw;min-width: 100px;margin-top: 2px; background-color: orange; border-color: orange;"><b><i>Enviar</i></b></button>
+
+					<button type="button" class="btn btn-primary " onclick="closeModalGiveGift2()" style="border-radius: 30px;margin-top: 2px;background-color: unset;border-color: var(--text);color: var(--text);"><b><i>Cancelar</i></b></button>
+				</center>
+			</div>
+		</div>
+	</div>
+</div>
