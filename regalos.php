@@ -3,7 +3,7 @@ require("core.php");
 head();
 //$giftSendByMe = getAllGiftSendBy($rowu['id']);
 
-$page = (isset($_GET['page']) AND !empty($_GET['page'])) ? $_GET['page'] : 1;
+$page = (isset($_GET['page']) and !empty($_GET['page'])) ? $_GET['page'] : 1;
 $giftSendToMe = getAllGiftSendTo($rowu['id'], $page, 20);
 ?>
 
@@ -49,53 +49,55 @@ $giftSendToMe = getAllGiftSendTo($rowu['id'], $page, 20);
 					</div>
 					Regalos enviados para mi -->
 					<div class="tab-pane active" id="SendToMe" role="tabpanel" aria-labelledby="sendToMe" style="padding: 15px;">
-						<?php if ($giftSendToMe != false): ?>
-							<?php foreach($giftSendToMe['data'] AS $giftData): ?>
+						<?php if ($giftSendToMe != false) : ?>
+							<?php foreach ($giftSendToMe['data'] as $giftData) : ?>
 								<?php
 								$SQLUser = getUser($giftData['fromid']);
 								$User = $SQLUser->fetch_assoc();
 								?>
 
 								<!-- Regalos giftAllUsers -->
-								<?php if($giftData['anonymous']): ?>
+								<?php if ($giftData['anonymous']) : ?>
 									<div class="row" onclick="openNewGiftMoneyAll('<?php echo $giftData['gift']; ?>');" align="center" style="display: flex;align-items: center;">
 										<div class="col col-sm-6">
 											<img src="assets/img/GiftCredits.png" class="" style="width: 32px;height: 32px;">&nbsp;&nbsp
 											<span>Has recibido un nuevo <a href="javascript:openNewGiftMoneyAll('<?php echo $notification['action'] ?>')">regalo</a>,</span>
 										</div>
 									</div>
-									<?php else: ?>
-										<!-- Regalo con archivo -->
-										<div class="row" onclick="openModalViewGiftFromUser('<?php echo $giftData['gift']; ?>');" align="center"style="display: flex;align-items: center;">
-											<div class="col col-sm-6">
-												<a href="<?php echo $sitio['site'].'profile.php?profile_id=' . $User['id']; ?>">
-													<img src="<?php echo $sitio['site'].$User['avatar']; ?>" class="img-circle img-avatar" style="width: 32px;height: 32px;">
-													<strong style="margin:0 2px;"><?php echo $User['username']; ?> </strong>
-												</a>
-												Te envió un regalo &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-											</div>
-											<div class="col col-sm-4">
-												<img src="<?php echo 'uploads/thumb_gift/thumb-'.basename($giftData['files']); ?>" width="100" style="max-height: 64; max-width: 64px; margin: 0 0px 0 0px;">
-											</div>
-											<div class="col col-sm-2">
-												<a class="btn btn-primary" href="#">Ver</a>
-											</div>
+								<?php else : ?>
+									<!-- Regalo con archivo -->
+									<div class="row" onclick="openModalViewGiftFromUser('<?php echo $giftData['gift']; ?>');" align="center" style="display: flex;align-items: center;">
+										<div class="col col-sm-6">
+											<a href="<?php echo $sitio['site'] . 'profile.php?profile_id=' . $User['id']; ?>">
+												<img src="<?php echo $sitio['site'] . $User['avatar']; ?>" class="img-circle img-avatar" style="width: 32px;height: 32px;">
+												<strong style="margin:0 2px;"><?php echo $User['username']; ?> </strong>
+											</a>
+											Te envió un regalo &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 										</div>
-									<?php endif ?>
-									<br>
-								<?php endforeach; ?>
-							<?php endif ?>
-						</div>
+										<div class="col col-sm-4">
+											<img src="<?php echo 'uploads/thumb_gift/thumb-' . basename($giftData['files']); ?>" width="100" style="max-height: 64; max-width: 64px; margin: 0 0px 0 0px;">
+										</div>
+										<div class="col col-sm-2">
+											<a class="btn btn-primary" href="#">Ver</a>
+										</div>
+									</div>
+								<?php endif ?>
+								<br>
+							<?php endforeach; ?>
+						<?php endif ?>
 					</div>
 				</div>
-				<center>
-					<?php paginationIndex('regalos',$giftSendToMe['total'], 10) ?>
-				</center>
 			</div>
+			<?php if ($giftSendToMe != false) : ?>
+				<div align="center">
+					<?php echo paginationIndex('regalos', $giftSendToMe['total'], 20) ?>
+				</div>
+			<?php endif; ?>
 		</div>
 	</div>
+</div>
 
 
-	<?php
-	footer();
-	?>
+<?php
+footer();
+?>

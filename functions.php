@@ -2240,7 +2240,7 @@ function getAllGiftSendBy($playerID)
  * @param  int $playerID ID del usuario
  * @param  int $pageNumber Número de la página que se desea obtener
  * @param  int $pageSize Cantidad de resultados por página
- * @return Array|false           Array asociativo o false si no hay resultados
+ * @return array|bool           Array asociativo o false si no hay resultados
  */
 function getAllGiftSendTo($playerID, $pageNumber, $pageSize)
 {
